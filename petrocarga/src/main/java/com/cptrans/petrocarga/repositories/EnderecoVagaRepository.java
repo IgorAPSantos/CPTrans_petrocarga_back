@@ -10,5 +10,5 @@ import com.cptrans.petrocarga.models.EnderecoVaga;
 @Repository
 public interface EnderecoVagaRepository extends JpaRepository<EnderecoVaga, Integer>{
     public Optional<EnderecoVaga> findByCodigoPmp(String codigoPmp);
-    public Optional<EnderecoVaga> findByRua(String rua);
+    public Optional<EnderecoVaga> findByLogradouro(String logradouro);
 }

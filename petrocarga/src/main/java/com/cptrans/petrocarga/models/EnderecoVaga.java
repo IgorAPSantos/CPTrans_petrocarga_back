@@ -1,5 +1,7 @@
 package com.cptrans.petrocarga.models;
 
+import com.cptrans.petrocarga.dto.EnderecoVagaResponseDTO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +19,7 @@ public class EnderecoVaga {
 
     @Column(nullable = false, length = 100, unique = true)
     @Size(min = 10, max = 100)
-    private String rua;
+    private String logradouro;
 
     @Column(nullable = false, length = 50)
     @Size(min = 3, max = 50)
@@ -29,8 +31,8 @@ public class EnderecoVaga {
 
     public EnderecoVaga() {}
 
-    public EnderecoVaga(String rua, String bairro, String codigoPmp) {
-        this.rua = rua;
+    public EnderecoVaga(String logradouro, String bairro, String codigoPmp) {
+        this.logradouro = logradouro;
         this.bairro = bairro;
         this.codigoPmp = codigoPmp;
     }
@@ -39,12 +41,16 @@ public class EnderecoVaga {
         return id;
     }
 
-    public String getRua() {
-        return rua;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public void setRua(String rua) {
-        this.rua = rua;
+    public String getLogradouro() {
+        return logradouro;
+    }
+
+    public void setLogradouro(String logradouro) {
+        this.logradouro = logradouro;
     }
 
     public String getBairro() {
@@ -67,9 +73,18 @@ public class EnderecoVaga {
     public String toString() {
         return "EnderecoVaga{" +
                 "id=" + id +
-                ", rua='" + rua + '\'' +
+                ", logradouro='" + logradouro + '\'' +
                 ", bairro='" + bairro + '\'' +
                 ", codigoPmp='" + codigoPmp + '\'' +
                 '}';
+    }
+
+    public EnderecoVagaResponseDTO toResponseDTO() {
+        EnderecoVagaResponseDTO dto = new EnderecoVagaResponseDTO();
+        dto.setId(this.id);
+        dto.setCodidoPmp(this.codigoPmp);
+        dto.setLogradouro(this.logradouro);
+        dto.setBairro(this.bairro);
+        return dto;
     }
 }
