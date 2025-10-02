@@ -1,57 +1,91 @@
 package com.cptrans.petrocarga.dto;
 
 import java.time.LocalTime;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
-import jakarta.validation.constraints.NotEmpty;
+import com.cptrans.petrocarga.enums.DiaSemanaEnum;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 
 public class VagaRequestDTO {
-    @Size(min = 3, max = 50, message="O campo 'codigoPMP' deve ter entre 3 e 50 caracteres.")
-    private String codigoPMP;
 
-    @Size(min = 3, max = 100, message="O campo 'logradouro' deve ter entre 3 e 100 caracteres.")
-    private String logradouro;
+    @Valid
+    private EnderecoVagaRequestDTO endereco;
 
-    @Size(min = 3, max = 50, message="O campo 'bairro' deve ter entre 3 e 50 caracteres.")
-    private String bairro;
-    
+    @Valid
+    @Schema(
+        description = "Localização da vaga em formato latitude, longitude",
+        example = "-22.509135, -43.171351"
+        
+    )
     @Size(min = 5, max = 100, message="O campo 'localizacao' deve ter entre 5 e 100 caracteres.")
     private String localizacao;
     
-    @NotEmpty(message="O campo 'horario_incio' não pode ser vazio.")
-    private LocalTime horario_inicio;
+    @Valid
+    @Schema(
+        description = "Horário de inicial de funcionamento da vaga no formato HH:mm",
+        example = "00:00"
+    )
+    private LocalTime horarioInicio;
     
-    @NotEmpty(message="O campo 'horario_fim' não pode ser vazio.")
-    private LocalTime horario_fim;
+    @Valid
+    @Schema(
+        description = "Horário final de funcionamento da vaga no formato HH:mm",
+        example = "13:00"
+    )
+    private LocalTime horarioFim;
+
+    @Valid
+    @Schema(
+        description = "Número máximo de eixos permitidos para a vaga",
+        example = "2",
+        minimum = "2",
+        maximum = "10"
+    )
+    private Integer maxEixos;
     
-    @NotEmpty(message="O campo 'max_eixos' não pode ser vazio.")
-    private Integer max_eixos;
-    
-    @NotEmpty(message="O campo 'comprimento' não pode ser vazio.")
+    @Valid
+    @Schema(
+        description = "Comprimento máximo em metros permitido para a vaga",
+        example = "12",
+        minimum = "5",
+        maximum = "30"
+    )
     private Integer comprimento;
+
+    @Valid
+    @Schema(
+        description = "Códigos dos dias da semana (1=Domingo, 2=Segunda, ..., 7=Sábado)",
+        example = "[1,2,3]",
+        allowableValues = {"1","2","3","4","5","6","7"}
+    )
+    private Set<Integer> diasSemana;
+
+    public EnderecoVagaRequestDTO getEndereco(){
+        return this.endereco;
+    }
     
-    public String getCodigoPMP(){
-        return this.codigoPMP;
+    public LocalTime getHorarioInicio(){
+        return this.horarioInicio;
     }
-    public String getLogradouro(){
-        return this.logradouro;
+     public LocalTime getHorarioFim(){
+        return this.horarioFim;
     }
-    public String getBairro(){
-        return this.bairro;
-    }
-    public LocalTime getHorario_inicio(){
-        return this.horario_inicio;
-    }
-     public LocalTime getHorario_fim(){
-        return this.horario_fim;
-    }
-     public Integer getMax_eixos(){
-        return this.max_eixos;
+     public Integer getMaxEixos(){
+        return this.maxEixos;
     }
      public Integer getComprimento(){
         return this.comprimento;
     }
      public String getLocalizacao(){
         return this.localizacao;
+    }
+    public TreeSet<DiaSemanaEnum> getDiasSemana() {
+        return this.diasSemana.stream().map(num -> DiaSemanaEnum.toEnum(num)).sorted(Comparator.comparingInt(dia -> dia.codigo)).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparingInt(dia -> dia.codigo))));
     }
 }
