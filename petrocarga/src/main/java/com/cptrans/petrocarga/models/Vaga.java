@@ -11,6 +11,7 @@ import com.cptrans.petrocarga.enums.DiaSemanaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -53,9 +54,11 @@ public class Vaga {
     @Column(nullable = false, name="horario_fim")
     private LocalTime horarioFim;
 
+    @Schema(description = "Número máximo de eixos permitidos para a vaga", example = "2", minimum = "2", maximum = "3")
     @Column(nullable = false)
     private Integer maxEixos;
 
+    @Schema(description = "Comprimento máximo da vaga em metros", example = "5", minimum = "5", maximum = "30")
     @Column(nullable=false)
     private Integer comprimento;
 
@@ -84,8 +87,8 @@ public class Vaga {
         this.localizacao = localizacao;
         this.horarioInicio = horarioInicio == null ? LocalTime.of(0, 0, 0, 0) : horarioInicio;
         this.horarioFim = horarioFim == null ? LocalTime.of(13, 0, 0, 0) : horarioFim;
-        this.maxEixos = maxEixos == null ? 2 : maxEixos;
-        this.comprimento = comprimento == null ? 5 : comprimento;
+        this.maxEixos = maxEixos == null || maxEixos < 2 || maxEixos > 3 ? 2 : maxEixos;
+        this.comprimento = comprimento == null || comprimento < 5 || comprimento > 30 ? 5 : comprimento;
         this.status = status == null ? status : StatusVagaEnum.DISPONIVEL;
         this.diasSemana = diasSemana;
     }
@@ -141,7 +144,7 @@ public class Vaga {
     }
 
     public void setMaxEixos(Integer maxEixos) {
-        this.maxEixos = maxEixos == null || maxEixos <= 0 ? 2 : maxEixos;
+        this.maxEixos = maxEixos == null || maxEixos < 2 || maxEixos > 3 ? 2 : maxEixos;
     }
 
     public Integer getComprimento() {
@@ -149,7 +152,7 @@ public class Vaga {
     }
 
     public void setComprimento(Integer comprimento) {
-        this.comprimento = comprimento == null || comprimento <= 0 ? 5 : comprimento;
+        this.comprimento = comprimento == null || comprimento < 5 || comprimento > 30 ? 5 : comprimento;
     }
 
     public StatusVagaEnum getStatus() {
