@@ -45,7 +45,7 @@ public class VagaRequestDTO {
         description = "Número máximo de eixos permitidos para a vaga",
         example = "2",
         minimum = "2",
-        maximum = "10"
+        maximum = "3"
     )
     private Integer maxEixos;
     
