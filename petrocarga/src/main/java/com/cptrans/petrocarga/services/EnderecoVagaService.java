@@ -20,9 +20,9 @@ public class EnderecoVagaService {
             if(enderecoVagaRequest == null) {
                 throw new IllegalArgumentException("O objeto EnderecoVagaRequestDTO não pode ser nulo.");
             }
-            EnderecoVaga enderecoVagaCadastrado = findEnderecoByCodigo_pmp(enderecoVagaRequest.getCodigoPMP());
-            if(enderecoVagaCadastrado != null) {
-                return enderecoVagaCadastrado;
+            Optional<EnderecoVaga> enderecoCadrastado = enderecoVagaRepository.findByCodigoPmp(enderecoVagaRequest.getCodigoPMP());
+            if(enderecoCadrastado.isPresent()){
+                return enderecoCadrastado.get();
             }
             if(enderecoVagaRequest.getCodigoPMP() == null || enderecoVagaRequest.getCodigoPMP().isEmpty()) {
                 throw new IllegalArgumentException("O campo 'codigoPMP' é obrigatório e não pode ser nulo ou vazio.");
@@ -46,16 +46,4 @@ public class EnderecoVagaService {
         }
     }
 
-    public EnderecoVaga findEnderecoByCodigo_pmp(String codigoPmp){
-        try {
-             Optional<EnderecoVaga> enderecoVaga = enderecoVagaRepository.findByCodigoPmp(codigoPmp);
-            if(enderecoVaga.isPresent()){
-                return enderecoVaga.get();
-            } else {
-                throw new RuntimeException("Endereço não encontrado para o código PMP: " + codigoPmp);
-            }
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Erro ao buscar endereço por código PMP: " + e.getMessage());
-        }
-    }
 }
