@@ -31,7 +31,7 @@ import jakarta.validation.constraints.Size;
 public class Vaga {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private Integer id;
 
     @ManyToOne

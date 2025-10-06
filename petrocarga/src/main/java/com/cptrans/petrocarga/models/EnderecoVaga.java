@@ -14,7 +14,7 @@ import jakarta.validation.constraints.Size;
 @Table(name = "endereco_vaga")
 public class EnderecoVaga {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private Integer id;
 
     @Column(nullable = false, length = 100, unique = true)
