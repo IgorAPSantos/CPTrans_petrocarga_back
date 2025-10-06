@@ -27,7 +27,7 @@
     </scm>
     <properties>
         <java.version>21</java.version>
-   		 <flyway.version>11.13.2</flyway.version> 
+        <flyway.version>11.13.2</flyway.version> 
     </properties>
     <dependencies>
         <dependency>
@@ -61,18 +61,17 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
-		<dependency>
-		    <groupId>org.postgresql</groupId>
-		    <artifactId>postgresql</artifactId>
-		    <version>42.7.3</version>
-		     <scope>runtime</scope>
-		</dependency>
-      
-    <dependency>
-    <groupId>org.flywaydb</groupId>
-    <artifactId>flyway-database-postgresql</artifactId>
-    <version>${flyway.version}</version>
-	</dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.3</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+            <version>${flyway.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -91,20 +90,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            
-            <plugin>
-   			 	<groupId>org.flywaydb</groupId>
-        		<artifactId>flyway-maven-plugin</artifactId>
-            	<version>11.13.2</version>
-            	<configuration>
-                	<url>jdbc:postgresql://localhost:5432/petrocarga</url>
-                	<user>postgres</user>
-                	<password>123456</password>
-                	<cleanDisabled>false</cleanDisabled>
-
-        		</configuration>
-        	</plugin>
-            
         </plugins>
     </build>
 
