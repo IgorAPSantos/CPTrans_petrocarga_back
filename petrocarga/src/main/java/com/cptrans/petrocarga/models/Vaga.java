@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import com.cptrans.petrocarga.dto.VagaResponseDTO;
 import com.cptrans.petrocarga.enums.AreaVagaEnum;
@@ -32,7 +33,7 @@ public class Vaga {
     
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private Integer id;
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "endereco_id", nullable = false)
@@ -90,7 +91,7 @@ public class Vaga {
         this.diasSemana = diasSemana;
     }
 
-    public Integer getId() {
+    public UUID getId() {
         return id;
     }
 

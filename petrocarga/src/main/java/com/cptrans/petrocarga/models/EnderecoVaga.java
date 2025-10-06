@@ -1,5 +1,7 @@
 package com.cptrans.petrocarga.models;
 
+import java.util.UUID;
+
 import com.cptrans.petrocarga.dto.EnderecoVagaResponseDTO;
 
 import jakarta.persistence.Column;
@@ -15,7 +17,7 @@ import jakarta.validation.constraints.Size;
 public class EnderecoVaga {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private Integer id;
+    private UUID id;
 
     @Column(nullable = false, length = 100, unique = true)
     @Size(min = 10, max = 100)
@@ -37,11 +39,11 @@ public class EnderecoVaga {
         this.codigoPmp = codigoPmp;
     }
 
-    public Integer getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

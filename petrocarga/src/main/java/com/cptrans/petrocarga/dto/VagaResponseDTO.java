@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.cptrans.petrocarga.enums.AreaVagaEnum;
@@ -12,7 +13,7 @@ import com.cptrans.petrocarga.enums.StatusVagaEnum;
 import com.cptrans.petrocarga.models.EnderecoVaga;
 
 public class VagaResponseDTO {
-    private Integer id;
+    private UUID id;
     private EnderecoVagaResponseDTO endereco;
     private AreaVagaEnum area;
     private String localizacao;
@@ -27,10 +28,10 @@ public class VagaResponseDTO {
         this.diasSemana = new TreeSet<>(Comparator.comparingInt(dia -> dia.codigo));
     }
 
-    public Integer getId() {
+    public UUID getId() {
         return id;
     }
-    public void setId(Integer id) {
+    public void setId(UUID id) {
         this.id = id;
     }
     public EnderecoVagaResponseDTO getEnderecoVagaResponseDTO() {
