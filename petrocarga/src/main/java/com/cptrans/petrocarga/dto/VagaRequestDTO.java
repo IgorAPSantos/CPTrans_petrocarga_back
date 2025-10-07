@@ -1,91 +1,141 @@
 package com.cptrans.petrocarga.dto;
 
-import java.time.LocalTime;
-import java.util.Comparator;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import com.cptrans.petrocarga.enums.DiaSemanaEnum;
-
+import com.cptrans.petrocarga.enums.AreaVagaEnum;
+import com.cptrans.petrocarga.enums.StatusVagaEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 
 public class VagaRequestDTO {
 
     @Valid
+    @NotNull(message = "O endereço é obrigatório.")
     private EnderecoVagaRequestDTO endereco;
+    
+    @Schema(description = "Área da vaga (Ex: AMARELA, VERMELHA)")
+    private AreaVagaEnum area;
+    
+    @Schema(description = "Número da vaga no endereço", example = "Vaga 03")
+    private String numeroEndereco;
+
+    @Schema(description = "Ponto de referência para a vaga", example = "Em frente ao portão principal")
+    private String referenciaEndereco;
+
+    @Schema(description = "Tipo de vaga (Ex: CARGA, DESCARGA)")
+    private String tipoVaga;
+
+    @Schema(description = "Coordenada geográfica inicial da vaga", example = "-22.509135, -43.171351")
+    private String referenciaGeoInicio;
+    
+    @Schema(description = "Coordenada geográfica final da vaga (se aplicável)", example = "-22.509140, -43.171355")
+    private String referenciaGeoFim;
 
     @Valid
-    @Schema(
-        description = "Localização da vaga em formato latitude, longitude",
-        example = "-22.509135, -43.171351"
-        
-    )
-    @Size(min = 5, max = 100, message="O campo 'localizacao' deve ter entre 5 e 100 caracteres.")
-    private String localizacao;
-    
-    @Valid
-    @Schema(
-        description = "Horário de inicial de funcionamento da vaga no formato HH:mm",
-        example = "00:00"
-    )
-    private LocalTime horarioInicio;
-    
-    @Valid
-    @Schema(
-        description = "Horário final de funcionamento da vaga no formato HH:mm",
-        example = "13:00"
-    )
-    private LocalTime horarioFim;
-
-    @Valid
-    @Schema(
-        description = "Número máximo de eixos permitidos para a vaga",
-        example = "2",
-        minimum = "2",
-        maximum = "3"
-    )
+    @NotNull(message = "O número máximo de eixos é obrigatório.")
+    @Schema(description = "Número máximo de eixos permitidos para a vaga", example = "2")
     private Integer maxEixos;
     
     @Valid
-    @Schema(
-        description = "Comprimento máximo em metros permitido para a vaga",
-        example = "12",
-        minimum = "5",
-        maximum = "30"
-    )
+    @NotNull(message = "O comprimento é obrigatório.")
+    @Schema(description = "Comprimento máximo em metros permitido para a vaga", example = "12")
     private Integer comprimento;
+    
+    @Schema(description = "Status inicial da vaga (Ex: DISPONIVEL, OCUPADA)")
+    private StatusVagaEnum status;
 
     @Valid
-    @Schema(
-        description = "Códigos dos dias da semana (1=Domingo, 2=Segunda, ..., 7=Sábado)",
-        example = "[1,2,3]",
-        allowableValues = {"1","2","3","4","5","6","7"}
-    )
-    private Set<Integer> diasSemana;
+    @Schema(description = "Lista com os dias e horários de funcionamento da vaga")
+    private Set<OperacaoVagaRequestDTO> operacoesVaga;
 
-    public EnderecoVagaRequestDTO getEndereco(){
-        return this.endereco;
-    }
+
+    // Getters e Setters
     
-    public LocalTime getHorarioInicio(){
-        return this.horarioInicio;
+    public EnderecoVagaRequestDTO getEndereco() {
+        return endereco;
     }
-     public LocalTime getHorarioFim(){
-        return this.horarioFim;
+
+    public void setEndereco(EnderecoVagaRequestDTO endereco) {
+        this.endereco = endereco;
     }
-     public Integer getMaxEixos(){
-        return this.maxEixos;
+
+    public AreaVagaEnum getArea() {
+        return area;
     }
-     public Integer getComprimento(){
-        return this.comprimento;
+
+    public void setArea(AreaVagaEnum area) {
+        this.area = area;
     }
-     public String getLocalizacao(){
-        return this.localizacao;
+
+    public String getNumeroEndereco() {
+        return numeroEndereco;
     }
-    public TreeSet<DiaSemanaEnum> getDiasSemana() {
-        return this.diasSemana.stream().map(num -> DiaSemanaEnum.toEnum(num)).sorted(Comparator.comparingInt(dia -> dia.codigo)).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparingInt(dia -> dia.codigo))));
+
+    public void setNumeroEndereco(String numeroEndereco) {
+        this.numeroEndereco = numeroEndereco;
+    }
+
+    public String getReferenciaEndereco() {
+        return referenciaEndereco;
+    }
+
+    public void setReferenciaEndereco(String referenciaEndereco) {
+        this.referenciaEndereco = referenciaEndereco;
+    }
+
+    public String getTipoVaga() {
+        return tipoVaga;
+    }
+
+    public void setTipoVaga(String tipoVaga) {
+        this.tipoVaga = tipoVaga;
+    }
+
+    public String getReferenciaGeoInicio() {
+        return referenciaGeoInicio;
+    }
+
+    public void setReferenciaGeoInicio(String referenciaGeoInicio) {
+        this.referenciaGeoInicio = referenciaGeoInicio;
+    }
+
+    public String getReferenciaGeoFim() {
+        return referenciaGeoFim;
+    }
+
+    public void setReferenciaGeoFim(String referenciaGeoFim) {
+        this.referenciaGeoFim = referenciaGeoFim;
+    }
+
+    public Integer getMaxEixos() {
+        return maxEixos;
+    }
+
+    public void setMaxEixos(Integer maxEixos) {
+        this.maxEixos = maxEixos;
+    }
+
+    public Integer getComprimento() {
+        return comprimento;
+    }
+
+    public void setComprimento(Integer comprimento) {
+        this.comprimento = comprimento;
+    }
+
+    public StatusVagaEnum getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusVagaEnum status) {
+        this.status = status;
+    }
+
+    public Set<OperacaoVagaRequestDTO> getOperacoesVaga() {
+        return operacoesVaga;
+    }
+
+    public void setOperacoesVaga(Set<OperacaoVagaRequestDTO> operacoesVaga) {
+        this.operacoesVaga = operacoesVaga;
     }
 }

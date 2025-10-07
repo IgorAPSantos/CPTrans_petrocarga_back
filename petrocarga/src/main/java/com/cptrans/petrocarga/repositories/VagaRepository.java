@@ -11,5 +11,5 @@ import com.cptrans.petrocarga.models.Vaga;
 @Repository
 public interface  VagaRepository extends JpaRepository<Vaga, UUID> {
 
-    public Optional<Vaga> findByLocalizacao(String localizacao);
+    //public Optional<Vaga> findByLocalizacao(String localizacao);
 }
