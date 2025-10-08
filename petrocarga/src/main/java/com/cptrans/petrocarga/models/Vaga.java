@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.models;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -173,7 +174,11 @@ public class Vaga {
     }
 
     public void setOperacoesVaga(Set<OperacaoVaga> operacoesVaga) {
-        this.operacoesVaga = operacoesVaga;
+        if(operacoesVaga != null){
+            if(this.operacoesVaga == null) this.operacoesVaga = new HashSet<>();
+            else this.operacoesVaga.clear();
+            this.operacoesVaga.addAll(operacoesVaga);
+        }
     }
 
     public VagaResponseDTO toResponseDTO() {

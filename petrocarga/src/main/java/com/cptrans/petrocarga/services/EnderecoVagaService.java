@@ -16,34 +16,27 @@ public class EnderecoVagaService {
     private EnderecoVagaRepository enderecoVagaRepository;
 
     public EnderecoVaga cadastrarEnderecoVaga(EnderecoVagaRequestDTO enderecoVagaRequest){
-        try {
-            if(enderecoVagaRequest == null) {
-                throw new IllegalArgumentException("O objeto EnderecoVagaRequestDTO não pode ser nulo.");
-            }
-            Optional<EnderecoVaga> enderecoCadrastado = enderecoVagaRepository.findByCodigoPmp(enderecoVagaRequest.getCodigoPMP());
-            if(enderecoCadrastado.isPresent()){
-                return enderecoCadrastado.get();
-            }
-            if(enderecoVagaRequest.getCodigoPMP() == null || enderecoVagaRequest.getCodigoPMP().isEmpty()) {
-                throw new IllegalArgumentException("O campo 'codigoPMP' é obrigatório e não pode ser nulo ou vazio.");
-            }
-            if(enderecoVagaRequest.getLogradouro() == null || enderecoVagaRequest.getLogradouro().isEmpty()) {
-                throw new IllegalArgumentException("O campo 'logradouro' é obrigatório e não pode ser nulo ou vazio.");
-            }
-            if(enderecoVagaRequest.getBairro() == null || enderecoVagaRequest.getBairro().isEmpty()) {
-                throw new IllegalArgumentException("O campo 'bairro' é obrigatório e não pode ser nulo ou vazio.");
-            }
-            if(enderecoVagaRepository.findByCodigoPmp(enderecoVagaRequest.getCodigoPMP()).isPresent()) {
-                throw new IllegalArgumentException("Já existe um endereço cadastrado com o código PMP: " + enderecoVagaRequest.getCodigoPMP());
-            }
-            EnderecoVaga enderecoVaga = new EnderecoVaga();
-            enderecoVaga.setCodigoPmp(enderecoVagaRequest.getCodigoPMP());
-            enderecoVaga.setLogradouro(enderecoVagaRequest.getLogradouro());
-            enderecoVaga.setBairro(enderecoVagaRequest.getBairro());
-            return enderecoVagaRepository.save(enderecoVaga);
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Erro ao cadastrar endereço: " + e.getMessage());
+        if(enderecoVagaRequest == null) {
+            throw new IllegalArgumentException("O objeto EnderecoVagaRequestDTO não pode ser nulo.");
         }
+        Optional<EnderecoVaga> enderecoCadrastado = enderecoVagaRepository.findByCodigoPmp(enderecoVagaRequest.getCodigoPMP());
+        if(enderecoCadrastado.isPresent()){
+            return enderecoCadrastado.get();
+        }
+        if(enderecoVagaRequest.getCodigoPMP() == null || enderecoVagaRequest.getCodigoPMP().isEmpty()) {
+            throw new IllegalArgumentException("O campo 'codigoPMP' é obrigatório e não pode ser nulo ou vazio.");
+        }
+        if(enderecoVagaRequest.getLogradouro() == null || enderecoVagaRequest.getLogradouro().isEmpty()) {
+            throw new IllegalArgumentException("O campo 'logradouro' é obrigatório e não pode ser nulo ou vazio.");
+        }
+        if(enderecoVagaRequest.getBairro() == null || enderecoVagaRequest.getBairro().isEmpty()) {
+            throw new IllegalArgumentException("O campo 'bairro' é obrigatório e não pode ser nulo ou vazio.");
+        }
+        EnderecoVaga enderecoVaga = new EnderecoVaga();
+        enderecoVaga.setCodigoPmp(enderecoVagaRequest.getCodigoPMP());
+        enderecoVaga.setLogradouro(enderecoVagaRequest.getLogradouro());
+        enderecoVaga.setBairro(enderecoVagaRequest.getBairro());
+        return enderecoVagaRepository.save(enderecoVaga);
     }
 
 }
