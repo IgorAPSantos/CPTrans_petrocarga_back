@@ -13,7 +13,7 @@ public class VagaRequestDTO {
     @NotNull(message = "O endereço é obrigatório.")
     private EnderecoVagaRequestDTO endereco;
     
-    @Schema(description = "Área da vaga (Ex: AMARELA, VERMELHA)")
+    @Schema(description = "Área da vaga (Ex: AMARELA, VERMELHA)", example = "AMARELA")
     private AreaVagaEnum area;
     
     @Schema(description = "Número da vaga no endereço", example = "Vaga 03")
@@ -41,11 +41,11 @@ public class VagaRequestDTO {
     @Schema(description = "Comprimento máximo em metros permitido para a vaga", example = "12")
     private Integer comprimento;
     
-    @Schema(description = "Status inicial da vaga (Ex: DISPONIVEL, OCUPADA)")
+    @Schema(description = "Status inicial da vaga (Ex: DISPONIVEL, OCUPADA)", example= "DISPONIVEL")
     private StatusVagaEnum status;
 
     @Valid
-    @Schema(description = "Lista com os dias e horários de funcionamento da vaga")
+    @Schema(description = "Lista com os dias e horários de funcionamento da vaga", example = "[{\"diaSemana\": \"SEGUNDA\", \"horaInicio\": \"00:00\", \"horaFim\": \"13:00\"}]")
     private Set<OperacaoVagaRequestDTO> operacoesVaga;
 
 
