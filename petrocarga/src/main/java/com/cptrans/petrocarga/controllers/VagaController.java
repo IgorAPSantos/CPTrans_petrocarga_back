@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cptrans.petrocarga.dto.VagaPatchDTO;
 import com.cptrans.petrocarga.dto.VagaRequestDTO;
+import com.cptrans.petrocarga.dto.VagaResponseDTO;
 import com.cptrans.petrocarga.models.Vaga;
 import com.cptrans.petrocarga.services.VagaService;
 
-import jakarta.persistence.EntityNotFoundException;
+import io.swagger.v3.oas.annotations.Operation;
 
 
 
@@ -31,6 +31,7 @@ public class VagaController {
     private VagaService vagaService;
 
     @GetMapping()
+    @Operation(summary = "Listar todas as vagas")
     public ResponseEntity<?> listarVagas() {
         try {
             return ResponseEntity.ok(vagaService.listarVagas().stream().map(vaga -> vaga.toResponseDTO()));
@@ -40,39 +41,24 @@ public class VagaController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> cadastrarVaga(@RequestBody VagaRequestDTO vagaRequest) {
-        try {
-            Vaga vaga = vagaService.cadastrarVaga(vagaRequest);
-            return ResponseEntity.status(HttpStatus.CREATED).body(vaga.toResponseDTO()); 
-        }catch(IllegalArgumentException e ){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("erro: " + e.getMessage());
-        }
-        catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("erro: Erro interno de servidor.");
-        }
+    @Operation(summary = "Cadastrar uma nova vaga")
+    public ResponseEntity<VagaResponseDTO> cadastrarVaga(@RequestBody VagaRequestDTO vagaRequest) {
+        Vaga vaga = vagaService.cadastrarVaga(vagaRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(vaga.toResponseDTO()); 
     }
     
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar uma vaga pelo ID")
     public ResponseEntity<?> deletarVaga(@PathVariable UUID id) {
-        try {
-            vagaService.deletarVaga(id);
-            return ResponseEntity.noContent().build(); 
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno ao deletar vaga.");
-        }
+        vagaService.deletarVaga(id);
+        return ResponseEntity.noContent().build(); 
+      
     }
     
     @PatchMapping("/{id}")
-    public ResponseEntity<?> atualizarParcialmenteVaga(@PathVariable UUID id, @RequestBody VagaPatchDTO vagaRequest) {
-        try {
-            Vaga vagaAtualizada = vagaService.atualizarParcialmenteVaga(id, vagaRequest);
-            return ResponseEntity.ok(vagaAtualizada.toResponseDTO());
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno ao atualizar vaga.");
-        }
+    @Operation(summary = "Atualizar atributos de uma vaga pelo ID")
+    public ResponseEntity<VagaResponseDTO> atualizarParcialmenteVaga(@PathVariable UUID id, @RequestBody VagaRequestDTO vagaRequest) {
+        Vaga vagaAtualizada = vagaService.atualizarParcialmenteVaga(id, vagaRequest);
+        return ResponseEntity.ok(vagaAtualizada.toResponseDTO());
     }
 }
