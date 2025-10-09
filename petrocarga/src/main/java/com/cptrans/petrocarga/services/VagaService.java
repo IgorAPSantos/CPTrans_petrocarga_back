@@ -30,11 +30,7 @@ public class VagaService {
     
 
     public List<Vaga> listarVagas() {
-        try {
-            return vagaRepository.findAll();
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao buscar vagas: " + e.getMessage());
-        }
+        return vagaRepository.findAll();
     }
     
     
@@ -59,7 +55,6 @@ public class VagaService {
         if(vagaRequest.getTipoVaga() != null) vagaExistente.setTipoVaga(vagaRequest.getTipoVaga());
         if(vagaRequest.getReferenciaGeoInicio() != null) vagaExistente.setReferenciaGeoInicio(vagaRequest.getReferenciaGeoInicio());
         if(vagaRequest.getReferenciaGeoFim() != null) vagaExistente.setReferenciaGeoFim(vagaRequest.getReferenciaGeoFim());
-        if(vagaRequest.getMaxEixos() != null) vagaExistente.setMaxEixos(vagaRequest.getMaxEixos());
         if(vagaRequest.getComprimento() != null) vagaExistente.setComprimento(vagaRequest.getComprimento());
         if(vagaRequest.getStatus() != null) vagaExistente.setStatus(vagaRequest.getStatus());
         if(vagaRequest.getOperacoesVaga() != null && !vagaRequest.getOperacoesVaga().isEmpty()){
@@ -96,7 +91,6 @@ public class VagaService {
         vaga.setTipoVaga(vagaRequest.getTipoVaga());
         vaga.setReferenciaGeoInicio(vagaRequest.getReferenciaGeoInicio());
         vaga.setReferenciaGeoFim(vagaRequest.getReferenciaGeoFim());
-        vaga.setMaxEixos(vagaRequest.getMaxEixos());
         vaga.setComprimento(vagaRequest.getComprimento());
         vaga.setStatus(vagaRequest.getStatus());
 

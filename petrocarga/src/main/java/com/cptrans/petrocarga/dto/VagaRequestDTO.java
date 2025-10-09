@@ -1,8 +1,11 @@
 package com.cptrans.petrocarga.dto;
 
 import java.util.Set;
+
 import com.cptrans.petrocarga.enums.AreaVagaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
+import com.cptrans.petrocarga.enums.TipoVagaEnum;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -22,8 +25,8 @@ public class VagaRequestDTO {
     @Schema(description = "Ponto de referência para a vaga", example = "Em frente ao portão principal")
     private String referenciaEndereco;
 
-    @Schema(description = "Tipo de vaga (Ex: CARGA, DESCARGA)")
-    private String tipoVaga;
+    @Schema(description = "Tipo de vaga (Ex: PARALELA, PERPENDICULAR)", example="PARALELA")
+    private TipoVagaEnum tipoVaga;
 
     @Schema(description = "Coordenada geográfica inicial da vaga", example = "-22.509135, -43.171351")
     private String referenciaGeoInicio;
@@ -31,11 +34,6 @@ public class VagaRequestDTO {
     @Schema(description = "Coordenada geográfica final da vaga (se aplicável)", example = "-22.509140, -43.171355")
     private String referenciaGeoFim;
 
-    @Valid
-    @NotNull(message = "O número máximo de eixos é obrigatório.")
-    @Schema(description = "Número máximo de eixos permitidos para a vaga", example = "2")
-    private Integer maxEixos;
-    
     @Valid
     @NotNull(message = "O comprimento é obrigatório.")
     @Schema(description = "Comprimento máximo em metros permitido para a vaga", example = "12")
@@ -83,11 +81,11 @@ public class VagaRequestDTO {
         this.referenciaEndereco = referenciaEndereco;
     }
 
-    public String getTipoVaga() {
+    public TipoVagaEnum getTipoVaga() {
         return tipoVaga;
     }
 
-    public void setTipoVaga(String tipoVaga) {
+    public void setTipoVaga(TipoVagaEnum tipoVaga) {
         this.tipoVaga = tipoVaga;
     }
 
@@ -105,14 +103,6 @@ public class VagaRequestDTO {
 
     public void setReferenciaGeoFim(String referenciaGeoFim) {
         this.referenciaGeoFim = referenciaGeoFim;
-    }
-
-    public Integer getMaxEixos() {
-        return maxEixos;
-    }
-
-    public void setMaxEixos(Integer maxEixos) {
-        this.maxEixos = maxEixos;
     }
 
     public Integer getComprimento() {

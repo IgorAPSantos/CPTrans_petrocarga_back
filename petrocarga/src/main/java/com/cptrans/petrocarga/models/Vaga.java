@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.cptrans.petrocarga.dto.VagaResponseDTO;
 import com.cptrans.petrocarga.enums.AreaVagaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
+import com.cptrans.petrocarga.enums.TipoVagaEnum;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -42,15 +43,15 @@ public class Vaga {
     @Enumerated(EnumType.STRING)
     private AreaVagaEnum area;
 
-    // NOVOS CAMPOS ADICIONADOS
     @Column(name = "numero_endereco")
     private String numeroEndereco;
 
     @Column(name = "referencia_endereco")
     private String referenciaEndereco;
 
-    @Column(name = "tipo_vaga")
-    private String tipoVaga;
+    @Column(name = "tipo_vaga", nullable=false)
+    @Enumerated(EnumType.STRING)
+    private TipoVagaEnum tipoVaga;
     
     @Column(name = "referencia_geo_inicio")
     private String referenciaGeoInicio;
@@ -58,11 +59,6 @@ public class Vaga {
     @Column(name = "referencia_geo_fim")
     private String referenciaGeoFim;
     
-    // CAMPOS MANTIDOS
-    @Schema(description = "Número máximo de eixos permitidos para a vaga", example = "2", minimum = "2", maximum = "3")
-    @Column(nullable = false)
-    private Integer maxEixos;
-
     @Schema(description = "Comprimento máximo da vaga em metros", example = "5", minimum = "5", maximum = "30")
     @Column(nullable=false)
     private Integer comprimento;
@@ -71,18 +67,15 @@ public class Vaga {
     @Enumerated(EnumType.STRING)
     private StatusVagaEnum status;
 
-    // LÓGICA DE DIAS/HORAS SUBSTITUÍDA PELA RELAÇÃO COM OperacaoVaga
     @OneToMany(mappedBy = "vaga", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private Set<OperacaoVaga> operacoesVaga;
 
-
-    // GETTERS, SETTERS, CONSTRUTORES E MÉTODOS ATUALIZADOS
+    // GETTERS, SETTERS, CONSTRUTOR
     
     public Vaga() {
         this.area = AreaVagaEnum.AMARELA;
         this.status = StatusVagaEnum.DISPONIVEL;
-        this.maxEixos = 2;
     }
 
     public UUID getId() {
@@ -121,11 +114,11 @@ public class Vaga {
         this.referenciaEndereco = referenciaEndereco;
     }
 
-    public String getTipoVaga() {
+    public TipoVagaEnum getTipoVaga() {
         return tipoVaga;
     }
 
-    public void setTipoVaga(String tipoVaga) {
+    public void setTipoVaga(TipoVagaEnum tipoVaga) {
         this.tipoVaga = tipoVaga;
     }
 
@@ -143,14 +136,6 @@ public class Vaga {
 
     public void setReferenciaGeoFim(String referenciaGeoFim) {
         this.referenciaGeoFim = referenciaGeoFim;
-    }
-
-    public Integer getMaxEixos() {
-        return maxEixos;
-    }
-
-    public void setMaxEixos(Integer maxEixos) {
-        this.maxEixos = maxEixos;
     }
 
     public Integer getComprimento() {
@@ -193,7 +178,6 @@ public class Vaga {
         dto.setTipoVaga(this.tipoVaga);
         dto.setReferenciaGeoInicio(this.referenciaGeoInicio);
         dto.setReferenciaGeoFim(this.referenciaGeoFim);
-        dto.setMaxEixos(this.maxEixos);
         dto.setComprimento(this.comprimento);
         dto.setStatus(this.status);
         if (this.operacoesVaga != null) {
