@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,6 +25,7 @@ import io.swagger.v3.oas.annotations.Operation;
 
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000/")
 @RequestMapping(value = "/vagas")
 public class VagaController {
     
@@ -33,11 +35,7 @@ public class VagaController {
     @GetMapping()
     @Operation(summary = "Listar todas as vagas")
     public ResponseEntity<?> listarVagas() {
-        try {
-            return ResponseEntity.ok(vagaService.listarVagas().stream().map(vaga -> vaga.toResponseDTO()));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("erro: Erro interno de servidor.");
-        }
+        return ResponseEntity.ok(vagaService.listarVagas().stream().map(vaga -> vaga.toResponseDTO()));
     }
 
     @PostMapping()

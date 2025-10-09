@@ -2,8 +2,10 @@ package com.cptrans.petrocarga.dto;
 
 import java.util.Set;
 import java.util.UUID;
+
 import com.cptrans.petrocarga.enums.AreaVagaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
+import com.cptrans.petrocarga.enums.TipoVagaEnum;
 
 public class VagaResponseDTO {
 
@@ -12,10 +14,9 @@ public class VagaResponseDTO {
     private AreaVagaEnum area;
     private String numeroEndereco;
     private String referenciaEndereco;
-    private String tipoVaga;
+    private TipoVagaEnum tipoVaga;
     private String referenciaGeoInicio;
     private String referenciaGeoFim;
-    private Integer maxEixos;
     private Integer comprimento;
     private StatusVagaEnum status;
     private Set<OperacaoVagaResponseDTO> operacoesVaga; // Substituído
@@ -62,11 +63,11 @@ public class VagaResponseDTO {
         this.referenciaEndereco = referenciaEndereco;
     }
 
-    public String getTipoVaga() {
+    public TipoVagaEnum getTipoVaga() {
         return tipoVaga;
     }
 
-    public void setTipoVaga(String tipoVaga) {
+    public void setTipoVaga(TipoVagaEnum tipoVaga) {
         this.tipoVaga = tipoVaga;
     }
 
@@ -84,14 +85,6 @@ public class VagaResponseDTO {
 
     public void setReferenciaGeoFim(String referenciaGeoFim) {
         this.referenciaGeoFim = referenciaGeoFim;
-    }
-
-    public Integer getMaxEixos() {
-        return maxEixos;
-    }
-
-    public void setMaxEixos(Integer maxEixos) {
-        this.maxEixos = maxEixos;
     }
 
     public Integer getComprimento() {
