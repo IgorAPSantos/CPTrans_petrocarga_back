@@ -50,7 +50,7 @@ public class VagaService {
         if(vagaRequest.getEndereco() != null) vagaExistente.setEndereco(enderecoVagaService.cadastrarEnderecoVaga(vagaRequest.getEndereco()));
         
         if(vagaRequest.getArea() != null) vagaExistente.setArea(vagaRequest.getArea());
-        if(vagaExistente.getNumeroEndereco() != null) vagaExistente.setNumeroEndereco(vagaRequest.getNumeroEndereco());
+        if(vagaRequest.getNumeroEndereco() != null) vagaExistente.setNumeroEndereco(vagaRequest.getNumeroEndereco());
         if(vagaRequest.getReferenciaEndereco() != null) vagaExistente.setReferenciaEndereco(vagaRequest.getReferenciaEndereco());
         if(vagaRequest.getTipoVaga() != null) vagaExistente.setTipoVaga(vagaRequest.getTipoVaga());
         if(vagaRequest.getReferenciaGeoInicio() != null) vagaExistente.setReferenciaGeoInicio(vagaRequest.getReferenciaGeoInicio());
