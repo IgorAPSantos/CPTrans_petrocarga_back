@@ -100,11 +100,43 @@
                         <schema>public</schema>
                     </schemas>
                     <cleanDisabled>false</cleanDisabled>
-
                 </configuration>
             </plugin>
-            
+            <!-- Plugin do compilador Java -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <release>${java.version}</release>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+    <profiles>
+        <!-- 👨‍💻 Profile local: usa Java 21 -->
+        <profile>
+            <id>local</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <java.version>21</java.version>
+                <flyway.url>jdbc:postgresql://localhost:5432/petrocarga</flyway.url>
+                <flyway.user>postgres</flyway.user>
+                <flyway.password>123456</flyway.password>
+            </properties>
+        </profile>
 
+        <!-- ☁️ Profile de produção (Render): usa Java 17 -->
+        <profile>
+            <id>render</id>
+            <properties>
+                <java.version>17</java.version>
+                <flyway.url>${DATABASE_URL}</flyway.url>
+                <flyway.user>${DATABASE_USER}</flyway.user>
+                <flyway.password>${DATABASE_PASSWORD}</flyway.password>
+            </properties>
+        </profile>
+    </profiles>
 </project>
