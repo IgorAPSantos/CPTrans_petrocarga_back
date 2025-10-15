@@ -14,7 +14,6 @@ public class EnderecoVagaRequestDTO {
     private String codigoPMP;
 
     @Valid
-    @Size(min = 3, max = 100, message="O campo 'logradouro' deve ter entre 3 e 100 caracteres.")
     @Schema(
         description = "Logradouro do endereço da vaga",
         example = "Rua Paulo Barbosa"
@@ -22,7 +21,6 @@ public class EnderecoVagaRequestDTO {
     private String logradouro;
 
     @Valid
-    @Size(min = 3, max = 50, message="O campo 'bairro' deve ter entre 3 e 50 caracteres.")
     @Schema(
         description = "Bairro do endereço da vaga",
         example = "Centro"
