@@ -2,12 +2,13 @@ package com.cptrans.petrocarga.dto;
 
 import java.time.LocalTime;
 import java.util.UUID;
+
 import com.cptrans.petrocarga.enums.DiaSemanaEnum;
 
 public class OperacaoVagaResponseDTO {
 
     private UUID id;
-    private DiaSemanaEnum diaSemana;
+    private String diaSemana;
     private LocalTime horaInicio;
     private LocalTime horaFim;
 
@@ -21,12 +22,12 @@ public class OperacaoVagaResponseDTO {
         this.id = id;
     }
 
-    public DiaSemanaEnum getDiaSemana() {
+    public String getDiaSemana() {
         return diaSemana;
     }
 
     public void setDiaSemana(DiaSemanaEnum diaSemana) {
-        this.diaSemana = diaSemana;
+        this.diaSemana = diaSemana.getDescricao();
     }
 
     public LocalTime getHoraInicio() {
@@ -43,5 +44,9 @@ public class OperacaoVagaResponseDTO {
 
     public void setHoraFim(LocalTime horaFim) {
         this.horaFim = horaFim;
+    }
+
+    public DiaSemanaEnum getDiaSemanaEnum() {
+       return DiaSemanaEnum.toEnumByDescricao(this.diaSemana);
     }
 }

@@ -1,7 +1,10 @@
 package com.cptrans.petrocarga.dto;
 
+import java.util.Comparator;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.cptrans.petrocarga.enums.AreaVagaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
@@ -19,9 +22,11 @@ public class VagaResponseDTO {
     private String referenciaGeoFim;
     private Integer comprimento;
     private StatusVagaEnum status;
-    private Set<OperacaoVagaResponseDTO> operacoesVaga; // Substituído
 
-    // Getters e Setters para todos os campos (incluindo os novos)
+    Comparator<OperacaoVagaResponseDTO> compararPorCodigoEnum = Comparator.comparingInt(op -> op.getDiaSemanaEnum().getCodigo());
+    private Set<OperacaoVagaResponseDTO> operacoesVaga = new TreeSet<>(compararPorCodigoEnum);
+
+    // Getters e Setters
 
     public UUID getId() {
         return id;
@@ -107,7 +112,9 @@ public class VagaResponseDTO {
         return operacoesVaga;
     }
 
-    public void setOperacoesVaga(Set<OperacaoVagaResponseDTO> operacoesVaga) {
-        this.operacoesVaga = operacoesVaga;
+    public void setOperacoesVaga(Set<OperacaoVagaResponseDTO> operacoesVaga){
+        this.operacoesVaga = operacoesVaga.stream()
+            .sorted(compararPorCodigoEnum)
+            .collect(Collectors.toCollection(() -> new TreeSet<>(compararPorCodigoEnum)));
     }
 }

@@ -1,20 +1,23 @@
 package com.cptrans.petrocarga.dto;
 
 import java.time.LocalTime;
-import com.cptrans.petrocarga.enums.DiaSemanaEnum;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class OperacaoVagaRequestDTO {
-    
-    private DiaSemanaEnum diaSemana;
+    @Schema(description = "Código do dia da semana (do 1 ao 7)", example = "1")
+    private Integer codigoDiaSemana;
+    @Schema(description = "Hora de inicio", example = "00:00")
     private LocalTime horaInicio;
+    @Schema(description = "Hora de fim", example = "13:00")
     private LocalTime horaFim;
 
     // Getters e Setters
-    public DiaSemanaEnum getDiaSemana() {
-        return diaSemana;
+    public Integer getCodigoDiaSemana() {
+        return codigoDiaSemana;
     }
-    public void setDiaSemana(DiaSemanaEnum diaSemana) {
-        this.diaSemana = diaSemana;
+    public void setCodigoDiaSemana(Integer codigoDiaSemana) {
+        this.codigoDiaSemana = codigoDiaSemana;
     }
     public LocalTime getHoraInicio() {
         return horaInicio;

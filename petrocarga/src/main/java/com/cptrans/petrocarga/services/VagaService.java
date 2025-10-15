@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.cptrans.petrocarga.dto.VagaRequestDTO;
+import com.cptrans.petrocarga.enums.DiaSemanaEnum;
 import com.cptrans.petrocarga.models.EnderecoVaga;
 import com.cptrans.petrocarga.models.OperacaoVaga;
 import com.cptrans.petrocarga.models.Vaga;
@@ -31,6 +32,11 @@ public class VagaService {
 
     public List<Vaga> listarVagas() {
         return vagaRepository.findAll();
+    }
+
+    public Vaga buscarVagaPorId(UUID id) {
+        return vagaRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Vaga com ID " + id + " não encontrada."));
     }
     
     
@@ -60,7 +66,7 @@ public class VagaService {
         if(vagaRequest.getOperacoesVaga() != null && !vagaRequest.getOperacoesVaga().isEmpty()){
             Set<OperacaoVaga> operacoes = vagaRequest.getOperacoesVaga().stream().map(dto -> {
                 OperacaoVaga op = new OperacaoVaga();
-                op.setDiaSemana(dto.getDiaSemana());
+                op.setDiaSemana(DiaSemanaEnum.toEnumByCodigo(dto.getCodigoDiaSemana()));
                 op.setHoraInicio(dto.getHoraInicio());
                 op.setHoraFim(dto.getHoraFim());
                 op.setVaga(vagaExistente); 
@@ -97,7 +103,7 @@ public class VagaService {
         if (vagaRequest.getOperacoesVaga() != null && !vagaRequest.getOperacoesVaga().isEmpty()) {
             Set<OperacaoVaga> operacoes = vagaRequest.getOperacoesVaga().stream().map(dto -> {
                 OperacaoVaga op = new OperacaoVaga();
-                op.setDiaSemana(dto.getDiaSemana());
+                op.setDiaSemana(DiaSemanaEnum.toEnumByCodigo(dto.getCodigoDiaSemana()));
                 op.setHoraInicio(dto.getHoraInicio());
                 op.setHoraFim(dto.getHoraFim());
                 op.setVaga(vaga); 
