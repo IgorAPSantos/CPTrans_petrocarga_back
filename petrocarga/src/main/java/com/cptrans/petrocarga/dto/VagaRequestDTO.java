@@ -43,7 +43,6 @@ public class VagaRequestDTO {
     private StatusVagaEnum status;
 
     @Valid
-    @Schema(description = "Lista com os dias e horários de funcionamento da vaga", example = "[{\"diaSemana\": \"SEGUNDA\", \"horaInicio\": \"00:00\", \"horaFim\": \"13:00\"}]")
     private Set<OperacaoVagaRequestDTO> operacoesVaga;
 
 

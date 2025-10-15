@@ -17,9 +17,9 @@ public enum DiaSemanaEnum {
         this.descricao = descricao;
     }
 
-    public static DiaSemanaEnum toEnum(Integer codigo){
-        if(codigo == null){
-            return null;
+    public static DiaSemanaEnum toEnumByCodigo(Integer codigo){
+        if(codigo == null || codigo < 1 || codigo > 7){
+            throw new IllegalArgumentException("Dia da semana inválido. Código não pode ser nulo ou menor que 1 ou maior que 7.");
         }
 
         for(DiaSemanaEnum dia : DiaSemanaEnum.values()){
@@ -29,5 +29,26 @@ public enum DiaSemanaEnum {
         }
 
         throw new IllegalArgumentException("Dia da semana inválido. Código: " + codigo);
+    }
+    
+    public static DiaSemanaEnum toEnumByDescricao(String descricao){
+        if(descricao == null || descricao.isEmpty()){
+            return null;
+        }
+
+        for(DiaSemanaEnum dia : DiaSemanaEnum.values()){
+            if(descricao.equals(dia.descricao)){
+                return dia;
+            }
+        }
+
+        throw new IllegalArgumentException("Dia da semana inválido. Descricao Enviada: " + descricao);
+    }
+
+    public Integer getCodigo(){
+        return this.codigo;
+    }
+    public String getDescricao(){
+        return this.descricao;
     }
 }
