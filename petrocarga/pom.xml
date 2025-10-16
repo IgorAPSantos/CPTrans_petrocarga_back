@@ -93,9 +93,9 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
                 <configuration>
-                    <url>jdbc:postgresql://localhost:5432/petrocarga</url>
-                    <user>postgres</user>
-                    <password>123456</password>
+                    <url>${flyway.url}</url>
+                    <user>${flyway.user}</user>
+                    <password>${flyway.password}</password>
                     <schemas>
                         <schema>public</schema>
                     </schemas>
@@ -128,7 +128,7 @@
         </profile>
 
         <profile>
-            <id>render</id>
+            <id>railway</id>
             <properties>
                 <java.version>21</java.version>
                 <flyway.url>${DATABASE_URL}</flyway.url>
