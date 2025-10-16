@@ -93,18 +93,48 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
                 <configuration>
-                    <url>jdbc:postgresql://localhost:5432/petrocarga</url>
-                    <user>postgres</user>
-                    <password>123456</password>
+                    <url>${flyway.url}</url>
+                    <user>${flyway.user}</user>
+                    <password>${flyway.password}</password>
                     <schemas>
                         <schema>public</schema>
                     </schemas>
                     <cleanDisabled>false</cleanDisabled>
-
                 </configuration>
             </plugin>
-            
+            <!-- Plugin do compilador Java -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <release>${java.version}</release>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>local</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <java.version>21</java.version>
+                <flyway.url>jdbc:postgresql://localhost:5432/petrocarga</flyway.url>
+                <flyway.user>postgres</flyway.user>
+                <flyway.password>123456</flyway.password>
+            </properties>
+        </profile>
 
+        <profile>
+            <id>railway</id>
+            <properties>
+                <java.version>21</java.version>
+                <flyway.url>${DATABASE_URL}</flyway.url>
+                <flyway.user>${DATABASE_USER}</flyway.user>
+                <flyway.password>${DATABASE_PASSWORD}</flyway.password>
+            </properties>
+        </profile>
+    </profiles>
 </project>
