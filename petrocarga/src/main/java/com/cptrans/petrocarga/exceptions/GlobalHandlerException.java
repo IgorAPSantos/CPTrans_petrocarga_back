@@ -63,7 +63,11 @@ public class GlobalHandlerException {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         Map<String, String> error = new HashMap<>();
-        error.put("erro", ex.getAllErrors().getFirst().getDefaultMessage());
+         if (!ex.getAllErrors().isEmpty()) {
+        error.put("erro", ex.getAllErrors().get(0).getDefaultMessage());
+        } else {
+            error.put("erro", "Erro de validação desconhecido");
+        }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
