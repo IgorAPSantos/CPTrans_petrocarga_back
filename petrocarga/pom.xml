@@ -131,9 +131,9 @@
             <id>railway</id>
             <properties>
                 <java.version>21</java.version>
-                <flyway.url>jdbc:postgresql://HOST:PORT/DB?sslmode=require</flyway.url>
-                <flyway.user>USER</flyway.user>
-                <flyway.password>PASS</flyway.password>
+                <flyway.url>${DATABASE_URL}</flyway.url>
+                <flyway.user>${DATABASE_USER}</flyway.user>
+                <flyway.password>${DATABASE_PASSWORD}</flyway.password>
             </properties>
         </profile>
     </profiles>
