@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cptrans.petrocarga.dto.VagaRequestDTO; 
 import com.cptrans.petrocarga.dto.VagaResponseDTO;
+import com.cptrans.petrocarga.enums.StatusVagaEnum;
 import com.cptrans.petrocarga.models.Vaga;
 import com.cptrans.petrocarga.services.VagaService;
 
@@ -36,10 +38,10 @@ public class VagaController {
     @Autowired
     private VagaService vagaService;
 
-    @GetMapping()
+     @GetMapping("/all")
     @Operation(
-        summary = "Listar todas as vagas",
-        description = "Retorna uma lista de todas as vagas cadastradas no sistema.",
+        summary = "Listar todas as vagas.",
+        description = "Retorna uma lista de todas as vagas registradas.",
         responses = {
             @ApiResponse(responseCode = "200", description = "Lista de vagas retornada com sucesso",
                         content = @Content(mediaType = "application/json",
@@ -47,8 +49,33 @@ public class VagaController {
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
         }
     )
-    public ResponseEntity<List<VagaResponseDTO>> listarVagas() {
-        return ResponseEntity.ok(vagaService.listarVagas().stream().map(vaga -> vaga.toResponseDTO()).toList());
+    public ResponseEntity<List<VagaResponseDTO>> listarTodasVagas(@RequestParam(required = false) StatusVagaEnum status) { 
+        if(status != null) {
+            List<VagaResponseDTO> vagas = vagaService.listarVagasByStatus(status).stream().map(vaga -> vaga.toResponseDTO()).toList();
+            return ResponseEntity.ok(vagas);
+        }
+        List<VagaResponseDTO> vagas = vagaService.listarVagas().stream().map(vaga -> vaga.toResponseDTO()).toList();
+        return ResponseEntity.ok(vagas);
+    }
+
+    @GetMapping()
+    @Operation(
+        summary = "Listar todas as vagas com paginação",
+        description = "Retorna uma lista paginada de todas as vagas disponíveis.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de vagas retornada com sucesso",
+                        content = @Content(mediaType = "application/json",
+                        array = @ArraySchema(schema = @Schema(implementation = VagaResponseDTO.class)))),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
+        }
+    )
+    public ResponseEntity<List<VagaResponseDTO>> listarVagasPaginadas(@RequestParam(defaultValue="0") Integer numeroPagina, @RequestParam(defaultValue="10") Integer tamanhoPagina, @RequestParam(defaultValue="endereco.logradouro") String ordenarPor, @RequestParam(required = false) StatusVagaEnum status) {
+        if(status != null) {
+            List<VagaResponseDTO> vagas = vagaService.listarVagasPaginadas(numeroPagina, tamanhoPagina, ordenarPor, status).stream().map(vaga -> vaga.toResponseDTO()).toList();
+            return ResponseEntity.ok(vagas);
+        }
+        List<VagaResponseDTO> vagas = vagaService.listarVagasPaginadas(numeroPagina, tamanhoPagina, ordenarPor).stream().map(vaga -> vaga.toResponseDTO()).toList();
+        return ResponseEntity.ok(vagas);
     }
     
     @GetMapping("/{id}")
@@ -63,7 +90,7 @@ public class VagaController {
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
         }
     )
-    public ResponseEntity<VagaResponseDTO> listarVagas(@Valid @PathVariable UUID id) {
+    public ResponseEntity<VagaResponseDTO> buscarVagaPorId(@Valid @PathVariable UUID id) {
         return ResponseEntity.ok(vagaService.buscarVagaPorId(id).toResponseDTO());
     }
 
