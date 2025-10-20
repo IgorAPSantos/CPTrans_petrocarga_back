@@ -6,10 +6,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.cptrans.petrocarga.dto.VagaRequestDTO;
 import com.cptrans.petrocarga.enums.DiaSemanaEnum;
+import com.cptrans.petrocarga.enums.StatusVagaEnum;
 import com.cptrans.petrocarga.models.EnderecoVaga;
 import com.cptrans.petrocarga.models.OperacaoVaga;
 import com.cptrans.petrocarga.models.Vaga;
@@ -28,10 +32,22 @@ public class VagaService {
     @Autowired
     private OperacaoVagaService operacaoVagaService; 
 
-    
-
     public List<Vaga> listarVagas() {
         return vagaRepository.findAll();
+    }
+
+    public List<Vaga> listarVagasByStatus(StatusVagaEnum status) {
+        return vagaRepository.findByStatus(status);
+    }
+
+    public List<Vaga> listarVagasPaginadas(Integer numeroPagina, Integer tamanhoPagina, String ordenarPor) {
+        Pageable pageable = PageRequest.of(numeroPagina, tamanhoPagina, Sort.by(ordenarPor).ascending());
+        return vagaRepository.findAll(pageable).getContent();
+    }
+
+    public List<Vaga> listarVagasPaginadas(Integer numeroPagina, Integer tamanhoPagina, String ordenarPor, StatusVagaEnum status) {
+        Pageable pageable = PageRequest.of(numeroPagina, tamanhoPagina, Sort.by(ordenarPor).ascending());
+        return vagaRepository.findByStatus(status, pageable);
     }
 
     public Vaga buscarVagaPorId(UUID id) {
