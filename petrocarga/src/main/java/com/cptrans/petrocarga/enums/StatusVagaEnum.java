@@ -1,6 +1,7 @@
 package com.cptrans.petrocarga.enums;
 
 public enum StatusVagaEnum {
-    DISPONIVEL,
-    INDISPONIVEL
+    ATIVA,
+    INATIVA,
+    MANUTENCAO
 }

@@ -1,0 +1,100 @@
+package com.cptrans.petrocarga.dto;
+
+import com.cptrans.petrocarga.enums.StatusReservaEnum;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+public class ReservaResponseDTO {
+
+    private UUID id;
+    private UUID vagaId;
+    private UUID motoristaId;
+    private UUID veiculoId;
+    private UUID criadoPorId;
+    private String cidadeOrigem;
+    private OffsetDateTime criadoEm;
+    private OffsetDateTime inicio;
+    private OffsetDateTime fim;
+    private StatusReservaEnum status;
+
+    // Getters and Setters
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getVagaId() {
+        return vagaId;
+    }
+
+    public void setVagaId(UUID vagaId) {
+        this.vagaId = vagaId;
+    }
+
+    public UUID getMotoristaId() {
+        return motoristaId;
+    }
+
+    public void setMotoristaId(UUID motoristaId) {
+        this.motoristaId = motoristaId;
+    }
+
+    public UUID getVeiculoId() {
+        return veiculoId;
+    }
+
+    public void setVeiculoId(UUID veiculoId) {
+        this.veiculoId = veiculoId;
+    }
+
+    public UUID getCriadoPorId() {
+        return criadoPorId;
+    }
+
+    public void setCriadoPorId(UUID criadoPorId) {
+        this.criadoPorId = criadoPorId;
+    }
+
+    public String getCidadeOrigem() {
+        return cidadeOrigem;
+    }
+
+    public void setCidadeOrigem(String cidadeOrigem) {
+        this.cidadeOrigem = cidadeOrigem;
+    }
+
+    public OffsetDateTime getCriadoEm() {
+        return criadoEm;
+    }
+
+    public void setCriadoEm(OffsetDateTime criadoEm) {
+        this.criadoEm = criadoEm;
+    }
+
+    public OffsetDateTime getInicio() {
+        return inicio;
+    }
+
+    public void setInicio(OffsetDateTime inicio) {
+        this.inicio = inicio;
+    }
+
+    public OffsetDateTime getFim() {
+        return fim;
+    }
+
+    public void setFim(OffsetDateTime fim) {
+        this.fim = fim;
+    }
+
+    public StatusReservaEnum getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusReservaEnum status) {
+        this.status = status;
+    }
+}
