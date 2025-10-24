@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.dto;
 
+import com.cptrans.petrocarga.models.EnderecoVaga;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -26,6 +27,14 @@ public class EnderecoVagaRequestDTO {
         example = "Centro"
     )
     private String bairro;
+
+    public EnderecoVaga toEntity() {
+        EnderecoVaga enderecoVaga = new EnderecoVaga();
+        enderecoVaga.setBairro(this.bairro);
+        enderecoVaga.setCodigoPMP(this.codigoPMP);
+        enderecoVaga.setLogradouro(this.logradouro);
+        return enderecoVaga;
+    }
 
     public String getCodigoPMP(){
         return this.codigoPMP;

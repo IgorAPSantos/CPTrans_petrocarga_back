@@ -85,7 +85,7 @@ public class EnderecoVaga {
     public EnderecoVagaResponseDTO toResponseDTO() {
         EnderecoVagaResponseDTO dto = new EnderecoVagaResponseDTO();
         dto.setId(this.id);
-        dto.setCodidoPmp(this.codigoPmp);
+        dto.setCodigoPmp(this.codigoPmp);
         dto.setLogradouro(this.logradouro);
         dto.setBairro(this.bairro);
         return dto;

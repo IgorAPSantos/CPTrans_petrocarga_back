@@ -1,6 +1,9 @@
 package com.cptrans.petrocarga.dto;
 
 import com.cptrans.petrocarga.enums.TipoCnhEnum;
+import com.cptrans.petrocarga.models.Empresa;
+import com.cptrans.petrocarga.models.Motorista;
+import com.cptrans.petrocarga.models.Usuario;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -20,6 +23,16 @@ public class MotoristaRequestDTO {
     private LocalDate dataValidadeCNH;
 
     private UUID empresaId;
+
+    public Motorista toEntity(Usuario usuario, Empresa empresa) {
+        Motorista motorista = new Motorista();
+        motorista.setUsuario(usuario);
+        motorista.setTipoCNH(this.tipoCNH);
+        motorista.setNumeroCNH(this.numeroCNH);
+        motorista.setDataValidadeCNH(this.dataValidadeCNH);
+        motorista.setEmpresa(empresa);
+        return motorista;
+    }
 
     // Getters and Setters
     public UUID getUsuarioId() {

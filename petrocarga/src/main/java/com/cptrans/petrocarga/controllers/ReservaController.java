@@ -45,7 +45,7 @@ public class ReservaController {
     @GetMapping
     public ResponseEntity<List<ReservaResponseDTO>> getAllReservas() {
         List<ReservaResponseDTO> reservas = reservaService.findAll().stream()
-                .map(this::convertToResponseDTO)
+                .map(ReservaResponseDTO::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(reservas);
     }
@@ -53,7 +53,7 @@ public class ReservaController {
     @GetMapping("/{id}")
     public ResponseEntity<ReservaResponseDTO> getReservaById(@PathVariable UUID id) {
         return reservaService.findById(id)
-                .map(this::convertToResponseDTO)
+                .map(ReservaResponseDTO::new)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -66,9 +66,9 @@ public class ReservaController {
         Optional<Usuario> criadoPorOpt = usuarioService.findById(reservaRequestDTO.getCriadoPorId());
 
         if (vagaOpt.isPresent() && motoristaOpt.isPresent() && veiculoOpt.isPresent() && criadoPorOpt.isPresent()) {
-            Reserva reserva = convertToEntity(reservaRequestDTO, vagaOpt.get(), motoristaOpt.get(), veiculoOpt.get(), criadoPorOpt.get());
+            Reserva reserva = reservaRequestDTO.toEntity(vagaOpt.get(), motoristaOpt.get(), veiculoOpt.get(), criadoPorOpt.get());
             Reserva savedReserva = reservaService.save(reserva);
-            return ResponseEntity.status(HttpStatus.CREATED).body(convertToResponseDTO(savedReserva));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ReservaResponseDTO(savedReserva));
         }
         return ResponseEntity.badRequest().build(); // Or a more specific error
     }
@@ -83,9 +83,16 @@ public class ReservaController {
                     Optional<Usuario> criadoPorOpt = usuarioService.findById(reservaRequestDTO.getCriadoPorId());
 
                     if (vagaOpt.isPresent() && motoristaOpt.isPresent() && veiculoOpt.isPresent() && criadoPorOpt.isPresent()) {
-                        updateEntityFromDto(existingReserva, reservaRequestDTO, vagaOpt.get(), motoristaOpt.get(), veiculoOpt.get(), criadoPorOpt.get());
+                        existingReserva.setVaga(vagaOpt.get());
+                        existingReserva.setMotorista(motoristaOpt.get());
+                        existingReserva.setVeiculo(veiculoOpt.get());
+                        existingReserva.setCriadoPor(criadoPorOpt.get());
+                        existingReserva.setCidadeOrigem(reservaRequestDTO.getCidadeOrigem());
+                        existingReserva.setInicio(reservaRequestDTO.getInicio());
+                        existingReserva.setFim(reservaRequestDTO.getFim());
+                        existingReserva.setStatus(reservaRequestDTO.getStatus());
                         Reserva updatedReserva = reservaService.save(existingReserva);
-                        return ResponseEntity.ok(convertToResponseDTO(updatedReserva));
+                        return ResponseEntity.ok(new ReservaResponseDTO(updatedReserva));
                     }
                     return ResponseEntity.badRequest().build();
                 })
@@ -99,44 +106,5 @@ public class ReservaController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
-    }
-
-    private ReservaResponseDTO convertToResponseDTO(Reserva reserva) {
-        ReservaResponseDTO dto = new ReservaResponseDTO();
-        dto.setId(reserva.getId());
-        dto.setVagaId(reserva.getVaga().getId());
-        dto.setMotoristaId(reserva.getMotorista().getId());
-        dto.setVeiculoId(reserva.getVeiculo().getId());
-        dto.setCriadoPorId(reserva.getCriadoPor().getId());
-        dto.setCidadeOrigem(reserva.getCidadeOrigem());
-        dto.setCriadoEm(reserva.getCriadoEm());
-        dto.setInicio(reserva.getInicio());
-        dto.setFim(reserva.getFim());
-        dto.setStatus(reserva.getStatus());
-        return dto;
-    }
-
-    private Reserva convertToEntity(ReservaRequestDTO dto, Vaga vaga, Motorista motorista, Veiculo veiculo, Usuario criadoPor) {
-        Reserva reserva = new Reserva();
-        reserva.setVaga(vaga);
-        reserva.setMotorista(motorista);
-        reserva.setVeiculo(veiculo);
-        reserva.setCriadoPor(criadoPor);
-        reserva.setCidadeOrigem(dto.getCidadeOrigem());
-        reserva.setInicio(dto.getInicio());
-        reserva.setFim(dto.getFim());
-        reserva.setStatus(dto.getStatus());
-        return reserva;
-    }
-
-    private void updateEntityFromDto(Reserva reserva, ReservaRequestDTO dto, Vaga vaga, Motorista motorista, Veiculo veiculo, Usuario criadoPor) {
-        reserva.setVaga(vaga);
-        reserva.setMotorista(motorista);
-        reserva.setVeiculo(veiculo);
-        reserva.setCriadoPor(criadoPor);
-        reserva.setCidadeOrigem(dto.getCidadeOrigem());
-        reserva.setInicio(dto.getInicio());
-        reserva.setFim(dto.getFim());
-        reserva.setStatus(dto.getStatus());
     }
 }

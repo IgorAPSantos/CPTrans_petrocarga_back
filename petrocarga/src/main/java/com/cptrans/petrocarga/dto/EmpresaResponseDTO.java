@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.dto;
 
+import com.cptrans.petrocarga.models.Empresa;
 import java.util.UUID;
 
 public class EmpresaResponseDTO {
@@ -8,6 +9,16 @@ public class EmpresaResponseDTO {
     private UUID usuarioId;
     private String cnpj;
     private String razaoSocial;
+
+    public EmpresaResponseDTO() {
+    }
+
+    public EmpresaResponseDTO(Empresa empresa) {
+        this.id = empresa.getId();
+        this.usuarioId = empresa.getUsuario().getId();
+        this.cnpj = empresa.getCnpj();
+        this.razaoSocial = empresa.getRazaoSocial();
+    }
 
     // Getters and Setters
     public UUID getId() {

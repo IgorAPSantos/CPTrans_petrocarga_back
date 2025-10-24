@@ -2,6 +2,9 @@ package com.cptrans.petrocarga.dto;
 
 import java.time.LocalTime;
 
+import com.cptrans.petrocarga.enums.DiaSemanaEnum;
+import com.cptrans.petrocarga.models.OperacaoVaga;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class OperacaoVagaRequestDTO {
@@ -11,6 +14,14 @@ public class OperacaoVagaRequestDTO {
     private LocalTime horaInicio;
     @Schema(description = "Hora de fim", example = "13:00")
     private LocalTime horaFim;
+
+    public OperacaoVaga toEntity() {
+        OperacaoVaga operacaoVaga = new OperacaoVaga();
+        operacaoVaga.setDiaSemana(DiaSemanaEnum.toEnum(this.codigoDiaSemana));
+        operacaoVaga.setHoraInicio(this.horaInicio);
+        operacaoVaga.setHoraFim(this.horaFim);
+        return operacaoVaga;
+    }
 
     // Getters e Setters
     public Integer getCodigoDiaSemana() {

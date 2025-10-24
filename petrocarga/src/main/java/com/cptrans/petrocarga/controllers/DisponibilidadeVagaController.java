@@ -35,7 +35,7 @@ public class DisponibilidadeVagaController {
     @GetMapping
     public ResponseEntity<List<DisponibilidadeVagaResponseDTO>> getAllDisponibilidadeVagas() {
         List<DisponibilidadeVagaResponseDTO> disponibilidadeVagas = disponibilidadeVagaService.findAll().stream()
-                .map(this::convertToResponseDTO)
+                .map(DisponibilidadeVagaResponseDTO::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(disponibilidadeVagas);
     }
@@ -43,7 +43,7 @@ public class DisponibilidadeVagaController {
     @GetMapping("/{id}")
     public ResponseEntity<DisponibilidadeVagaResponseDTO> getDisponibilidadeVagaById(@PathVariable UUID id) {
         return disponibilidadeVagaService.findById(id)
-                .map(this::convertToResponseDTO)
+                .map(DisponibilidadeVagaResponseDTO::new)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -54,9 +54,9 @@ public class DisponibilidadeVagaController {
         Optional<Usuario> usuarioOpt = usuarioService.findById(disponibilidadeVagaRequestDTO.getCriadoPorId());
 
         if (vagaOpt.isPresent() && usuarioOpt.isPresent()) {
-            DisponibilidadeVaga disponibilidadeVaga = convertToEntity(disponibilidadeVagaRequestDTO, vagaOpt.get(), usuarioOpt.get());
+            DisponibilidadeVaga disponibilidadeVaga = disponibilidadeVagaRequestDTO.toEntity(vagaOpt.get(), usuarioOpt.get());
             DisponibilidadeVaga savedDisponibilidadeVaga = disponibilidadeVagaService.save(disponibilidadeVaga);
-            return ResponseEntity.status(HttpStatus.CREATED).body(convertToResponseDTO(savedDisponibilidadeVaga));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new DisponibilidadeVagaResponseDTO(savedDisponibilidadeVaga));
         }
         return ResponseEntity.badRequest().build(); // Or a more specific error
     }
@@ -69,9 +69,12 @@ public class DisponibilidadeVagaController {
                     Optional<Usuario> usuarioOpt = usuarioService.findById(disponibilidadeVagaRequestDTO.getCriadoPorId());
 
                     if (vagaOpt.isPresent() && usuarioOpt.isPresent()) {
-                        updateEntityFromDto(existingDisponibilidadeVaga, disponibilidadeVagaRequestDTO, vagaOpt.get(), usuarioOpt.get());
+                        existingDisponibilidadeVaga.setVaga(vagaOpt.get());
+                        existingDisponibilidadeVaga.setInicio(disponibilidadeVagaRequestDTO.getInicio());
+                        existingDisponibilidadeVaga.setFim(disponibilidadeVagaRequestDTO.getFim());
+                        existingDisponibilidadeVaga.setCriadoPor(usuarioOpt.get());
                         DisponibilidadeVaga updatedDisponibilidadeVaga = disponibilidadeVagaService.save(existingDisponibilidadeVaga);
-                        return ResponseEntity.ok(convertToResponseDTO(updatedDisponibilidadeVaga));
+                        return ResponseEntity.ok(new DisponibilidadeVagaResponseDTO(updatedDisponibilidadeVaga));
                     }
                     return ResponseEntity.badRequest().build();
                 })
@@ -85,32 +88,5 @@ public class DisponibilidadeVagaController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
-    }
-
-    private DisponibilidadeVagaResponseDTO convertToResponseDTO(DisponibilidadeVaga disponibilidadeVaga) {
-        DisponibilidadeVagaResponseDTO dto = new DisponibilidadeVagaResponseDTO();
-        dto.setId(disponibilidadeVaga.getId());
-        dto.setVagaId(disponibilidadeVaga.getVaga().getId());
-        dto.setInicio(disponibilidadeVaga.getInicio());
-        dto.setFim(disponibilidadeVaga.getFim());
-        dto.setCriadoEm(disponibilidadeVaga.getCriadoEm());
-        dto.setCriadoPorId(disponibilidadeVaga.getCriadoPor().getId());
-        return dto;
-    }
-
-    private DisponibilidadeVaga convertToEntity(DisponibilidadeVagaRequestDTO dto, Vaga vaga, Usuario usuario) {
-        DisponibilidadeVaga disponibilidadeVaga = new DisponibilidadeVaga();
-        disponibilidadeVaga.setVaga(vaga);
-        disponibilidadeVaga.setInicio(dto.getInicio());
-        disponibilidadeVaga.setFim(dto.getFim());
-        disponibilidadeVaga.setCriadoPor(usuario);
-        return disponibilidadeVaga;
-    }
-
-    private void updateEntityFromDto(DisponibilidadeVaga disponibilidadeVaga, DisponibilidadeVagaRequestDTO dto, Vaga vaga, Usuario usuario) {
-        disponibilidadeVaga.setVaga(vaga);
-        disponibilidadeVaga.setInicio(dto.getInicio());
-        disponibilidadeVaga.setFim(dto.getFim());
-        disponibilidadeVaga.setCriadoPor(usuario);
     }
 }

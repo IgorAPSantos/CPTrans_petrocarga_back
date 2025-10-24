@@ -1,14 +1,22 @@
 package com.cptrans.petrocarga.dto;
 
+import com.cptrans.petrocarga.models.EnderecoVaga;
 import java.util.UUID;
 
 public class EnderecoVagaResponseDTO {
     private UUID id;
-    private String codidoPmp;
+    private String codigoPmp;
     private String logradouro;  
     private String bairro;
 
     public EnderecoVagaResponseDTO() {
+    }
+
+    public EnderecoVagaResponseDTO(EnderecoVaga enderecoVaga) {
+        this.id = enderecoVaga.getId();
+        this.codigoPmp = enderecoVaga.getCodigoPMP();
+        this.logradouro = enderecoVaga.getLogradouro();
+        this.bairro = enderecoVaga.getBairro();
     }
 
     public UUID getId() {
@@ -17,11 +25,11 @@ public class EnderecoVagaResponseDTO {
     public void setId(UUID id) {
         this.id = id;
     }
-    public String getCodidoPmp() {
-        return codidoPmp;
+    public String getCodigoPmp() {
+        return codigoPmp;
     }
-    public void setCodidoPmp(String codidoPmp) {
-        this.codidoPmp = codidoPmp;
+    public void setCodigoPmp(String codigoPmp) {
+        this.codigoPmp = codigoPmp;
     }
     public String getLogradouro() {
         return logradouro;

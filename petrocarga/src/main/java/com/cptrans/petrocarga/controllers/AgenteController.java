@@ -1,13 +1,11 @@
 package com.cptrans.petrocarga.controllers;
 
-import com.cptrans.petrocarga.dto.ReservaRapidaRequestDTO;
-import com.cptrans.petrocarga.dto.ReservaRapidaResponseDTO;
+import com.cptrans.petrocarga.dto.AgenteRequestDTO;
+import com.cptrans.petrocarga.dto.AgenteResponseDTO;
 import com.cptrans.petrocarga.models.Agente;
-import com.cptrans.petrocarga.models.ReservaRapida;
-import com.cptrans.petrocarga.models.Vaga;
+import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.services.AgenteService;
-import com.cptrans.petrocarga.services.ReservaRapidaService;
-import com.cptrans.petrocarga.services.VagaService;
+import com.cptrans.petrocarga.services.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,103 +18,80 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/reservas-rapidas")
-public class ReservaRapidaController {
-
-    @Autowired
-    private ReservaRapidaService reservaRapidaService;
-
-    @Autowired
-    private VagaService vagaService;
+@RequestMapping("/agentes")
+public class AgenteController {
 
     @Autowired
     private AgenteService agenteService;
 
+    @Autowired
+    private UsuarioService usuarioService;
+
     @GetMapping
-    public ResponseEntity<List<ReservaRapidaResponseDTO>> getAllReservaRapidas() {
-        List<ReservaRapidaResponseDTO> reservasRapidas = reservaRapidaService.findAll().stream()
+    public ResponseEntity<List<AgenteResponseDTO>> getAllAgentes() {
+        List<AgenteResponseDTO> agentes = agenteService.findAll().stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(reservasRapidas);
+        return ResponseEntity.ok(agentes);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReservaRapidaResponseDTO> getReservaRapidaById(@PathVariable UUID id) {
-        return reservaRapidaService.findById(id)
+    public ResponseEntity<AgenteResponseDTO> getAgenteById(@PathVariable UUID id) {
+        return agenteService.findById(id)
                 .map(this::convertToResponseDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<ReservaRapidaResponseDTO> createReservaRapida(@RequestBody @Valid ReservaRapidaRequestDTO reservaRapidaRequestDTO) {
-        Optional<Vaga> vagaOpt = vagaService.findById(reservaRapidaRequestDTO.getVagaId());
-        Optional<Agente> agenteOpt = agenteService.findById(reservaRapidaRequestDTO.getAgenteId());
-
-        if (vagaOpt.isPresent() && agenteOpt.isPresent()) {
-            ReservaRapida reservaRapida = convertToEntity(reservaRapidaRequestDTO, vagaOpt.get(), agenteOpt.get());
-            ReservaRapida savedReservaRapida = reservaRapidaService.save(reservaRapida);
-            return ResponseEntity.status(HttpStatus.CREATED).body(convertToResponseDTO(savedReservaRapida));
-        }
-        return ResponseEntity.badRequest().build(); // Or a more specific error
+    public ResponseEntity<AgenteResponseDTO> createAgente(@RequestBody @Valid AgenteRequestDTO agenteRequestDTO) {
+        return usuarioService.findById(agenteRequestDTO.getUsuarioId())
+                .map(usuario -> {
+                    Agente agente = convertToEntity(agenteRequestDTO, usuario);
+                    Agente savedAgente = agenteService.save(agente);
+                    return ResponseEntity.status(HttpStatus.CREATED).body(convertToResponseDTO(savedAgente));
+                })
+                .orElse(ResponseEntity.badRequest().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ReservaRapidaResponseDTO> updateReservaRapida(@PathVariable UUID id, @RequestBody @Valid ReservaRapidaRequestDTO reservaRapidaRequestDTO) {
-        return reservaRapidaService.findById(id)
-                .map(existingReservaRapida -> {
-                    Optional<Vaga> vagaOpt = vagaService.findById(reservaRapidaRequestDTO.getVagaId());
-                    Optional<Agente> agenteOpt = agenteService.findById(reservaRapidaRequestDTO.getAgenteId());
-
-                    if (vagaOpt.isPresent() && agenteOpt.isPresent()) {
-                        updateEntityFromDto(existingReservaRapida, reservaRapidaRequestDTO, vagaOpt.get(), agenteOpt.get());
-                        ReservaRapida updatedReservaRapida = reservaRapidaService.save(existingReservaRapida);
-                        return ResponseEntity.ok(convertToResponseDTO(updatedReservaRapida));
-                    }
-                    return ResponseEntity.badRequest().build();
-                })
+    public ResponseEntity<AgenteResponseDTO> updateAgente(@PathVariable UUID id, @RequestBody @Valid AgenteRequestDTO agenteRequestDTO) {
+        return agenteService.findById(id)
+                .flatMap(existingAgente -> usuarioService.findById(agenteRequestDTO.getUsuarioId())
+                        .map(usuario -> {
+                            updateEntityFromDto(existingAgente, agenteRequestDTO, usuario);
+                            Agente updatedAgente = agenteService.save(existingAgente);
+                            return ResponseEntity.ok(convertToResponseDTO(updatedAgente));
+                        }))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservaRapida(@PathVariable UUID id) {
-        if (reservaRapidaService.findById(id).isPresent()) {
-            reservaRapidaService.deleteById(id);
+    public ResponseEntity<Void> deleteAgente(@PathVariable UUID id) {
+        if (agenteService.findById(id).isPresent()) {
+            agenteService.deleteById(id);
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
     }
 
-    private ReservaRapidaResponseDTO convertToResponseDTO(ReservaRapida reservaRapida) {
-        ReservaRapidaResponseDTO dto = new ReservaRapidaResponseDTO();
-        dto.setId(reservaRapida.getId());
-        dto.setVagaId(reservaRapida.getVaga().getId());
-        dto.setAgenteId(reservaRapida.getAgente().getId());
-        dto.setTipoVeiculo(reservaRapida.getTipoVeiculo());
-        dto.setPlaca(reservaRapida.getPlaca());
-        dto.setInicio(reservaRapida.getInicio());
-        dto.setFim(reservaRapida.getFim());
-        dto.setCriadoEm(reservaRapida.getCriadoEm());
+    private AgenteResponseDTO convertToResponseDTO(Agente agente) {
+        AgenteResponseDTO dto = new AgenteResponseDTO();
+        dto.setId(agente.getId());
+        dto.setMatricula(agente.getMatricula());
+        dto.setUsuarioId(agente.getUsuario().getId());
         return dto;
     }
 
-    private ReservaRapida convertToEntity(ReservaRapidaRequestDTO dto, Vaga vaga, Agente agente) {
-        ReservaRapida reservaRapida = new ReservaRapida();
-        reservaRapida.setVaga(vaga);
-        reservaRapida.setAgente(agente);
-        reservaRapida.setTipoVeiculo(dto.getTipoVeiculo());
-        reservaRapida.setPlaca(dto.getPlaca());
-        reservaRapida.setInicio(dto.getInicio());
-        reservaRapida.setFim(dto.getFim());
-        return reservaRapida;
+    private Agente convertToEntity(AgenteRequestDTO dto, Usuario usuario) {
+        Agente agente = new Agente();
+        agente.setMatricula(dto.getMatricula());
+        agente.setUsuario(usuario);
+        return agente;
     }
 
-    private void updateEntityFromDto(ReservaRapida reservaRapida, ReservaRapidaRequestDTO dto, Vaga vaga, Agente agente) {
-        reservaRapida.setVaga(vaga);
-        reservaRapida.setAgente(agente);
-        reservaRapida.setTipoVeiculo(dto.getTipoVeiculo());
-        reservaRapida.setPlaca(dto.getPlaca());
-        reservaRapida.setInicio(dto.getInicio());
-        reservaRapida.setFim(dto.getFim());
+    private void updateEntityFromDto(Agente agente, AgenteRequestDTO dto, Usuario usuario) {
+        agente.setMatricula(dto.getMatricula());
+        agente.setUsuario(usuario);
     }
 }

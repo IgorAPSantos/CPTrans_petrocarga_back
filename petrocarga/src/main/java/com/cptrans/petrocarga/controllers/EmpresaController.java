@@ -1,4 +1,4 @@
-POspackage com.cptrans.petrocarga.controllers;
+package com.cptrans.petrocarga.controllers;
 
 import com.cptrans.petrocarga.dto.EmpresaRequestDTO;
 import com.cptrans.petrocarga.dto.EmpresaResponseDTO;
@@ -29,7 +29,7 @@ public class EmpresaController {
     @GetMapping
     public ResponseEntity<List<EmpresaResponseDTO>> getAllEmpresas() {
         List<EmpresaResponseDTO> empresas = empresaService.findAll().stream()
-                .map(this::convertToResponseDTO)
+                .map(EmpresaResponseDTO::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(empresas);
     }
@@ -37,7 +37,7 @@ public class EmpresaController {
     @GetMapping("/{id}")
     public ResponseEntity<EmpresaResponseDTO> getEmpresaById(@PathVariable UUID id) {
         return empresaService.findById(id)
-                .map(this::convertToResponseDTO)
+                .map(EmpresaResponseDTO::new)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -46,9 +46,9 @@ public class EmpresaController {
     public ResponseEntity<EmpresaResponseDTO> createEmpresa(@RequestBody @Valid EmpresaRequestDTO empresaRequestDTO) {
         return usuarioService.findById(empresaRequestDTO.getUsuarioId())
                 .map(usuario -> {
-                    Empresa empresa = convertToEntity(empresaRequestDTO, usuario);
+                    Empresa empresa = empresaRequestDTO.toEntity(usuario);
                     Empresa savedEmpresa = empresaService.save(empresa);
-                    return ResponseEntity.status(HttpStatus.CREATED).body(convertToResponseDTO(savedEmpresa));
+                    return ResponseEntity.status(HttpStatus.CREATED).body(new EmpresaResponseDTO(savedEmpresa));
                 })
                 .orElse(ResponseEntity.badRequest().build()); // Or a more specific error
     }
@@ -59,9 +59,11 @@ public class EmpresaController {
                 .map(existingEmpresa -> {
                     return usuarioService.findById(empresaRequestDTO.getUsuarioId())
                             .map(usuario -> {
-                                updateEntityFromDto(existingEmpresa, empresaRequestDTO, usuario);
+                                existingEmpresa.setUsuario(usuario);
+                                existingEmpresa.setCnpj(empresaRequestDTO.getCnpj());
+                                existingEmpresa.setRazaoSocial(empresaRequestDTO.getRazaoSocial());
                                 Empresa updatedEmpresa = empresaService.save(existingEmpresa);
-                                return ResponseEntity.ok(convertToResponseDTO(updatedEmpresa));
+                                return ResponseEntity.ok(new EmpresaResponseDTO(updatedEmpresa));
                             })
                             .orElse(ResponseEntity.badRequest().build());
                 })
@@ -75,28 +77,5 @@ public class EmpresaController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
-    }
-
-    private EmpresaResponseDTO convertToResponseDTO(Empresa empresa) {
-        EmpresaResponseDTO dto = new EmpresaResponseDTO();
-        dto.setId(empresa.getId());
-        dto.setUsuarioId(empresa.getUsuario().getId());
-        dto.setCnpj(empresa.getCnpj());
-        dto.setRazaoSocial(empresa.getRazaoSocial());
-        return dto;
-    }
-
-    private Empresa convertToEntity(EmpresaRequestDTO dto, Usuario usuario) {
-        Empresa empresa = new Empresa();
-        empresa.setUsuario(usuario);
-        empresa.setCnpj(dto.getCnpj());
-        empresa.setRazaoSocial(dto.getRazaoSocial());
-        return empresa;
-    }
-
-    private void updateEntityFromDto(Empresa empresa, EmpresaRequestDTO dto, Usuario usuario) {
-        empresa.setUsuario(usuario);
-        empresa.setCnpj(dto.getCnpj());
-        empresa.setRazaoSocial(dto.getRazaoSocial());
     }
 }

@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.dto;
 
+import com.cptrans.petrocarga.models.DisponibilidadeVaga;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -11,6 +12,18 @@ public class DisponibilidadeVagaResponseDTO {
     private OffsetDateTime fim;
     private OffsetDateTime criadoEm;
     private UUID criadoPorId;
+
+    public DisponibilidadeVagaResponseDTO() {
+    }
+
+    public DisponibilidadeVagaResponseDTO(DisponibilidadeVaga disponibilidadeVaga) {
+        this.id = disponibilidadeVaga.getId();
+        this.vagaId = disponibilidadeVaga.getVaga().getId();
+        this.inicio = disponibilidadeVaga.getInicio();
+        this.fim = disponibilidadeVaga.getFim();
+        this.criadoEm = disponibilidadeVaga.getCriadoEm();
+        this.criadoPorId = disponibilidadeVaga.getCriadoPor().getId();
+    }
 
     // Getters and Setters
     public UUID getId() {

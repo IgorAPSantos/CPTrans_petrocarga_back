@@ -1,10 +1,6 @@
-package com.cptrans.petrocarga.dto;
-
-import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import com.cptrans.petrocarga.models.Agente;
+import com.cptrans.petrocarga.models.ReservaRapida;
+import com.cptrans.petrocarga.models.Vaga;
 
 public class ReservaRapidaRequestDTO {
 
@@ -23,6 +19,20 @@ public class ReservaRapidaRequestDTO {
 
     @NotNull
     private OffsetDateTime fim;
+
+    public ReservaRapidaRequestDTO() {
+    }
+
+    public ReservaRapida toEntity(Vaga vaga, Agente agente) {
+        ReservaRapida reservaRapida = new ReservaRapida();
+        reservaRapida.setVaga(vaga);
+        reservaRapida.setAgente(agente);
+        reservaRapida.setTipoVeiculo(this.tipoVeiculo);
+        reservaRapida.setPlaca(this.placa);
+        reservaRapida.setInicio(this.inicio);
+        reservaRapida.setFim(this.fim);
+        return reservaRapida;
+    }
 
     // Getters and Setters
     public UUID getVagaId() {

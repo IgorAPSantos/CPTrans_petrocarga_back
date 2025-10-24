@@ -1,6 +1,7 @@
 package com.cptrans.petrocarga.dto;
 
 import com.cptrans.petrocarga.enums.PermissoesEnum;
+import com.cptrans.petrocarga.models.Usuario;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +27,17 @@ public class UsuarioRequestDTO {
 
     @NotNull
     private PermissoesEnum permissao;
+
+    public Usuario toEntity() {
+        Usuario usuario = new Usuario();
+        usuario.setNome(this.nome);
+        usuario.setCpf(this.cpf);
+        usuario.setTelefone(this.telefone);
+        usuario.setEmail(this.email);
+        usuario.setSenha(this.senha);
+        usuario.setPermissao(this.permissao);
+        return usuario;
+    }
 
     // Getters and Setters
     public String getNome() {

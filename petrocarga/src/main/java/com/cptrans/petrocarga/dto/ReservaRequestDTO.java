@@ -1,6 +1,11 @@
 package com.cptrans.petrocarga.dto;
 
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
+import com.cptrans.petrocarga.models.Motorista;
+import com.cptrans.petrocarga.models.Reserva;
+import com.cptrans.petrocarga.models.Usuario;
+import com.cptrans.petrocarga.models.Vaga;
+import com.cptrans.petrocarga.models.Veiculo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
@@ -30,6 +35,19 @@ public class ReservaRequestDTO {
 
     @NotNull
     private StatusReservaEnum status;
+
+    public Reserva toEntity(Vaga vaga, Motorista motorista, Veiculo veiculo, Usuario criadoPor) {
+        Reserva reserva = new Reserva();
+        reserva.setVaga(vaga);
+        reserva.setMotorista(motorista);
+        reserva.setVeiculo(veiculo);
+        reserva.setCriadoPor(criadoPor);
+        reserva.setCidadeOrigem(this.cidadeOrigem);
+        reserva.setInicio(this.inicio);
+        reserva.setFim(this.fim);
+        reserva.setStatus(this.status);
+        return reserva;
+    }
 
     // Getters and Setters
     public UUID getVagaId() {

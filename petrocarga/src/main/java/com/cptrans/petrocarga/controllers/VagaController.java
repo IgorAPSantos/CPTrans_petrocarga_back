@@ -51,10 +51,10 @@ public class VagaController {
     )
     public ResponseEntity<List<VagaResponseDTO>> listarTodasVagas(@RequestParam(required = false) StatusVagaEnum status) { 
         if(status != null) {
-            List<VagaResponseDTO> vagas = vagaService.listarVagasByStatus(status).stream().map(vaga -> vaga.toResponseDTO()).toList();
+            List<VagaResponseDTO> vagas = vagaService.listarVagasByStatus(status).stream().map(VagaResponseDTO::new).toList();
             return ResponseEntity.ok(vagas);
         }
-        List<VagaResponseDTO> vagas = vagaService.listarVagas().stream().map(vaga -> vaga.toResponseDTO()).toList();
+        List<VagaResponseDTO> vagas = vagaService.listarVagas().stream().map(VagaResponseDTO::new).toList();
         return ResponseEntity.ok(vagas);
     }
 
@@ -71,10 +71,10 @@ public class VagaController {
     )
     public ResponseEntity<List<VagaResponseDTO>> listarVagasPaginadas(@RequestParam(defaultValue="0") Integer numeroPagina, @RequestParam(defaultValue="10") Integer tamanhoPagina, @RequestParam(defaultValue="endereco.logradouro") String ordenarPor, @RequestParam(required = false) StatusVagaEnum status) {
         if(status != null) {
-            List<VagaResponseDTO> vagas = vagaService.listarVagasPaginadas(numeroPagina, tamanhoPagina, ordenarPor, status).stream().map(vaga -> vaga.toResponseDTO()).toList();
+            List<VagaResponseDTO> vagas = vagaService.listarVagasPaginadas(numeroPagina, tamanhoPagina, ordenarPor, status).stream().map(VagaResponseDTO::new).toList();
             return ResponseEntity.ok(vagas);
         }
-        List<VagaResponseDTO> vagas = vagaService.listarVagasPaginadas(numeroPagina, tamanhoPagina, ordenarPor).stream().map(vaga -> vaga.toResponseDTO()).toList();
+        List<VagaResponseDTO> vagas = vagaService.listarVagasPaginadas(numeroPagina, tamanhoPagina, ordenarPor).stream().map(VagaResponseDTO::new).toList();
         return ResponseEntity.ok(vagas);
     }
     
@@ -91,7 +91,7 @@ public class VagaController {
         }
     )
     public ResponseEntity<VagaResponseDTO> buscarVagaPorId(@Valid @PathVariable UUID id) {
-        return ResponseEntity.ok(vagaService.buscarVagaPorId(id).toResponseDTO());
+        return ResponseEntity.ok(new VagaResponseDTO(vagaService.buscarVagaPorId(id)));
     }
 
     @PostMapping()
@@ -114,7 +114,7 @@ public class VagaController {
 
     public ResponseEntity<VagaResponseDTO> cadastrarVaga(@Valid @RequestBody VagaRequestDTO vagaRequest) {
         Vaga vaga = vagaService.cadastrarVaga(vagaRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(vaga.toResponseDTO()); 
+        return ResponseEntity.status(HttpStatus.CREATED).body(new VagaResponseDTO(vaga));
     }
     
     @DeleteMapping("/{id}")
@@ -160,6 +160,6 @@ public class VagaController {
     )
     public ResponseEntity<VagaResponseDTO> atualizarParcialmenteVaga(@Valid @PathVariable UUID id,@Valid @RequestBody VagaRequestDTO vagaRequest) {
         Vaga vagaAtualizada = vagaService.atualizarParcialmenteVaga(id, vagaRequest);
-        return ResponseEntity.ok(vagaAtualizada.toResponseDTO());
+        return ResponseEntity.ok(new VagaResponseDTO(vagaAtualizada));
     }
 }

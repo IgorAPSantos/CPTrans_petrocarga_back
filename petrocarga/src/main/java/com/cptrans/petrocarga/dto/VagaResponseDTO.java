@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.cptrans.petrocarga.enums.AreaVagaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
 import com.cptrans.petrocarga.enums.TipoVagaEnum;
+import com.cptrans.petrocarga.models.Vaga;
 
 public class VagaResponseDTO {
 
@@ -23,8 +24,27 @@ public class VagaResponseDTO {
     private Integer comprimento;
     private StatusVagaEnum status;
 
-    Comparator<OperacaoVagaResponseDTO> compararPorCodigoEnum = Comparator.comparingInt(op -> op.getDiaSemanaEnum().getCodigo());
+    Comparator<OperacaoVagaResponseDTO> compararPorCodigoEnum = Comparator.comparingInt(op -> op.getDiaSemanaAsEnum().getCodigo());
     private Set<OperacaoVagaResponseDTO> operacoesVaga = new TreeSet<>(compararPorCodigoEnum);
+
+    public VagaResponseDTO() {
+    }
+
+    public VagaResponseDTO(Vaga vaga) {
+        this.id = vaga.getId();
+        this.endereco = vaga.getEndereco().toResponseDTO();
+        this.area = vaga.getArea();
+        this.numeroEndereco = vaga.getNumeroEndereco();
+        this.referenciaEndereco = vaga.getReferenciaEndereco();
+        this.tipoVaga = vaga.getTipoVaga();
+        this.referenciaGeoInicio = vaga.getReferenciaGeoInicio();
+        this.referenciaGeoFim = vaga.getReferenciaGeoFim();
+        this.comprimento = vaga.getComprimento();
+        this.status = vaga.getStatus();
+        this.operacoesVaga = vaga.getOperacoesVaga().stream()
+                .map(operacaoVaga -> new OperacaoVagaResponseDTO(operacaoVaga))
+                .collect(Collectors.toCollection(() -> new TreeSet<>(compararPorCodigoEnum)));
+    }
 
     // Getters e Setters
 

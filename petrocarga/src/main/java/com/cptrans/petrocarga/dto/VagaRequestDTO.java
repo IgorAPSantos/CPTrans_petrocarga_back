@@ -1,10 +1,14 @@
 package com.cptrans.petrocarga.dto;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.cptrans.petrocarga.enums.AreaVagaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
 import com.cptrans.petrocarga.enums.TipoVagaEnum;
+import com.cptrans.petrocarga.models.EnderecoVaga;
+import com.cptrans.petrocarga.models.OperacaoVaga;
+import com.cptrans.petrocarga.models.Vaga;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -37,7 +41,7 @@ public class VagaRequestDTO {
     @Valid
     @NotNull(message = "O comprimento é obrigatório.")
     @Schema(description = "Comprimento máximo em metros permitido para a vaga", example = "12")
-    private Integer comprimento;
+    private BigDecimal comprimento;
     
     @Schema(description = "Status inicial da vaga (Ex: DISPONIVEL, OCUPADA)", example= "DISPONIVEL")
     private StatusVagaEnum status;
@@ -45,6 +49,39 @@ public class VagaRequestDTO {
     @Valid
     private Set<OperacaoVagaRequestDTO> operacoesVaga;
 
+    public Vaga toEntity() {
+        Vaga vaga = new Vaga();
+        vaga.setArea(this.area);
+        vaga.setComprimento(this.comprimento);
+        vaga.setNumeroEndereco(this.numeroEndereco);
+        vaga.setReferenciaEndereco(this.referenciaEndereco);
+        vaga.setReferenciaGeoFim(this.referenciaGeoFim);
+        vaga.setReferenciaGeoInicio(this.referenciaGeoInicio);
+        vaga.setStatus(this.status);
+        vaga.setTipoVaga(this.tipoVaga);
+
+        if (this.endereco != null) {
+            EnderecoVaga enderecoVaga = new EnderecoVaga();
+            enderecoVaga.setBairro(this.endereco.getBairro());
+            enderecoVaga.setCodigoPMP(this.endereco.getCodigoPMP());
+            enderecoVaga.setLogradouro(this.endereco.getLogradouro());
+            vaga.setEndereco(enderecoVaga);
+        }
+
+        if (this.operacoesVaga != null) {
+            Set<OperacaoVaga> operacoes = this.operacoesVaga.stream()
+                    .map(dto -> {
+                        OperacaoVaga operacao = new OperacaoVaga();
+                        operacao.setDiaSemana(com.cptrans.petrocarga.enums.DiaSemanaEnum.toEnum(dto.getCodigoDiaSemana()));
+                        operacao.setHoraInicio(dto.getHoraInicio());
+                        operacao.setHoraFim(dto.getHoraFim());
+                        return operacao;
+                    })
+                    .collect(Collectors.toSet());
+            vaga.setOperacoesVaga(operacoes);
+        }
+        return vaga;
+    }
 
     // Getters e Setters
     
@@ -104,11 +141,11 @@ public class VagaRequestDTO {
         this.referenciaGeoFim = referenciaGeoFim;
     }
 
-    public Integer getComprimento() {
+    public BigDecimal getComprimento() {
         return comprimento;
     }
 
-    public void setComprimento(Integer comprimento) {
+    public void setComprimento(BigDecimal comprimento) {
         this.comprimento = comprimento;
     }
 

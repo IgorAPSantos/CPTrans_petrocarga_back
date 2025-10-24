@@ -1,6 +1,7 @@
 package com.cptrans.petrocarga.dto;
 
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
+import com.cptrans.petrocarga.models.Reserva;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -16,6 +17,22 @@ public class ReservaResponseDTO {
     private OffsetDateTime inicio;
     private OffsetDateTime fim;
     private StatusReservaEnum status;
+
+    public ReservaResponseDTO() {
+    }
+
+    public ReservaResponseDTO(Reserva reserva) {
+        this.id = reserva.getId();
+        this.vagaId = reserva.getVaga().getId();
+        this.motoristaId = reserva.getMotorista().getId();
+        this.veiculoId = reserva.getVeiculo().getId();
+        this.criadoPorId = reserva.getCriadoPor().getId();
+        this.cidadeOrigem = reserva.getCidadeOrigem();
+        this.criadoEm = reserva.getCriadoEm();
+        this.inicio = reserva.getInicio();
+        this.fim = reserva.getFim();
+        this.status = reserva.getStatus();
+    }
 
     // Getters and Setters
     public UUID getId() {

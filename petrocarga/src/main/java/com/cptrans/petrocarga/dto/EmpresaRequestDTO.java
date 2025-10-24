@@ -1,5 +1,7 @@
 package com.cptrans.petrocarga.dto;
 
+import com.cptrans.petrocarga.models.Empresa;
+import com.cptrans.petrocarga.models.Usuario;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,6 +18,14 @@ public class EmpresaRequestDTO {
 
     @NotBlank
     private String razaoSocial;
+
+    public Empresa toEntity(Usuario usuario) {
+        Empresa empresa = new Empresa();
+        empresa.setUsuario(usuario);
+        empresa.setCnpj(this.cnpj);
+        empresa.setRazaoSocial(this.razaoSocial);
+        return empresa;
+    }
 
     // Getters and Setters
     public UUID getUsuarioId() {

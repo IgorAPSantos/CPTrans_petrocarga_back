@@ -35,7 +35,7 @@ public class MotoristaController {
     @GetMapping
     public ResponseEntity<List<MotoristaResponseDTO>> getAllMotoristas() {
         List<MotoristaResponseDTO> motoristas = motoristaService.findAll().stream()
-                .map(this::convertToResponseDTO)
+                .map(MotoristaResponseDTO::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(motoristas);
     }
@@ -43,7 +43,7 @@ public class MotoristaController {
     @GetMapping("/{id}")
     public ResponseEntity<MotoristaResponseDTO> getMotoristaById(@PathVariable UUID id) {
         return motoristaService.findById(id)
-                .map(this::convertToResponseDTO)
+                .map(MotoristaResponseDTO::new)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -57,9 +57,9 @@ public class MotoristaController {
         }
 
         if (usuarioOpt.isPresent() && (motoristaRequestDTO.getEmpresaId() == null || empresaOpt.isPresent())) {
-            Motorista motorista = convertToEntity(motoristaRequestDTO, usuarioOpt.get(), empresaOpt.orElse(null));
+            Motorista motorista = motoristaRequestDTO.toEntity(usuarioOpt.get(), empresaOpt.orElse(null));
             Motorista savedMotorista = motoristaService.save(motorista);
-            return ResponseEntity.status(HttpStatus.CREATED).body(convertToResponseDTO(savedMotorista));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new MotoristaResponseDTO(savedMotorista));
         }
         return ResponseEntity.badRequest().build(); // Or a more specific error
     }
@@ -75,9 +75,13 @@ public class MotoristaController {
                     }
 
                     if (usuarioOpt.isPresent() && (motoristaRequestDTO.getEmpresaId() == null || empresaOpt.isPresent())) {
-                        updateEntityFromDto(existingMotorista, motoristaRequestDTO, usuarioOpt.get(), empresaOpt.orElse(null));
+                        existingMotorista.setUsuario(usuarioOpt.get());
+                        existingMotorista.setTipoCNH(motoristaRequestDTO.getTipoCNH());
+                        existingMotorista.setNumeroCNH(motoristaRequestDTO.getNumeroCNH());
+                        existingMotorista.setDataValidadeCNH(motoristaRequestDTO.getDataValidadeCNH());
+                        existingMotorista.setEmpresa(empresaOpt.orElse(null));
                         Motorista updatedMotorista = motoristaService.save(existingMotorista);
-                        return ResponseEntity.ok(convertToResponseDTO(updatedMotorista));
+                        return ResponseEntity.ok(new MotoristaResponseDTO(updatedMotorista));
                     }
                     return ResponseEntity.badRequest().build();
                 })
@@ -91,36 +95,5 @@ public class MotoristaController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
-    }
-
-    private MotoristaResponseDTO convertToResponseDTO(Motorista motorista) {
-        MotoristaResponseDTO dto = new MotoristaResponseDTO();
-        dto.setId(motorista.getId());
-        dto.setUsuarioId(motorista.getUsuario().getId());
-        dto.setTipoCNH(motorista.getTipoCNH());
-        dto.setNumeroCNH(motorista.getNumeroCNH());
-        dto.setDataValidadeCNH(motorista.getDataValidadeCNH());
-        if (motorista.getEmpresa() != null) {
-            dto.setEmpresaId(motorista.getEmpresa().getId());
-        }
-        return dto;
-    }
-
-    private Motorista convertToEntity(MotoristaRequestDTO dto, Usuario usuario, Empresa empresa) {
-        Motorista motorista = new Motorista();
-        motorista.setUsuario(usuario);
-        motorista.setTipoCNH(dto.getTipoCNH());
-        motorista.setNumeroCNH(dto.getNumeroCNH());
-        motorista.setDataValidadeCNH(dto.getDataValidadeCNH());
-        motorista.setEmpresa(empresa);
-        return motorista;
-    }
-
-    private void updateEntityFromDto(Motorista motorista, MotoristaRequestDTO dto, Usuario usuario, Empresa empresa) {
-        motorista.setUsuario(usuario);
-        motorista.setTipoCNH(dto.getTipoCNH());
-        motorista.setNumeroCNH(dto.getNumeroCNH());
-        motorista.setDataValidadeCNH(dto.getDataValidadeCNH());
-        motorista.setEmpresa(empresa);
     }
 }

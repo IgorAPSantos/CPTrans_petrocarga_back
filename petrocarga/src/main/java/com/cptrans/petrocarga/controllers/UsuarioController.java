@@ -24,7 +24,7 @@ public class UsuarioController {
     @GetMapping
     public ResponseEntity<List<UsuarioResponseDTO>> getAllUsuarios() {
         List<UsuarioResponseDTO> usuarios = usuarioService.findAll().stream()
-                .map(this::convertToResponseDTO)
+                .map(UsuarioResponseDTO::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(usuarios);
     }
@@ -32,25 +32,30 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> getUsuarioById(@PathVariable UUID id) {
         return usuarioService.findById(id)
-                .map(this::convertToResponseDTO)
+                .map(UsuarioResponseDTO::new)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public ResponseEntity<UsuarioResponseDTO> createUsuario(@RequestBody @Valid UsuarioRequestDTO usuarioRequestDTO) {
-        Usuario usuario = convertToEntity(usuarioRequestDTO);
+        Usuario usuario = usuarioRequestDTO.toEntity();
         Usuario savedUsuario = usuarioService.save(usuario);
-        return ResponseEntity.status(HttpStatus.CREATED).body(convertToResponseDTO(savedUsuario));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new UsuarioResponseDTO(savedUsuario));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> updateUsuario(@PathVariable UUID id, @RequestBody @Valid UsuarioRequestDTO usuarioRequestDTO) {
         return usuarioService.findById(id)
                 .map(existingUsuario -> {
-                    updateEntityFromDto(existingUsuario, usuarioRequestDTO);
+                    existingUsuario.setNome(usuarioRequestDTO.getNome());
+                    existingUsuario.setCpf(usuarioRequestDTO.getCpf());
+                    existingUsuario.setTelefone(usuarioRequestDTO.getTelefone());
+                    existingUsuario.setEmail(usuarioRequestDTO.getEmail());
+                    existingUsuario.setSenha(usuarioRequestDTO.getSenha());
+                    existingUsuario.setPermissao(usuarioRequestDTO.getPermissao());
                     Usuario updatedUsuario = usuarioService.save(existingUsuario);
-                    return ResponseEntity.ok(convertToResponseDTO(updatedUsuario));
+                    return ResponseEntity.ok(new UsuarioResponseDTO(updatedUsuario));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -62,39 +67,5 @@ public class UsuarioController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
-    }
-
-    private UsuarioResponseDTO convertToResponseDTO(Usuario usuario) {
-        UsuarioResponseDTO dto = new UsuarioResponseDTO();
-        dto.setId(usuario.getId());
-        dto.setNome(usuario.getNome());
-        dto.setCpf(usuario.getCpf());
-        dto.setTelefone(usuario.getTelefone());
-        dto.setEmail(usuario.getEmail());
-        dto.setPermissao(usuario.getPermissao());
-        dto.setCriadoEm(usuario.getCriadoEm());
-        dto.setAtivo(usuario.getAtivo());
-        dto.setDesativadoEm(usuario.getDesativadoEm());
-        return dto;
-    }
-
-    private Usuario convertToEntity(UsuarioRequestDTO dto) {
-        Usuario usuario = new Usuario();
-        usuario.setNome(dto.getNome());
-        usuario.setCpf(dto.getCpf());
-        usuario.setTelefone(dto.getTelefone());
-        usuario.setEmail(dto.getEmail());
-        usuario.setSenha(dto.getSenha());
-        usuario.setPermissao(dto.getPermissao());
-        return usuario;
-    }
-
-    private void updateEntityFromDto(Usuario usuario, UsuarioRequestDTO dto) {
-        usuario.setNome(dto.getNome());
-        usuario.setCpf(dto.getCpf());
-        usuario.setTelefone(dto.getTelefone());
-        usuario.setEmail(dto.getEmail());
-        usuario.setSenha(dto.getSenha());
-        usuario.setPermissao(dto.getPermissao());
     }
 }

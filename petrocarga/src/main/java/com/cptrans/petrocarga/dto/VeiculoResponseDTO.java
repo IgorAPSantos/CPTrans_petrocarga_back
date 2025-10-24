@@ -1,6 +1,7 @@
 package com.cptrans.petrocarga.dto;
 
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
+import com.cptrans.petrocarga.models.Veiculo;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -15,6 +16,21 @@ public class VeiculoResponseDTO {
     private UUID usuarioId;
     private String cpfProprietario;
     private String cnpjProprietario;
+
+    public VeiculoResponseDTO() {
+    }
+
+    public VeiculoResponseDTO(Veiculo veiculo) {
+        this.id = veiculo.getId();
+        this.placa = veiculo.getPlaca();
+        this.marca = veiculo.getMarca();
+        this.modelo = veiculo.getModelo();
+        this.tipo = veiculo.getTipo();
+        this.comprimento = veiculo.getComprimento();
+        this.usuarioId = veiculo.getUsuario().getId();
+        this.cpfProprietario = veiculo.getCpfProprietario();
+        this.cnpjProprietario = veiculo.getCnpjProprietario();
+    }
 
     // Getters and Setters
     public UUID getId() {

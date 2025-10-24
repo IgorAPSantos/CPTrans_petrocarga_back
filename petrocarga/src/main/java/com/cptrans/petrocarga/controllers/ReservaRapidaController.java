@@ -35,7 +35,7 @@ public class ReservaRapidaController {
     @GetMapping
     public ResponseEntity<List<ReservaRapidaResponseDTO>> getAllReservaRapidas() {
         List<ReservaRapidaResponseDTO> reservasRapidas = reservaRapidaService.findAll().stream()
-                .map(this::convertToResponseDTO)
+                .map(reservaRapida -> new ReservaRapidaResponseDTO(reservaRapida))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(reservasRapidas);
     }
@@ -43,7 +43,7 @@ public class ReservaRapidaController {
     @GetMapping("/{id}")
     public ResponseEntity<ReservaRapidaResponseDTO> getReservaRapidaById(@PathVariable UUID id) {
         return reservaRapidaService.findById(id)
-                .map(this::convertToResponseDTO)
+                .map(reservaRapida -> new ReservaRapidaResponseDTO(reservaRapida))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -54,11 +54,11 @@ public class ReservaRapidaController {
         Optional<Agente> agenteOpt = agenteService.findById(reservaRapidaRequestDTO.getAgenteId());
 
         if (vagaOpt.isPresent() && agenteOpt.isPresent()) {
-            ReservaRapida reservaRapida = convertToEntity(reservaRapidaRequestDTO, vagaOpt.get(), agenteOpt.get());
+            ReservaRapida reservaRapida = reservaRapidaRequestDTO.toEntity(vagaOpt.get(), agenteOpt.get());
             ReservaRapida savedReservaRapida = reservaRapidaService.save(reservaRapida);
-            return ResponseEntity.status(HttpStatus.CREATED).body(convertToResponseDTO(savedReservaRapida));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ReservaRapidaResponseDTO(savedReservaRapida));
         }
-        return ResponseEntity.badRequest().build(); // Or a more specific error
+        return ResponseEntity.badRequest().build();
     }
 
     @PutMapping("/{id}")
@@ -69,9 +69,14 @@ public class ReservaRapidaController {
                     Optional<Agente> agenteOpt = agenteService.findById(reservaRapidaRequestDTO.getAgenteId());
 
                     if (vagaOpt.isPresent() && agenteOpt.isPresent()) {
-                        updateEntityFromDto(existingReservaRapida, reservaRapidaRequestDTO, vagaOpt.get(), agenteOpt.get());
+                        existingReservaRapida.setVaga(vagaOpt.get());
+                        existingReservaRapida.setAgente(agenteOpt.get());
+                        existingReservaRapida.setTipoVeiculo(reservaRapidaRequestDTO.getTipoVeiculo());
+                        existingReservaRapida.setPlaca(reservaRapidaRequestDTO.getPlaca());
+                        existingReservaRapida.setInicio(reservaRapidaRequestDTO.getInicio());
+                        existingReservaRapida.setFim(reservaRapidaRequestDTO.getFim());
                         ReservaRapida updatedReservaRapida = reservaRapidaService.save(existingReservaRapida);
-                        return ResponseEntity.ok(convertToResponseDTO(updatedReservaRapida));
+                        return ResponseEntity.ok(new ReservaRapidaResponseDTO(updatedReservaRapida));
                     }
                     return ResponseEntity.badRequest().build();
                 })
@@ -85,38 +90,5 @@ public class ReservaRapidaController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
-    }
-
-    private ReservaRapidaResponseDTO convertToResponseDTO(ReservaRapida reservaRapida) {
-        ReservaRapidaResponseDTO dto = new ReservaRapidaResponseDTO();
-        dto.setId(reservaRapida.getId());
-        dto.setVagaId(reservaRapida.getVaga().getId());
-        dto.setAgenteId(reservaRapida.getAgente().getId());
-        dto.setTipoVeiculo(reservaRapida.getTipoVeiculo());
-        dto.setPlaca(reservaRapida.getPlaca());
-        dto.setInicio(reservaRapida.getInicio());
-        dto.setFim(reservaRapida.getFim());
-        dto.setCriadoEm(reservaRapida.getCriadoEm());
-        return dto;
-    }
-
-    private ReservaRapida convertToEntity(ReservaRapidaRequestDTO dto, Vaga vaga, Agente agente) {
-        ReservaRapida reservaRapida = new ReservaRapida();
-        reservaRapida.setVaga(vaga);
-        reservaRapida.setAgente(agente);
-        reservaRapida.setTipoVeiculo(dto.getTipoVeiculo());
-        reservaRapida.setPlaca(dto.getPlaca());
-        reservaRapida.setInicio(dto.getInicio());
-        reservaRapida.setFim(dto.getFim());
-        return reservaRapida;
-    }
-
-    private void updateEntityFromDto(ReservaRapida reservaRapida, ReservaRapidaRequestDTO dto, Vaga vaga, Agente agente) {
-        reservaRapida.setVaga(vaga);
-        reservaRapida.setAgente(agente);
-        reservaRapida.setTipoVeiculo(dto.getTipoVeiculo());
-        reservaRapida.setPlaca(dto.getPlaca());
-        reservaRapida.setInicio(dto.getInicio());
-        reservaRapida.setFim(dto.getFim());
     }
 }

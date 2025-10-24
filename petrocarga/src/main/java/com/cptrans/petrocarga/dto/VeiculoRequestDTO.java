@@ -1,6 +1,8 @@
 package com.cptrans.petrocarga.dto;
 
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
+import com.cptrans.petrocarga.models.Usuario;
+import com.cptrans.petrocarga.models.Veiculo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -27,6 +29,19 @@ public class VeiculoRequestDTO {
     private String cpfProprietario;
 
     private String cnpjProprietario;
+
+    public Veiculo toEntity(Usuario usuario) {
+        Veiculo veiculo = new Veiculo();
+        veiculo.setPlaca(this.placa);
+        veiculo.setMarca(this.marca);
+        veiculo.setModelo(this.modelo);
+        veiculo.setTipo(this.tipo);
+        veiculo.setComprimento(this.comprimento);
+        veiculo.setUsuario(usuario);
+        veiculo.setCpfProprietario(this.cpfProprietario);
+        veiculo.setCnpjProprietario(this.cnpjProprietario);
+        return veiculo;
+    }
 
     // Getters and Setters
     public String getPlaca() {

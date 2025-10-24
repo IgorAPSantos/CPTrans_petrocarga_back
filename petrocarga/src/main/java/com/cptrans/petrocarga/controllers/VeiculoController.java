@@ -30,7 +30,7 @@ public class VeiculoController {
     @GetMapping
     public ResponseEntity<List<VeiculoResponseDTO>> getAllVeiculos() {
         List<VeiculoResponseDTO> veiculos = veiculoService.findAll().stream()
-                .map(this::convertToResponseDTO)
+                .map(VeiculoResponseDTO::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(veiculos);
     }
@@ -38,7 +38,7 @@ public class VeiculoController {
     @GetMapping("/{id}")
     public ResponseEntity<VeiculoResponseDTO> getVeiculoById(@PathVariable UUID id) {
         return veiculoService.findById(id)
-                .map(this::convertToResponseDTO)
+                .map(VeiculoResponseDTO::new)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -47,9 +47,9 @@ public class VeiculoController {
     public ResponseEntity<VeiculoResponseDTO> createVeiculo(@RequestBody @Valid VeiculoRequestDTO veiculoRequestDTO) {
         return usuarioService.findById(veiculoRequestDTO.getUsuarioId())
                 .map(usuario -> {
-                    Veiculo veiculo = convertToEntity(veiculoRequestDTO, usuario);
+                    Veiculo veiculo = veiculoRequestDTO.toEntity(usuario);
                     Veiculo savedVeiculo = veiculoService.save(veiculo);
-                    return ResponseEntity.status(HttpStatus.CREATED).body(convertToResponseDTO(savedVeiculo));
+                    return ResponseEntity.status(HttpStatus.CREATED).body(new VeiculoResponseDTO(savedVeiculo));
                 })
                 .orElse(ResponseEntity.badRequest().build()); // Or a more specific error
     }
@@ -60,9 +60,16 @@ public class VeiculoController {
                 .map(existingVeiculo -> {
                     return usuarioService.findById(veiculoRequestDTO.getUsuarioId())
                             .map(usuario -> {
-                                updateEntityFromDto(existingVeiculo, veiculoRequestDTO, usuario);
+                                existingVeiculo.setPlaca(veiculoRequestDTO.getPlaca());
+                                existingVeiculo.setMarca(veiculoRequestDTO.getMarca());
+                                existingVeiculo.setModelo(veiculoRequestDTO.getModelo());
+                                existingVeiculo.setTipo(veiculoRequestDTO.getTipo());
+                                existingVeiculo.setComprimento(veiculoRequestDTO.getComprimento());
+                                existingVeiculo.setUsuario(usuario);
+                                existingVeiculo.setCpfProprietario(veiculoRequestDTO.getCpfProprietario());
+                                existingVeiculo.setCnpjProprietario(veiculoRequestDTO.getCnpjProprietario());
                                 Veiculo updatedVeiculo = veiculoService.save(existingVeiculo);
-                                return ResponseEntity.ok(convertToResponseDTO(updatedVeiculo));
+                                return ResponseEntity.ok(new VeiculoResponseDTO(updatedVeiculo));
                             })
                             .orElse(ResponseEntity.badRequest().build());
                 })
@@ -76,43 +83,5 @@ public class VeiculoController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
-    }
-
-    private VeiculoResponseDTO convertToResponseDTO(Veiculo veiculo) {
-        VeiculoResponseDTO dto = new VeiculoResponseDTO();
-        dto.setId(veiculo.getId());
-        dto.setPlaca(veiculo.getPlaca());
-        dto.setMarca(veiculo.getMarca());
-        dto.setModelo(veiculo.getModelo());
-        dto.setTipo(veiculo.getTipo());
-        dto.setComprimento(veiculo.getComprimento());
-        dto.setUsuarioId(veiculo.getUsuario().getId());
-        dto.setCpfProprietario(veiculo.getCpfProprietario());
-        dto.setCnpjProprietario(veiculo.getCnpjProprietario());
-        return dto;
-    }
-
-    private Veiculo convertToEntity(VeiculoRequestDTO dto, Usuario usuario) {
-        Veiculo veiculo = new Veiculo();
-        veiculo.setPlaca(dto.getPlaca());
-        veiculo.setMarca(dto.getMarca());
-        veiculo.setModelo(dto.getModelo());
-        veiculo.setTipo(dto.getTipo());
-        veiculo.setComprimento(dto.getComprimento());
-        veiculo.setUsuario(usuario);
-        veiculo.setCpfProprietario(dto.getCpfProprietario());
-        veiculo.setCnpjProprietario(dto.getCnpjProprietario());
-        return veiculo;
-    }
-
-    private void updateEntityFromDto(Veiculo veiculo, VeiculoRequestDTO dto, Usuario usuario) {
-        veiculo.setPlaca(dto.getPlaca());
-        veiculo.setMarca(dto.getMarca());
-        veiculo.setModelo(dto.getModelo());
-        veiculo.setTipo(dto.getTipo());
-        veiculo.setComprimento(dto.getComprimento());
-        veiculo.setUsuario(usuario);
-        veiculo.setCpfProprietario(dto.getCpfProprietario());
-        veiculo.setCnpjProprietario(dto.getCnpjProprietario());
     }
 }

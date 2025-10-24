@@ -1,6 +1,7 @@
 package com.cptrans.petrocarga.dto;
 
 import com.cptrans.petrocarga.enums.PermissoesEnum;
+import com.cptrans.petrocarga.models.Usuario;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -15,6 +16,21 @@ public class UsuarioResponseDTO {
     private OffsetDateTime criadoEm;
     private Boolean ativo;
     private OffsetDateTime desativadoEm;
+
+    public UsuarioResponseDTO() {
+    }
+
+    public UsuarioResponseDTO(Usuario usuario) {
+        this.id = usuario.getId();
+        this.nome = usuario.getNome();
+        this.cpf = usuario.getCpf();
+        this.telefone = usuario.getTelefone();
+        this.email = usuario.getEmail();
+        this.permissao = usuario.getPermissao();
+        this.criadoEm = usuario.getCriadoEm();
+        this.ativo = usuario.getAtivo();
+        this.desativadoEm = usuario.getDesativadoEm();
+    }
 
     // Getters and Setters
     public UUID getId() {
