@@ -1,1 +1,0 @@
-ALTER TABLE endereco_vaga ADD COLUMN codigo_pmp VARCHAR(100);
