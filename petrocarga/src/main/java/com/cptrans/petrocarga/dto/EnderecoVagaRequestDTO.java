@@ -12,7 +12,7 @@ public class EnderecoVagaRequestDTO {
         description = "Código PMP do endereço da vaga",
         example = "Pb-1234"
     )
-    private String codigoPMP;
+    private String codigoPmp;
 
     @Valid
     @Schema(
@@ -31,13 +31,13 @@ public class EnderecoVagaRequestDTO {
     public EnderecoVaga toEntity() {
         EnderecoVaga enderecoVaga = new EnderecoVaga();
         enderecoVaga.setBairro(this.bairro);
-        enderecoVaga.setCodigoPMP(this.codigoPMP);
+        enderecoVaga.setCodigoPmp(this.codigoPmp);
         enderecoVaga.setLogradouro(this.logradouro);
         return enderecoVaga;
     }
 
-    public String getCodigoPMP(){
-        return this.codigoPMP;
+    public String getCodigoPmp(){
+        return this.codigoPmp;
     }
 
     public String getLogradouro(){

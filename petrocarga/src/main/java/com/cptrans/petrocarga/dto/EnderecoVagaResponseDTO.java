@@ -14,7 +14,7 @@ public class EnderecoVagaResponseDTO {
 
     public EnderecoVagaResponseDTO(EnderecoVaga enderecoVaga) {
         this.id = enderecoVaga.getId();
-        this.codigoPmp = enderecoVaga.getCodigoPMP();
+        this.codigoPmp = enderecoVaga.getCodigoPmp();
         this.logradouro = enderecoVaga.getLogradouro();
         this.bairro = enderecoVaga.getBairro();
     }

@@ -63,24 +63,35 @@ public class ReservaRapidaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ReservaRapidaResponseDTO> updateReservaRapida(@PathVariable UUID id, @RequestBody @Valid ReservaRapidaRequestDTO reservaRapidaRequestDTO) {
-        return reservaRapidaService.findById(id)
-                .map(existingReservaRapida -> {
-                    Optional<Vaga> vagaOpt = vagaService.findById(reservaRapidaRequestDTO.getVagaId());
-                    Optional<Agente> agenteOpt = agenteService.findById(reservaRapidaRequestDTO.getAgenteId());
+        
+        // 1. Verificar se a entidade a ser atualizada (ReservaRapida) existe
+        Optional<ReservaRapida> existingOpt = reservaRapidaService.findById(id);
+        if (existingOpt.isEmpty()) {
+            return ResponseEntity.notFound().build(); // 404 Not Found
+        }
 
-                    if (vagaOpt.isPresent() && agenteOpt.isPresent()) {
-                        existingReservaRapida.setVaga(vagaOpt.get());
-                        existingReservaRapida.setAgente(agenteOpt.get());
-                        existingReservaRapida.setTipoVeiculo(reservaRapidaRequestDTO.getTipoVeiculo());
-                        existingReservaRapida.setPlaca(reservaRapidaRequestDTO.getPlaca());
-                        existingReservaRapida.setInicio(reservaRapidaRequestDTO.getInicio());
-                        existingReservaRapida.setFim(reservaRapidaRequestDTO.getFim());
-                        ReservaRapida updatedReservaRapida = reservaRapidaService.save(existingReservaRapida);
-                        return ResponseEntity.ok(new ReservaRapidaResponseDTO(updatedReservaRapida));
-                    }
-                    return ResponseEntity.badRequest().build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+        // 2. Verificar as dependências
+        Optional<Vaga> vagaOpt = vagaService.findById(reservaRapidaRequestDTO.getVagaId());
+        Optional<Agente> agenteOpt = agenteService.findById(reservaRapidaRequestDTO.getAgenteId());
+
+        // 3. Validar se as dependências foram encontradas
+        if (vagaOpt.isEmpty() || agenteOpt.isEmpty()) {
+            return ResponseEntity.badRequest().build(); // 400 Bad Request (dependências ausentes)
+        }
+        
+        // 4. Todas as verificações passaram, realizar a atualização
+        ReservaRapida existingReservaRapida = existingOpt.get();
+        existingReservaRapida.setVaga(vagaOpt.get());
+        existingReservaRapida.setAgente(agenteOpt.get());
+        existingReservaRapida.setTipoVeiculo(reservaRapidaRequestDTO.getTipoVeiculo());
+        existingReservaRapida.setPlaca(reservaRapidaRequestDTO.getPlaca());
+        existingReservaRapida.setInicio(reservaRapidaRequestDTO.getInicio());
+        existingReservaRapida.setFim(reservaRapidaRequestDTO.getFim());
+        
+        ReservaRapida updatedReservaRapida = reservaRapidaService.save(existingReservaRapida);
+        
+        // 200 OK
+        return ResponseEntity.ok(new ReservaRapidaResponseDTO(updatedReservaRapida));
     }
 
     @DeleteMapping("/{id}")

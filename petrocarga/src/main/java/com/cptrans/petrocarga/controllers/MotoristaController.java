@@ -66,26 +66,38 @@ public class MotoristaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<MotoristaResponseDTO> updateMotorista(@PathVariable UUID id, @RequestBody @Valid MotoristaRequestDTO motoristaRequestDTO) {
-        return motoristaService.findById(id)
-                .map(existingMotorista -> {
-                    Optional<Usuario> usuarioOpt = usuarioService.findById(motoristaRequestDTO.getUsuarioId());
-                    Optional<Empresa> empresaOpt = Optional.empty();
-                    if (motoristaRequestDTO.getEmpresaId() != null) {
-                        empresaOpt = empresaService.findById(motoristaRequestDTO.getEmpresaId());
-                    }
+        
+        // 1. Verificar se a entidade a ser atualizada (Motorista) existe
+        Optional<Motorista> existingOpt = motoristaService.findById(id);
+        if (existingOpt.isEmpty()) {
+            return ResponseEntity.notFound().build(); // 404 Not Found
+        }
 
-                    if (usuarioOpt.isPresent() && (motoristaRequestDTO.getEmpresaId() == null || empresaOpt.isPresent())) {
-                        existingMotorista.setUsuario(usuarioOpt.get());
-                        existingMotorista.setTipoCNH(motoristaRequestDTO.getTipoCNH());
-                        existingMotorista.setNumeroCNH(motoristaRequestDTO.getNumeroCNH());
-                        existingMotorista.setDataValidadeCNH(motoristaRequestDTO.getDataValidadeCNH());
-                        existingMotorista.setEmpresa(empresaOpt.orElse(null));
-                        Motorista updatedMotorista = motoristaService.save(existingMotorista);
-                        return ResponseEntity.ok(new MotoristaResponseDTO(updatedMotorista));
-                    }
-                    return ResponseEntity.badRequest().build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+        // 2. Verificar as dependências (Usuario e Empresa)
+        Optional<Usuario> usuarioOpt = usuarioService.findById(motoristaRequestDTO.getUsuarioId());
+        Optional<Empresa> empresaOpt = Optional.empty();
+        if (motoristaRequestDTO.getEmpresaId() != null) {
+            empresaOpt = empresaService.findById(motoristaRequestDTO.getEmpresaId());
+        }
+
+        // 3. Validar se as dependências foram encontradas
+        // (O usuário deve existir. A empresa é opcional, mas se o ID foi passado, ela deve existir)
+        if (usuarioOpt.isEmpty() || (motoristaRequestDTO.getEmpresaId() != null && empresaOpt.isEmpty())) {
+            return ResponseEntity.badRequest().build(); // 400 Bad Request (dependências ausentes)
+        }
+
+        // 4. Todas as verificações passaram, realizar a atualização
+        Motorista existingMotorista = existingOpt.get();
+        existingMotorista.setUsuario(usuarioOpt.get());
+        existingMotorista.setTipoCNH(motoristaRequestDTO.getTipoCNH());
+        existingMotorista.setNumeroCNH(motoristaRequestDTO.getNumeroCNH());
+        existingMotorista.setDataValidadeCNH(motoristaRequestDTO.getDataValidadeCNH());
+        existingMotorista.setEmpresa(empresaOpt.orElse(null)); // Define null se nenhuma empresa foi passada
+
+        Motorista updatedMotorista = motoristaService.save(existingMotorista);
+        
+        // 200 OK
+        return ResponseEntity.ok(new MotoristaResponseDTO(updatedMotorista));
     }
 
     @DeleteMapping("/{id}")

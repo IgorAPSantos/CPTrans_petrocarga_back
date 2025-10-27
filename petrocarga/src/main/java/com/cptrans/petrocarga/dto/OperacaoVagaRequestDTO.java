@@ -17,7 +17,7 @@ public class OperacaoVagaRequestDTO {
 
     public OperacaoVaga toEntity() {
         OperacaoVaga operacaoVaga = new OperacaoVaga();
-        operacaoVaga.setDiaSemana(DiaSemanaEnum.toEnum(this.codigoDiaSemana));
+        operacaoVaga.setDiaSemana(DiaSemanaEnum.toEnumByCodigo(this.codigoDiaSemana));
         operacaoVaga.setHoraInicio(this.horaInicio);
         operacaoVaga.setHoraFim(this.horaFim);
         return operacaoVaga;

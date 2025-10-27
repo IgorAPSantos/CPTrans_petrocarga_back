@@ -16,10 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cptrans.petrocarga.dto.VagaRequestDTO; 
+import com.cptrans.petrocarga.dto.VagaRequestDTO;
 import com.cptrans.petrocarga.dto.VagaResponseDTO;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
-import com.cptrans.petrocarga.models.Vaga;
 import com.cptrans.petrocarga.services.VagaService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,6 +29,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 
+
+import com.cptrans.petrocarga.models.Vaga; 
+import jakarta.persistence.EntityNotFoundException; 
 
 @RestController
 @RequestMapping("/vagas")
@@ -91,7 +93,11 @@ public class VagaController {
         }
     )
     public ResponseEntity<VagaResponseDTO> buscarVagaPorId(@Valid @PathVariable UUID id) {
-        return ResponseEntity.ok(new VagaResponseDTO(vagaService.buscarVagaPorId(id)));
+        //return ResponseEntity.ok(new VagaResponseDTO(vagaService.buscarVagaPorId(id)));
+    	Vaga vaga = vagaService.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Vaga com ID " + id + " não encontrada."));
+        return ResponseEntity.ok(new VagaResponseDTO(vaga));
+    
     }
 
     @PostMapping()

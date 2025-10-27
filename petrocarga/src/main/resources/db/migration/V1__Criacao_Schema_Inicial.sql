@@ -1,4 +1,3 @@
-
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 
@@ -176,7 +175,7 @@ CREATE TABLE Reserva (
     FOREIGN KEY (criado_por) REFERENCES Usuario(UniqueID)
 );
 
-viCREATE TABLE Reserva_Rapida (
+CREATE TABLE Reserva_Rapida (
     UniqueID uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     vaga_id uuid NOT NULL,
     agente_id uuid NOT NULL,

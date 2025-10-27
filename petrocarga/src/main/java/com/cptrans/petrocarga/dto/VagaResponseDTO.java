@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
 
 import com.cptrans.petrocarga.enums.AreaVagaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
@@ -21,7 +22,7 @@ public class VagaResponseDTO {
     private TipoVagaEnum tipoVaga;
     private String referenciaGeoInicio;
     private String referenciaGeoFim;
-    private Integer comprimento;
+    private BigDecimal comprimento;
     private StatusVagaEnum status;
 
     Comparator<OperacaoVagaResponseDTO> compararPorCodigoEnum = Comparator.comparingInt(op -> op.getDiaSemanaAsEnum().getCodigo());
@@ -112,14 +113,13 @@ public class VagaResponseDTO {
         this.referenciaGeoFim = referenciaGeoFim;
     }
 
-    public Integer getComprimento() {
+    public BigDecimal getComprimento() { 
         return comprimento;
     }
 
-    public void setComprimento(Integer comprimento) {
+    public void setComprimento(BigDecimal comprimento) { 
         this.comprimento = comprimento;
     }
-
     public StatusVagaEnum getStatus() {
         return status;
     }

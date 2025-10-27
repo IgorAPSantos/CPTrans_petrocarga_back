@@ -70,7 +70,6 @@ public class Vaga {
     private StatusVagaEnum status;
 
     @OneToMany(mappedBy = "vaga", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonManagedReference
     private Set<OperacaoVaga> operacoesVaga;
 
     // GETTERS, SETTERS, CONSTRUTOR

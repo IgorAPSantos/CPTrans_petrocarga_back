@@ -2,6 +2,7 @@ package com.cptrans.petrocarga.dto;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
 
 import com.cptrans.petrocarga.enums.AreaVagaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
@@ -9,6 +10,7 @@ import com.cptrans.petrocarga.enums.TipoVagaEnum;
 import com.cptrans.petrocarga.models.EnderecoVaga;
 import com.cptrans.petrocarga.models.OperacaoVaga;
 import com.cptrans.petrocarga.models.Vaga;
+import com.cptrans.petrocarga.enums.DiaSemanaEnum;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -63,7 +65,7 @@ public class VagaRequestDTO {
         if (this.endereco != null) {
             EnderecoVaga enderecoVaga = new EnderecoVaga();
             enderecoVaga.setBairro(this.endereco.getBairro());
-            enderecoVaga.setCodigoPMP(this.endereco.getCodigoPMP());
+            enderecoVaga.setCodigoPmp(this.endereco.getCodigoPmp());
             enderecoVaga.setLogradouro(this.endereco.getLogradouro());
             vaga.setEndereco(enderecoVaga);
         }
@@ -72,7 +74,7 @@ public class VagaRequestDTO {
             Set<OperacaoVaga> operacoes = this.operacoesVaga.stream()
                     .map(dto -> {
                         OperacaoVaga operacao = new OperacaoVaga();
-                        operacao.setDiaSemana(com.cptrans.petrocarga.enums.DiaSemanaEnum.toEnum(dto.getCodigoDiaSemana()));
+                        operacao.setDiaSemana(com.cptrans.petrocarga.enums.DiaSemanaEnum.toEnumByCodigo(dto.getCodigoDiaSemana()));
                         operacao.setHoraInicio(dto.getHoraInicio());
                         operacao.setHoraFim(dto.getHoraFim());
                         return operacao;

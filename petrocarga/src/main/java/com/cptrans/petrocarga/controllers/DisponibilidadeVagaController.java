@@ -1,10 +1,13 @@
 package com.cptrans.petrocarga.controllers;
 
+
 import com.cptrans.petrocarga.dto.DisponibilidadeVagaRequestDTO;
 import com.cptrans.petrocarga.dto.DisponibilidadeVagaResponseDTO;
 import com.cptrans.petrocarga.models.DisponibilidadeVaga;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.models.Vaga;
+
+import jakarta.persistence.EntityNotFoundException;
 import com.cptrans.petrocarga.services.DisponibilidadeVagaService;
 import com.cptrans.petrocarga.services.UsuarioService;
 import com.cptrans.petrocarga.services.VagaService;
@@ -32,6 +35,7 @@ public class DisponibilidadeVagaController {
     @Autowired
     private UsuarioService usuarioService;
 
+    
     @GetMapping
     public ResponseEntity<List<DisponibilidadeVagaResponseDTO>> getAllDisponibilidadeVagas() {
         List<DisponibilidadeVagaResponseDTO> disponibilidadeVagas = disponibilidadeVagaService.findAll().stream()
@@ -63,22 +67,29 @@ public class DisponibilidadeVagaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<DisponibilidadeVagaResponseDTO> updateDisponibilidadeVaga(@PathVariable UUID id, @RequestBody @Valid DisponibilidadeVagaRequestDTO disponibilidadeVagaRequestDTO) {
-        return disponibilidadeVagaService.findById(id)
-                .map(existingDisponibilidadeVaga -> {
-                    Optional<Vaga> vagaOpt = vagaService.findById(disponibilidadeVagaRequestDTO.getVagaId());
-                    Optional<Usuario> usuarioOpt = usuarioService.findById(disponibilidadeVagaRequestDTO.getCriadoPorId());
+        
+        Optional<DisponibilidadeVaga> existingOpt = disponibilidadeVagaService.findById(id);
+        if (existingOpt.isEmpty()) {
+            return ResponseEntity.notFound().build(); // 404 Not Found
+        }
 
-                    if (vagaOpt.isPresent() && usuarioOpt.isPresent()) {
-                        existingDisponibilidadeVaga.setVaga(vagaOpt.get());
-                        existingDisponibilidadeVaga.setInicio(disponibilidadeVagaRequestDTO.getInicio());
-                        existingDisponibilidadeVaga.setFim(disponibilidadeVagaRequestDTO.getFim());
-                        existingDisponibilidadeVaga.setCriadoPor(usuarioOpt.get());
-                        DisponibilidadeVaga updatedDisponibilidadeVaga = disponibilidadeVagaService.save(existingDisponibilidadeVaga);
-                        return ResponseEntity.ok(new DisponibilidadeVagaResponseDTO(updatedDisponibilidadeVaga));
-                    }
-                    return ResponseEntity.badRequest().build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+        Optional<Vaga> vagaOpt = vagaService.findById(disponibilidadeVagaRequestDTO.getVagaId());
+        Optional<Usuario> usuarioOpt = usuarioService.findById(disponibilidadeVagaRequestDTO.getCriadoPorId());
+
+        if (vagaOpt.isEmpty() || usuarioOpt.isEmpty()) {
+            return ResponseEntity.badRequest().build(); 
+        }
+
+        DisponibilidadeVaga existingDisponibilidadeVaga = existingOpt.get();
+        existingDisponibilidadeVaga.setVaga(vagaOpt.get());
+        existingDisponibilidadeVaga.setInicio(disponibilidadeVagaRequestDTO.getInicio());
+        existingDisponibilidadeVaga.setFim(disponibilidadeVagaRequestDTO.getFim());
+        existingDisponibilidadeVaga.setCriadoPor(usuarioOpt.get());
+        
+        DisponibilidadeVaga updatedDisponibilidadeVaga = disponibilidadeVagaService.save(existingDisponibilidadeVaga);
+        
+        // 200 OK
+        return ResponseEntity.ok(new DisponibilidadeVagaResponseDTO(updatedDisponibilidadeVaga));
     }
 
     @DeleteMapping("/{id}")

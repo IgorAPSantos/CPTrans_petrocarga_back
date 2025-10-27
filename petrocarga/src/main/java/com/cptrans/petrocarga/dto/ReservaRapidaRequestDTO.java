@@ -1,6 +1,14 @@
+package com.cptrans.petrocarga.dto;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
 import com.cptrans.petrocarga.models.Agente;
 import com.cptrans.petrocarga.models.ReservaRapida;
 import com.cptrans.petrocarga.models.Vaga;
+
+import jakarta.validation.constraints.NotNull;
 
 public class ReservaRapidaRequestDTO {
 

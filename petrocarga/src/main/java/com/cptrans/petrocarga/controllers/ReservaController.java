@@ -75,28 +75,39 @@ public class ReservaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ReservaResponseDTO> updateReserva(@PathVariable UUID id, @RequestBody @Valid ReservaRequestDTO reservaRequestDTO) {
-        return reservaService.findById(id)
-                .map(existingReserva -> {
-                    Optional<Vaga> vagaOpt = vagaService.findById(reservaRequestDTO.getVagaId());
-                    Optional<Motorista> motoristaOpt = motoristaService.findById(reservaRequestDTO.getMotoristaId());
-                    Optional<Veiculo> veiculoOpt = veiculoService.findById(reservaRequestDTO.getVeiculoId());
-                    Optional<Usuario> criadoPorOpt = usuarioService.findById(reservaRequestDTO.getCriadoPorId());
+        
+        // 1. Verificar se a entidade a ser atualizada (Reserva) existe
+        Optional<Reserva> existingOpt = reservaService.findById(id);
+        if (existingOpt.isEmpty()) {
+            return ResponseEntity.notFound().build(); // 404 Not Found
+        }
 
-                    if (vagaOpt.isPresent() && motoristaOpt.isPresent() && veiculoOpt.isPresent() && criadoPorOpt.isPresent()) {
-                        existingReserva.setVaga(vagaOpt.get());
-                        existingReserva.setMotorista(motoristaOpt.get());
-                        existingReserva.setVeiculo(veiculoOpt.get());
-                        existingReserva.setCriadoPor(criadoPorOpt.get());
-                        existingReserva.setCidadeOrigem(reservaRequestDTO.getCidadeOrigem());
-                        existingReserva.setInicio(reservaRequestDTO.getInicio());
-                        existingReserva.setFim(reservaRequestDTO.getFim());
-                        existingReserva.setStatus(reservaRequestDTO.getStatus());
-                        Reserva updatedReserva = reservaService.save(existingReserva);
-                        return ResponseEntity.ok(new ReservaResponseDTO(updatedReserva));
-                    }
-                    return ResponseEntity.badRequest().build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+        // 2. Verificar todas as dependências
+        Optional<Vaga> vagaOpt = vagaService.findById(reservaRequestDTO.getVagaId());
+        Optional<Motorista> motoristaOpt = motoristaService.findById(reservaRequestDTO.getMotoristaId());
+        Optional<Veiculo> veiculoOpt = veiculoService.findById(reservaRequestDTO.getVeiculoId());
+        Optional<Usuario> criadoPorOpt = usuarioService.findById(reservaRequestDTO.getCriadoPorId());
+
+        // 3. Validar se TODAS as dependências foram encontradas
+        if (vagaOpt.isEmpty() || motoristaOpt.isEmpty() || veiculoOpt.isEmpty() || criadoPorOpt.isEmpty()) {
+            return ResponseEntity.badRequest().build(); // 400 Bad Request (dependências ausentes)
+        }
+
+        // 4. Todas as verificações passaram, realizar a atualização
+        Reserva existingReserva = existingOpt.get();
+        existingReserva.setVaga(vagaOpt.get());
+        existingReserva.setMotorista(motoristaOpt.get());
+        existingReserva.setVeiculo(veiculoOpt.get());
+        existingReserva.setCriadoPor(criadoPorOpt.get());
+        existingReserva.setCidadeOrigem(reservaRequestDTO.getCidadeOrigem());
+        existingReserva.setInicio(reservaRequestDTO.getInicio());
+        existingReserva.setFim(reservaRequestDTO.getFim());
+        existingReserva.setStatus(reservaRequestDTO.getStatus());
+        
+        Reserva updatedReserva = reservaService.save(existingReserva);
+        
+        // 200 OK
+        return ResponseEntity.ok(new ReservaResponseDTO(updatedReserva));
     }
 
     @DeleteMapping("/{id}")
