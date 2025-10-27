@@ -1,17 +1,26 @@
 package com.cptrans.petrocarga.models;
 
-import com.cptrans.petrocarga.enums.PermissoesEnum;
-import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.cptrans.petrocarga.enums.PermissaoEnum;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 @Entity
-@Table(name = "Usuario")
+@Table(name = "usuario")
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "UniqueID")
+    @Column(name = "id")
     private UUID id;
 
     @Column(nullable = false)
@@ -20,7 +29,7 @@ public class Usuario {
     @Column(nullable = false, unique = true, length = 11)
     private String cpf;
 
-    @Column(length = 20)
+    @Column(length = 11)
     private String telefone;
 
     @Column(nullable = false, unique = true)
@@ -31,7 +40,7 @@ public class Usuario {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PermissoesEnum permissao;
+    private PermissaoEnum permissao;
 
     @Column(name = "criado_em", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime criadoEm;
@@ -97,11 +106,11 @@ public class Usuario {
         this.senha = senha;
     }
 
-    public PermissoesEnum getPermissao() {
+    public PermissaoEnum getPermissao() {
         return permissao;
     }
 
-    public void setPermissao(PermissoesEnum permissao) {
+    public void setPermissao(PermissaoEnum permissao) {
         this.permissao = permissao;
     }
 

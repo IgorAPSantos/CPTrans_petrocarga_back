@@ -1,10 +1,10 @@
 package com.cptrans.petrocarga.services;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -13,13 +13,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.cptrans.petrocarga.dto.VagaRequestDTO;
+import com.cptrans.petrocarga.enums.DiaSemanaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
-import com.cptrans.petrocarga.models.Vaga;
-import com.cptrans.petrocarga.repositories.VagaRepository;
-
 import com.cptrans.petrocarga.models.EnderecoVaga;
 import com.cptrans.petrocarga.models.OperacaoVaga;
-import com.cptrans.petrocarga.enums.DiaSemanaEnum;
+import com.cptrans.petrocarga.models.Vaga;
+import com.cptrans.petrocarga.repositories.VagaRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional; 
@@ -30,8 +29,6 @@ public class VagaService {
     private VagaRepository vagaRepository;
     @Autowired
     private EnderecoVagaService enderecoVagaService;
-    @Autowired
-    private OperacaoVagaService operacaoVagaService; 
 
     public List<Vaga> listarVagas() {
         return vagaRepository.findAll();

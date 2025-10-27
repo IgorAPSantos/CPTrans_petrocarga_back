@@ -1,40 +1,49 @@
 package com.cptrans.petrocarga.models;
 
-import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
-import jakarta.persistence.*;
-import java.math.BigDecimal;
 import java.util.UUID;
 
+import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+
 @Entity
-@Table(name = "Veiculo", uniqueConstraints = {
+@Table(name = "veiculo", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"placa", "usuario_id"})
 })
-// Note: The CHECK constraint 'chk_cpf_cnpj_proprietario' (cpf_proprietario IS NULL AND cnpj_proprietario IS NOT NULL) OR (cpf_proprietario IS NOT NULL AND cnpj_proprietario IS NULL)
-// needs to be handled either by a custom validator or by database-level constraint.
-// JPA @Check annotation is not widely supported across all JPA providers for complex expressions.
 public class Veiculo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "UniqueID")
+    @Column(name = "id")
     private UUID id;
 
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, length = 7, columnDefinition="CHAR(7)")
     private String placa;
 
-    @Column(length = 100)
+    @Column(length = 50)
     private String marca;
 
-    @Column(length = 100)
+    @Column(length = 50)
     private String modelo;
 
     @Enumerated(EnumType.STRING)
     private TipoVeiculoEnum tipo;
 
     @Column(precision = 5, scale = 2)
-    private BigDecimal comprimento;
+    private Integer comprimento;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
@@ -88,11 +97,11 @@ public class Veiculo {
         this.tipo = tipo;
     }
 
-    public BigDecimal getComprimento() {
+    public Integer getComprimento() {
         return comprimento;
     }
 
-    public void setComprimento(BigDecimal comprimento) {
+    public void setComprimento(Integer comprimento) {
         this.comprimento = comprimento;
     }
 

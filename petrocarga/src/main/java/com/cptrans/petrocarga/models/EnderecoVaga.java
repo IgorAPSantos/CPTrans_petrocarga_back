@@ -17,7 +17,7 @@ import jakarta.validation.constraints.Size;
 public class EnderecoVaga {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "UniqueID")
+    @Column(name = "id")
     private UUID id;
 
     @Column(nullable = false, length = 100, unique = true)
@@ -25,11 +25,11 @@ public class EnderecoVaga {
     private String logradouro;
 
     @Column(nullable = false, length = 50)
-    @Size(min = 3, max = 100)
+    @Size(min = 3, max = 50)
     private String bairro;
 
-    @Column(nullable = false, length = 9, unique = true, name = "codigo_pmp")
-    @Size(min = 1, max = 50)
+    @Column(nullable = false, length = 6, unique = true, name = "codigo_pmp")
+    @Size(min = 1, max = 6)
     private String codigoPmp;
 
     public EnderecoVaga() {}

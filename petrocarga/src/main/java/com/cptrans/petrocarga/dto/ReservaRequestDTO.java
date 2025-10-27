@@ -1,15 +1,16 @@
 package com.cptrans.petrocarga.dto;
 
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.models.Reserva;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.models.Vaga;
 import com.cptrans.petrocarga.models.Veiculo;
-import jakarta.validation.constraints.NotBlank;
+
 import jakarta.validation.constraints.NotNull;
-import java.time.OffsetDateTime;
-import java.util.UUID;
 
 public class ReservaRequestDTO {
 

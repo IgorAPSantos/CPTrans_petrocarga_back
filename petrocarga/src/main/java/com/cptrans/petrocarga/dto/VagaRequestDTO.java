@@ -2,7 +2,6 @@ package com.cptrans.petrocarga.dto;
 
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.math.BigDecimal;
 
 import com.cptrans.petrocarga.enums.AreaVagaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
@@ -10,7 +9,6 @@ import com.cptrans.petrocarga.enums.TipoVagaEnum;
 import com.cptrans.petrocarga.models.EnderecoVaga;
 import com.cptrans.petrocarga.models.OperacaoVaga;
 import com.cptrans.petrocarga.models.Vaga;
-import com.cptrans.petrocarga.enums.DiaSemanaEnum;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -43,7 +41,7 @@ public class VagaRequestDTO {
     @Valid
     @NotNull(message = "O comprimento é obrigatório.")
     @Schema(description = "Comprimento máximo em metros permitido para a vaga", example = "12")
-    private BigDecimal comprimento;
+    private Integer comprimento;
     
     @Schema(description = "Status inicial da vaga (Ex: DISPONIVEL, OCUPADA)", example= "DISPONIVEL")
     private StatusVagaEnum status;
@@ -62,13 +60,11 @@ public class VagaRequestDTO {
         vaga.setStatus(this.status);
         vaga.setTipoVaga(this.tipoVaga);
 
-        if (this.endereco != null) {
-            EnderecoVaga enderecoVaga = new EnderecoVaga();
-            enderecoVaga.setBairro(this.endereco.getBairro());
-            enderecoVaga.setCodigoPmp(this.endereco.getCodigoPmp());
-            enderecoVaga.setLogradouro(this.endereco.getLogradouro());
-            vaga.setEndereco(enderecoVaga);
-        }
+        EnderecoVaga enderecoVaga = new EnderecoVaga();
+        enderecoVaga.setBairro(this.endereco.getBairro());
+        enderecoVaga.setCodigoPmp(this.endereco.getCodigoPmp());
+        enderecoVaga.setLogradouro(this.endereco.getLogradouro());
+        vaga.setEndereco(enderecoVaga);
 
         if (this.operacoesVaga != null) {
             Set<OperacaoVaga> operacoes = this.operacoesVaga.stream()
@@ -143,11 +139,11 @@ public class VagaRequestDTO {
         this.referenciaGeoFim = referenciaGeoFim;
     }
 
-    public BigDecimal getComprimento() {
+    public Integer getComprimento() {
         return comprimento;
     }
 
-    public void setComprimento(BigDecimal comprimento) {
+    public void setComprimento(Integer comprimento) {
         this.comprimento = comprimento;
     }
 

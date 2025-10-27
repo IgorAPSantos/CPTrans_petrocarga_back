@@ -1,34 +1,48 @@
 package com.cptrans.petrocarga.models;
 
-import com.cptrans.petrocarga.enums.TipoCnhEnum;
-import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import com.cptrans.petrocarga.enums.TipoCnhEnum;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+
 @Entity
-@Table(name = "Motorista")
+@Table(name = "motorista")
 public class Motorista {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "UniqueID")
+    @Column(name = "id")
     private UUID id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "usuario_id", nullable = false, unique = true)
     private Usuario usuario;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_CNH")
-    private TipoCnhEnum tipoCNH;
+    @Column(name = "tipo_cnh", length=1, nullable = false)
+    private TipoCnhEnum tipoCnh;
 
-    @Column(name = "numero_CNH", unique = true, length = 20)
-    private String numeroCNH;
+    @Column(name = "numero_cnh", unique = true, length = 9, nullable = false)
+    private String numeroCnh;
 
-    @Column(name = "data_validade_CNH")
-    private LocalDate dataValidadeCNH;
+    @Column(name = "data_validade_cnh")
+    private LocalDate dataValidadeCnh;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "empresa_id")
     private Empresa empresa;
 
@@ -53,27 +67,27 @@ public class Motorista {
     }
 
     public TipoCnhEnum getTipoCNH() {
-        return tipoCNH;
+        return tipoCnh;
     }
 
-    public void setTipoCNH(TipoCnhEnum tipoCNH) {
-        this.tipoCNH = tipoCNH;
+    public void setTipoCNH(TipoCnhEnum tipoCnh) {
+        this.tipoCnh = tipoCnh;
     }
 
     public String getNumeroCNH() {
-        return numeroCNH;
+        return numeroCnh;
     }
 
-    public void setNumeroCNH(String numeroCNH) {
-        this.numeroCNH = numeroCNH;
+    public void setNumeroCNH(String numeroCnh) {
+        this.numeroCnh = numeroCnh;
     }
 
     public LocalDate getDataValidadeCNH() {
-        return dataValidadeCNH;
+        return dataValidadeCnh;
     }
 
-    public void setDataValidadeCNH(LocalDate dataValidadeCNH) {
-        this.dataValidadeCNH = dataValidadeCNH;
+    public void setDataValidadeCNH(LocalDate dataValidadeCnh) {
+        this.dataValidadeCnh = dataValidadeCnh;
     }
 
     public Empresa getEmpresa() {

@@ -1,6 +1,6 @@
 package com.cptrans.petrocarga.enums;
 
-public enum PermissoesEnum {
+public enum PermissaoEnum {
     AGENTE,
     GESTOR,
     MOTORISTA,

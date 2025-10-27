@@ -1,13 +1,14 @@
 package com.cptrans.petrocarga.services;
 
-import com.cptrans.petrocarga.models.VeiculoMotoristaAssociacao;
-import com.cptrans.petrocarga.models.VeiculoMotoristaId;
-import com.cptrans.petrocarga.repositories.VeiculoMotoristaAssociacaoRepository;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import com.cptrans.petrocarga.models.VeiculoEmpresaMotorista;
+import com.cptrans.petrocarga.models.VeiculoEmpresaMotoristaId;
+import com.cptrans.petrocarga.repositories.VeiculoMotoristaAssociacaoRepository;
 
 @Service
 public class VeiculoMotoristaAssociacaoService {
@@ -15,19 +16,19 @@ public class VeiculoMotoristaAssociacaoService {
     @Autowired
     private VeiculoMotoristaAssociacaoRepository veiculoMotoristaAssociacaoRepository;
 
-    public List<VeiculoMotoristaAssociacao> findAll() {
+    public List<VeiculoEmpresaMotorista> findAll() {
         return veiculoMotoristaAssociacaoRepository.findAll();
     }
 
-    public Optional<VeiculoMotoristaAssociacao> findById(VeiculoMotoristaId id) {
+    public Optional<VeiculoEmpresaMotorista> findById(VeiculoEmpresaMotoristaId id) {
         return veiculoMotoristaAssociacaoRepository.findById(id);
     }
 
-    public VeiculoMotoristaAssociacao save(VeiculoMotoristaAssociacao veiculoMotoristaAssociacao) {
+    public VeiculoEmpresaMotorista save(VeiculoEmpresaMotorista veiculoMotoristaAssociacao) {
         return veiculoMotoristaAssociacaoRepository.save(veiculoMotoristaAssociacao);
     }
 
-    public void deleteById(VeiculoMotoristaId id) {
+    public void deleteById(VeiculoEmpresaMotoristaId id) {
         veiculoMotoristaAssociacaoRepository.deleteById(id);
     }
 }

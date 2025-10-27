@@ -1,13 +1,14 @@
 package com.cptrans.petrocarga.dto;
 
+import java.util.UUID;
+
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.models.Veiculo;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.math.BigDecimal;
-import java.util.UUID;
 
 public class VeiculoRequestDTO {
 
@@ -21,7 +22,7 @@ public class VeiculoRequestDTO {
 
     private TipoVeiculoEnum tipo;
 
-    private BigDecimal comprimento;
+    private Integer comprimento;
 
     @NotNull
     private UUID usuarioId;
@@ -76,11 +77,11 @@ public class VeiculoRequestDTO {
         this.tipo = tipo;
     }
 
-    public BigDecimal getComprimento() {
+    public Integer getComprimento() {
         return comprimento;
     }
 
-    public void setComprimento(BigDecimal comprimento) {
+    public void setComprimento(Integer comprimento) {
         this.comprimento = comprimento;
     }
 

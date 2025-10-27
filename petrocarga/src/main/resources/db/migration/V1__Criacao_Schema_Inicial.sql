@@ -1,138 +1,97 @@
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
-
-
-CREATE TYPE permissoes_enum AS ENUM (
-    'AGENTE',
-    'GESTOR',
-    'MOTORISTA',
-    'EMPRESA',
-    'ADMIN'
-);
-
-CREATE TYPE tipo_cnh_enum AS ENUM (
-    'A', 'B', 'C', 'D', 'E', 'AB', 'AC', 'AD', 'AE'
-);
-
-CREATE TYPE tipo_veiculo_enum AS ENUM (
-    'VUC', 'CAMINHAO_TOCO', 'CAMINHAO_TRUCK', 'CARRETA', 'MOTO', 'CARRO'
-);
-
-CREATE TYPE status_vaga_enum AS ENUM (
-    'ATIVA', 'INATIVA', 'MANUTENCAO'
-);
-
-CREATE TYPE area_vaga_enum AS ENUM (
-    'AZUL', 'BRANCA', 'CARGA_DESCARGA'
-);
-
-CREATE TYPE tipo_vaga_carga_enum AS ENUM (
-    'CARGA_DESCARGA', 'ESTACIONAMENTO_ROTATIVO'
-);
-
-CREATE TYPE dia_semana_enum AS ENUM (
-    'SEGUNDA', 'TERCA', 'QUARTA', 'QUINTA', 'SEXTA', 'SABADO', 'DOMINGO'
-);
-
-CREATE TYPE status_reserva_enum AS ENUM (
-    'PENDENTE', 'CONFIRMADA', 'CANCELADA', 'CONCLUIDA', 'EM_USO'
-);
-
-
-
-CREATE TABLE Usuario (
-    UniqueID uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE usuario (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     nome VARCHAR(255) NOT NULL,
     cpf VARCHAR(11) UNIQUE NOT NULL,
-    telefone VARCHAR(20),
+    telefone VARCHAR(11),
     email VARCHAR(255) UNIQUE NOT NULL,
     senha VARCHAR(255) NOT NULL,
-    permissao permissoes_enum NOT NULL,
+    permissao VARCHAR(40) NOT NULL,
     criado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     ativo BOOLEAN DEFAULT true,
     desativado_em TIMESTAMP WITH TIME ZONE
 );
 
-CREATE TABLE Agente (
-    UniqueID uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE agente (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     usuario_id uuid NOT NULL UNIQUE,
     matricula VARCHAR(50) UNIQUE NOT NULL,
-    FOREIGN KEY (usuario_id) REFERENCES Usuario(UniqueID)
+    FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );
 
-CREATE TABLE Empresa (
-    UniqueID uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE empresa (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     usuario_id uuid NOT NULL UNIQUE,
     cnpj VARCHAR(14) UNIQUE NOT NULL,
-    razao_social VARCHAR(255) NOT NULL
+    razao_social VARCHAR(255) NOT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );
 
-CREATE TABLE Motorista (
-    UniqueID uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE motorista (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     usuario_id uuid NOT NULL UNIQUE,
-    tipo_CNH tipo_cnh_enum,
-    numero_CNH VARCHAR(20) UNIQUE,
-    data_validade_CNH DATE,
-    empresa_id uuid,
-    FOREIGN KEY (usuario_id) REFERENCES Usuario(UniqueID),
-    FOREIGN KEY (empresa_id) REFERENCES Empresa(UniqueID)
+    tipo_cnh CHAR(1) NOT NULL,
+    numero_cnh VARCHAR(9) UNIQUE,
+    data_validade_cnh DATE NOT NULL,
+    empresa_id uuid DEFAULT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES usuario(id),
+    FOREIGN KEY (empresa_id) REFERENCES empresa(id)
 );
 
-CREATE TABLE Endereco_vaga (
-    UniqueID uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    codigo_pmp VARCHAR(50) UNIQUE,
-    logradouro VARCHAR(255) NOT NULL,
-    bairro VARCHAR(100)
+CREATE TABLE endereco_vaga (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    codigo_pmp VARCHAR(6) NOT NULL UNIQUE,
+    logradouro VARCHAR(255) NOT NULL UNIQUE,
+    bairro VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE Vaga (
-    UniqueID uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE vaga (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     endereco_id uuid NOT NULL,
-    area area_vaga_enum,
-    numero_endereco VARCHAR(20),
-    referencia_endereco TEXT,
-    tipo_vaga tipo_vaga_carga_enum,
-    comprimento DECIMAL(5, 2),
-    status status_vaga_enum NOT NULL DEFAULT 'INATIVA',
-    referencia_geo_inicio VARCHAR(100),
-    referencia_geo_fim VARCHAR(100),
-    FOREIGN KEY (endereco_id) REFERENCES Endereco_vaga(UniqueID)
+    area VARCHAR(20) NOT NULL,
+    numero_endereco VARCHAR(10) NOT NULL,
+    referencia_endereco TEXT NOT NULL,
+    tipo_vaga VARCHAR(20) NOT NULL,
+    comprimento INT NOT NULL CHECK (comprimento >= 5 AND comprimento <= 50),
+    status VARCHAR(20) NOT NULL DEFAULT 'INDISPONIVEL',
+    referencia_geo_inicio VARCHAR(100) NOT NULL UNIQUE,
+    referencia_geo_fim VARCHAR(100) NOT NULL UNIQUE,
+    FOREIGN KEY (endereco_id) REFERENCES endereco_vaga(id)
 );
 
-CREATE TABLE Operacao_vaga (
-    operacao_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE operacao_vaga (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     vaga_id uuid NOT NULL,
-    dia_semana dia_semana_enum NOT NULL,
+    dia_semana VARCHAR(10) NOT NULL,
     hora_inicio TIME NOT NULL,
     hora_fim TIME NOT NULL,
-    FOREIGN KEY (vaga_id) REFERENCES Vaga(UniqueID),
-    UNIQUE (vaga_id, dia_semana, hora_inicio)
+    FOREIGN KEY (vaga_id) REFERENCES vaga(id),
+    UNIQUE (vaga_id, dia_semana)
 );
 
 CREATE TABLE disponibilidade_vaga (
-    UniqueID uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     vaga_id uuid NOT NULL,
     inicio TIMESTAMP WITH TIME ZONE NOT NULL,
     fim TIMESTAMP WITH TIME ZONE NOT NULL,
     criado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     criado_por uuid NOT NULL, 
-    FOREIGN KEY (vaga_id) REFERENCES Vaga(UniqueID),
-    FOREIGN KEY (criado_por) REFERENCES Usuario(UniqueID)
+    FOREIGN KEY (vaga_id) REFERENCES vaga(id),
+    FOREIGN KEY (criado_por) REFERENCES usuario(id)
 );
 
 
-CREATE TABLE Veiculo (
-    UniqueID uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    placa VARCHAR(10) NOT NULL,
-    marca VARCHAR(100),
-    modelo VARCHAR(100),
-    tipo tipo_veiculo_enum,
-    comprimento DECIMAL(5, 2),
+CREATE TABLE veiculo (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    placa VARCHAR(7) NOT NULL,
+    marca VARCHAR(50) NOT NULL,
+    modelo VARCHAR(50) NOT NULL,
+    tipo VARCHAR(30) NOT NULL,
+    comprimento INT NOT NULL CHECK (comprimento >= 5 AND comprimento <= 50),
     usuario_id uuid NOT NULL,
     cpf_proprietario VARCHAR(11),
     cnpj_proprietario VARCHAR(14),
     
-    FOREIGN KEY (usuario_id) REFERENCES Usuario(UniqueID),
+    FOREIGN KEY (usuario_id) REFERENCES usuario(id),
     
     UNIQUE (placa, usuario_id),
     
@@ -142,48 +101,49 @@ CREATE TABLE Veiculo (
     )
 );
 
-CREATE UNIQUE INDEX idx_unique_placa_cpf ON Veiculo (placa, cpf_proprietario)
+CREATE UNIQUE INDEX idx_unique_placa_cpf ON veiculo (placa, cpf_proprietario)
 WHERE cpf_proprietario IS NOT NULL;
 
-CREATE UNIQUE INDEX idx_unique_placa_cnpj ON Veiculo (placa, cnpj_proprietario)
+CREATE UNIQUE INDEX idx_unique_placa_cnpj ON veiculo (placa, cnpj_proprietario)
 WHERE cnpj_proprietario IS NOT NULL;
 
 
 
-CREATE TABLE veiculo_motorista_associacao (
+CREATE TABLE veiculo_empresa_motorista (
     veiculo_id uuid NOT NULL,
     motorista_id uuid NOT NULL,
     PRIMARY KEY (veiculo_id, motorista_id),
-    FOREIGN KEY (veiculo_id) REFERENCES Veiculo(UniqueID) ON DELETE CASCADE,
-    FOREIGN KEY (motorista_id) REFERENCES Motorista(UniqueID) ON DELETE CASCADE
+    FOREIGN KEY (veiculo_id) REFERENCES veiculo(id) ON DELETE CASCADE,
+    FOREIGN KEY (motorista_id) REFERENCES motorista(id) ON DELETE CASCADE
 );
 
-CREATE TABLE Reserva (
-    UniqueID uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE reserva (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     vaga_id uuid NOT NULL,
     motorista_id uuid NOT NULL,
     veiculo_id uuid NOT NULL,
     criado_por uuid NOT NULL, 
-    cidade_origem VARCHAR(100),
+    cidade_origem VARCHAR(100) NOT NULL,
     criado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     inicio TIMESTAMP WITH TIME ZONE NOT NULL,
     fim TIMESTAMP WITH TIME ZONE NOT NULL,
-    status status_reserva_enum NOT NULL DEFAULT 'PENDENTE',
-    FOREIGN KEY (vaga_id) REFERENCES Vaga(UniqueID),
-    FOREIGN KEY (motorista_id) REFERENCES Motorista(UniqueID),
-    FOREIGN KEY (veiculo_id) REFERENCES Veiculo(UniqueID),
-    FOREIGN KEY (criado_por) REFERENCES Usuario(UniqueID)
+    status VARCHAR(20) NOT NULL DEFAULT 'CONFIRMADA',
+    FOREIGN KEY (vaga_id) REFERENCES vaga(id),
+    FOREIGN KEY (motorista_id) REFERENCES motorista(id),
+    FOREIGN KEY (veiculo_id) REFERENCES veiculo(id),
+    FOREIGN KEY (criado_por) REFERENCES usuario(id)
 );
 
-CREATE TABLE Reserva_Rapida (
-    UniqueID uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE reserva_rapida (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     vaga_id uuid NOT NULL,
     agente_id uuid NOT NULL,
-    tipo_veiculo tipo_veiculo_enum,
-    placa VARCHAR(10),
+    tipo_veiculo VARCHAR(30) NOT NULL,
+    placa VARCHAR(7) NOT NULL,
     inicio TIMESTAMP WITH TIME ZONE NOT NULL,
     fim TIMESTAMP WITH TIME ZONE NOT NULL,
     criado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (vaga_id) REFERENCES Vaga(UniqueID),
-    FOREIGN KEY (agente_id) REFERENCES Agente(UniqueID)
+    status VARCHAR(20) NOT NULL DEFAULT 'CONFIRMADA',
+    FOREIGN KEY (vaga_id) REFERENCES vaga(id),
+    FOREIGN KEY (agente_id) REFERENCES agente(id)
 );

@@ -1,14 +1,15 @@
 package com.cptrans.petrocarga.dto;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
 import com.cptrans.petrocarga.enums.TipoCnhEnum;
 import com.cptrans.petrocarga.models.Empresa;
 import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.models.Usuario;
-import jakarta.validation.constraints.NotBlank;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDate;
-import java.util.UUID;
 
 public class MotoristaRequestDTO {
 
