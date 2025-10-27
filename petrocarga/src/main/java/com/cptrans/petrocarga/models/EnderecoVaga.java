@@ -17,18 +17,19 @@ import jakarta.validation.constraints.Size;
 public class EnderecoVaga {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "UniqueID")
     private UUID id;
 
     @Column(nullable = false, length = 100, unique = true)
-    @Size(min = 10, max = 100)
+    @Size(min = 10, max = 255)
     private String logradouro;
 
     @Column(nullable = false, length = 50)
-    @Size(min = 3, max = 50)
+    @Size(min = 3, max = 100)
     private String bairro;
 
     @Column(nullable = false, length = 9, unique = true, name = "codigo_pmp")
-    @Size(min = 1, max = 20)
+    @Size(min = 1, max = 50)
     private String codigoPmp;
 
     public EnderecoVaga() {}
@@ -84,7 +85,7 @@ public class EnderecoVaga {
     public EnderecoVagaResponseDTO toResponseDTO() {
         EnderecoVagaResponseDTO dto = new EnderecoVagaResponseDTO();
         dto.setId(this.id);
-        dto.setCodidoPmp(this.codigoPmp);
+        dto.setCodigoPmp(this.codigoPmp);
         dto.setLogradouro(this.logradouro);
         dto.setBairro(this.bairro);
         return dto;

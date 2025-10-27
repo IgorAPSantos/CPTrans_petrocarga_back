@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -12,16 +13,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.cptrans.petrocarga.dto.VagaRequestDTO;
-import com.cptrans.petrocarga.enums.DiaSemanaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
-import com.cptrans.petrocarga.models.EnderecoVaga;
-import com.cptrans.petrocarga.models.OperacaoVaga;
 import com.cptrans.petrocarga.models.Vaga;
 import com.cptrans.petrocarga.repositories.VagaRepository;
 
+import com.cptrans.petrocarga.models.EnderecoVaga;
+import com.cptrans.petrocarga.models.OperacaoVaga;
+import com.cptrans.petrocarga.enums.DiaSemanaEnum;
+
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional; 
-
 
 @Service
 public class VagaService {
@@ -50,10 +51,15 @@ public class VagaService {
         return vagaRepository.findByStatus(status, pageable);
     }
 
-    public Vaga buscarVagaPorId(UUID id) {
-        return vagaRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Vaga com ID " + id + " não encontrada."));
+    public Optional<Vaga> findById(UUID id) {
+        return vagaRepository.findById(id);
     }
+    
+
+    // public Vaga buscarVagaPorId(UUID id) {
+    //      return vagaRepository.findById(id)
+    //          .orElseThrow(() -> new EntityNotFoundException("Vaga com ID " + id + " não encontrada."));
+    // }
     
     
     public void deletarVaga(UUID id) {
@@ -91,7 +97,6 @@ public class VagaService {
             vagaExistente.setOperacoesVaga(operacoes);
         }
         Vaga vagaAtualizada = vagaRepository.save(vagaExistente);
-        operacaoVagaService.salvarOperacaoVaga(vagaAtualizada.getOperacoesVaga());
         
         return vagaAtualizada;
     }
@@ -128,7 +133,6 @@ public class VagaService {
             vaga.setOperacoesVaga(operacoes);
         }
         Vaga novaVaga = vagaRepository.save(vaga);
-        operacaoVagaService.salvarOperacaoVaga(novaVaga.getOperacoesVaga());
         return novaVaga;
     }
 }

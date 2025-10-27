@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 import com.cptrans.petrocarga.enums.DiaSemanaEnum;
+import com.cptrans.petrocarga.models.OperacaoVaga;
 
 public class OperacaoVagaResponseDTO {
 
@@ -11,6 +12,16 @@ public class OperacaoVagaResponseDTO {
     private String diaSemana;
     private LocalTime horaInicio;
     private LocalTime horaFim;
+
+    public OperacaoVagaResponseDTO() {
+    }
+
+    public OperacaoVagaResponseDTO(OperacaoVaga operacaoVaga) {
+        this.id = operacaoVaga.getId();
+        this.diaSemana = operacaoVaga.getDiaSemana().getDescricao();
+        this.horaInicio = operacaoVaga.getHoraInicio();
+        this.horaFim = operacaoVaga.getHoraFim();
+    }
 
     // Getters e Setters
 
@@ -46,7 +57,7 @@ public class OperacaoVagaResponseDTO {
         this.horaFim = horaFim;
     }
 
-    public DiaSemanaEnum getDiaSemanaEnum() {
+    public DiaSemanaEnum getDiaSemanaAsEnum() {
        return DiaSemanaEnum.toEnumByDescricao(this.diaSemana);
     }
 }
