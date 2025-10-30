@@ -58,7 +58,7 @@ public class ReservaRapida {
     // Constructors
     public ReservaRapida() {
         this.criadoEm = OffsetDateTime.now();
-        this.status = StatusReservaEnum.CONFIRMADA;
+        this.status = StatusReservaEnum.ATIVA;
     }
 
     // Getters and Setters

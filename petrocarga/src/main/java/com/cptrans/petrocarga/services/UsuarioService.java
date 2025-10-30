@@ -1,16 +1,24 @@
 package com.cptrans.petrocarga.services;
 
-import com.cptrans.petrocarga.models.Usuario;
-import com.cptrans.petrocarga.repositories.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.cptrans.petrocarga.enums.PermissaoEnum;
+import com.cptrans.petrocarga.models.Usuario;
+import com.cptrans.petrocarga.repositories.UsuarioRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class UsuarioService {
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -19,12 +27,56 @@ public class UsuarioService {
         return usuarioRepository.findAll();
     }
 
-    public Optional<Usuario> findById(UUID id) {
-        return usuarioRepository.findById(id);
+    public Usuario findById(UUID id) {
+        return usuarioRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuario não encontrado."));
     }
 
-    public Usuario save(Usuario usuario) {
-        return usuarioRepository.save(usuario);
+    public Usuario createUsuario(Usuario usuario, PermissaoEnum permissao) {
+        if(usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email já cadastrado");
+        }
+        if(usuarioRepository.findByCpf(usuario.getCpf()).isPresent()) {
+            throw new IllegalArgumentException("CPF já cadastrado");
+        }
+
+        Usuario novoUsuario = new Usuario();
+        novoUsuario.setNome(usuario.getNome());
+        novoUsuario.setCpf(usuario.getCpf());
+        novoUsuario.setTelefone(usuario.getTelefone());
+        novoUsuario.setEmail(usuario.getEmail());
+        novoUsuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+        novoUsuario.setPermissao(permissao);
+
+        return usuarioRepository.save(novoUsuario);
+    }
+
+    public Usuario updateUsuario(UUID id, Usuario novoUsuario, PermissaoEnum permissao) {
+        Usuario usuarioExistente = findById(id);
+
+        if(!usuarioExistente.getEmail().equals(novoUsuario.getEmail())) {
+            Optional<Usuario> usuarioByEmail = usuarioRepository.findByEmail(novoUsuario.getEmail());
+            if (usuarioByEmail.isPresent() && !usuarioByEmail.get().getId().equals(id)) {
+                throw new IllegalArgumentException("Email já cadastrado");
+            }
+            usuarioExistente.setEmail(novoUsuario.getEmail());
+        }
+
+        if (!usuarioExistente.getCpf().equals(novoUsuario.getCpf())) {
+            Optional<Usuario> usuarioByCpf = usuarioRepository.findByCpf(novoUsuario.getCpf());
+            if (usuarioByCpf.isPresent() && !usuarioByCpf.get().getId().equals(id)) {
+                throw new IllegalArgumentException("CPF já cadastrado");
+            }
+            usuarioExistente.setCpf(novoUsuario.getCpf());
+        }
+
+        usuarioExistente.setNome(novoUsuario.getNome());
+        usuarioExistente.setTelefone(novoUsuario.getTelefone());
+
+        if (novoUsuario.getSenha() != null && !novoUsuario.getSenha().isEmpty()) {
+            usuarioExistente.setSenha(passwordEncoder.encode(novoUsuario.getSenha()));
+        }
+        usuarioExistente.setPermissao(permissao);
+        return usuarioRepository.save(usuarioExistente);
     }
 
     public void deleteById(UUID id) {

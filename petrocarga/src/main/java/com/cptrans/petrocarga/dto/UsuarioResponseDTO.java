@@ -21,6 +21,19 @@ public class UsuarioResponseDTO {
     public UsuarioResponseDTO() {
     }
 
+    public UsuarioResponseDTO(UUID id, String nome, String cpf, String telefone, String email, PermissaoEnum permissao,
+            OffsetDateTime criadoEm, Boolean ativo, OffsetDateTime desativadoEm) {
+        this.id = id;
+        this.nome = nome;
+        this.cpf = cpf;
+        this.telefone = telefone;
+        this.email = email;
+        this.permissao = permissao;
+        this.criadoEm = criadoEm;
+        this.ativo = ativo;
+        this.desativadoEm = desativadoEm;
+    }
+
     public UsuarioResponseDTO(Usuario usuario) {
         this.id = usuario.getId();
         this.nome = usuario.getNome();
