@@ -3,6 +3,8 @@ package com.cptrans.petrocarga.models;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.cptrans.petrocarga.dto.DisponibilidadeVagaResponseDTO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -91,5 +93,9 @@ public class DisponibilidadeVaga {
 
     public void setCriadoPor(Usuario criadoPor) {
         this.criadoPor = criadoPor;
+    }
+
+    public DisponibilidadeVagaResponseDTO toResponseDTO() {
+        return new DisponibilidadeVagaResponseDTO(this);
     }
 }

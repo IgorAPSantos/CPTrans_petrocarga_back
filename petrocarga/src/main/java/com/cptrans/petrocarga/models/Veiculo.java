@@ -2,6 +2,7 @@ package com.cptrans.petrocarga.models;
 
 import java.util.UUID;
 
+import com.cptrans.petrocarga.dto.VeiculoResponseDTO;
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
 
 import jakarta.persistence.Column;
@@ -127,5 +128,9 @@ public class Veiculo {
 
     public void setCnpjProprietario(String cnpjProprietario) {
         this.cnpjProprietario = cnpjProprietario;
+    }
+
+    public VeiculoResponseDTO toResponseDTO() {
+        return new VeiculoResponseDTO(this);
     }
 }

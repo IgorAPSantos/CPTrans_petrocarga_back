@@ -23,7 +23,7 @@ public class VagaRequestDTO {
     @Schema(description = "Área da vaga (Ex: AMARELA, VERMELHA)", example = "AMARELA")
     private AreaVagaEnum area;
     
-    @Schema(description = "Número da vaga no endereço", example = "Vaga 03")
+    @Schema(description = "Número de endereço dereferência da vaga", example = "07 ao 35")
     private String numeroEndereco;
 
     @Schema(description = "Ponto de referência para a vaga", example = "Em frente ao portão principal")

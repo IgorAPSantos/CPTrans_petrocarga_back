@@ -74,7 +74,7 @@ public class Vaga {
     // GETTERS, SETTERS, CONSTRUTOR
     
     public Vaga() {
-        this.status = StatusVagaEnum.INATIVA;
+        this.status = StatusVagaEnum.DISPONIVEL;
     }
 
     public UUID getId() {

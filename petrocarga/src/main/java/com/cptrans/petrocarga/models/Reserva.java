@@ -3,6 +3,7 @@ package com.cptrans.petrocarga.models;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.cptrans.petrocarga.dto.ReservaResponseDTO;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 
 import jakarta.persistence.Column;
@@ -61,7 +62,7 @@ public class Reserva {
     // Constructors
     public Reserva() {
         this.criadoEm = OffsetDateTime.now();
-        this.status = StatusReservaEnum.PENDENTE;
+        this.status = StatusReservaEnum.ATIVA;
     }
 
     // Getters and Setters
@@ -143,5 +144,9 @@ public class Reserva {
 
     public void setStatus(StatusReservaEnum status) {
         this.status = status;
+    }
+
+    public ReservaResponseDTO toResponseDTO() {
+        return new ReservaResponseDTO(this);
     }
 }

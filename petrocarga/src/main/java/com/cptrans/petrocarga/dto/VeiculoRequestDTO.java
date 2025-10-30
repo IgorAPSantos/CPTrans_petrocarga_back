@@ -2,110 +2,71 @@ package com.cptrans.petrocarga.dto;
 
 import java.util.UUID;
 
+import org.hibernate.validator.constraints.br.CNPJ;
+import org.hibernate.validator.constraints.br.CPF;
+
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
-import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.models.Veiculo;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.Size;
+
 
 public class VeiculoRequestDTO {
 
-    @NotBlank
-    @Size(max = 10)
+    @Size(min=7, max=7, message="Placa deve ter exatamente 7 caracteres.")
     private String placa;
-
+    
+    @Size(min=3, max=20, message="Marca deve ter entre 3 e 20 caracteres.")
     private String marca;
 
+    @Size(min=3, max=20, message="Modelo deve ter entre 3 e 20 caracteres.")
     private String modelo;
 
+    @Nonnull
     private TipoVeiculoEnum tipo;
 
-    private Integer comprimento;
-
-    @NotNull
+    @Nonnull
     private UUID usuarioId;
 
+    @CPF(message = "CPF inválido.")
     private String cpfProprietario;
 
+    @CNPJ
     private String cnpjProprietario;
 
-    public Veiculo toEntity(Usuario usuario) {
+    public Veiculo toEntity() {
         Veiculo veiculo = new Veiculo();
         veiculo.setPlaca(this.placa);
         veiculo.setMarca(this.marca);
         veiculo.setModelo(this.modelo);
         veiculo.setTipo(this.tipo);
-        veiculo.setComprimento(this.comprimento);
-        veiculo.setUsuario(usuario);
+        veiculo.setComprimento(this.tipo.getComprimento());
         veiculo.setCpfProprietario(this.cpfProprietario);
         veiculo.setCnpjProprietario(this.cnpjProprietario);
         return veiculo;
     }
 
-    // Getters and Setters
+    // Getters
     public String getPlaca() {
         return placa;
     }
-
-    public void setPlaca(String placa) {
-        this.placa = placa;
-    }
-
     public String getMarca() {
         return marca;
     }
-
-    public void setMarca(String marca) {
-        this.marca = marca;
-    }
-
     public String getModelo() {
         return modelo;
     }
-
-    public void setModelo(String modelo) {
-        this.modelo = modelo;
-    }
-
     public TipoVeiculoEnum getTipo() {
         return tipo;
     }
-
-    public void setTipo(TipoVeiculoEnum tipo) {
-        this.tipo = tipo;
-    }
-
-    public Integer getComprimento() {
-        return comprimento;
-    }
-
-    public void setComprimento(Integer comprimento) {
-        this.comprimento = comprimento;
-    }
-
     public UUID getUsuarioId() {
         return usuarioId;
     }
-
-    public void setUsuarioId(UUID usuarioId) {
-        this.usuarioId = usuarioId;
-    }
-
     public String getCpfProprietario() {
         return cpfProprietario;
     }
-
-    public void setCpfProprietario(String cpfProprietario) {
-        this.cpfProprietario = cpfProprietario;
-    }
-
     public String getCnpjProprietario() {
         return cnpjProprietario;
-    }
-
-    public void setCnpjProprietario(String cnpjProprietario) {
-        this.cnpjProprietario = cnpjProprietario;
     }
 }

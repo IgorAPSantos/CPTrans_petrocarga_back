@@ -3,6 +3,7 @@ package com.cptrans.petrocarga.models;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import com.cptrans.petrocarga.dto.MotoristaResponseDTO;
 import com.cptrans.petrocarga.enums.TipoCnhEnum;
 
 import jakarta.persistence.CascadeType;
@@ -96,5 +97,9 @@ public class Motorista {
 
     public void setEmpresa(Empresa empresa) {
         this.empresa = empresa;
+    }
+
+    public MotoristaResponseDTO toResponseDTO() {
+        return new MotoristaResponseDTO(this);
     }
 }

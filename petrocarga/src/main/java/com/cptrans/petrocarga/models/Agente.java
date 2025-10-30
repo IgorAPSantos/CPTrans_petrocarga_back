@@ -2,6 +2,8 @@ package com.cptrans.petrocarga.models;
 
 import java.util.UUID;
 
+import com.cptrans.petrocarga.dto.AgenteResponseDTO;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -55,5 +57,9 @@ public class Agente {
 
     public void setMatricula(String matricula) {
         this.matricula = matricula;
+    }
+
+    public AgenteResponseDTO toResponseDTO() {
+        return new AgenteResponseDTO(this);
     }
 }

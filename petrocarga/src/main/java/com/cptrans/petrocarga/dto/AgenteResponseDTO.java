@@ -1,34 +1,29 @@
 package com.cptrans.petrocarga.dto;
 
-import java.util.UUID;
+import com.cptrans.petrocarga.models.Agente;
 
 public class AgenteResponseDTO {
 
-    private UUID id;
-    private UUID usuarioId;
+    private UsuarioResponseDTO usuario;
     private String matricula;
 
+    public AgenteResponseDTO() {}
+
+    public AgenteResponseDTO(Agente agente) {
+        this.usuario = new UsuarioResponseDTO(agente.getUsuario());
+        this.matricula = agente.getMatricula();
+    }
+
     // Getters and Setters
-    public UUID getId() {
-        return id;
+    public UsuarioResponseDTO getUsuario() {
+        return usuario;
     }
-
-    public void setId(UUID id) {
-        this.id = id;
+    public void setUsuario(UsuarioResponseDTO usuario) {
+        this.usuario = usuario;
     }
-
-    public UUID getUsuarioId() {
-        return usuarioId;
-    }
-
-    public void setUsuarioId(UUID usuarioId) {
-        this.usuarioId = usuarioId;
-    }
-
     public String getMatricula() {
         return matricula;
     }
-
     public void setMatricula(String matricula) {
         this.matricula = matricula;
     }

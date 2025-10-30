@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cptrans.petrocarga.dto.VeiculoRequestDTO;
 import com.cptrans.petrocarga.dto.VeiculoResponseDTO;
 import com.cptrans.petrocarga.models.Veiculo;
-import com.cptrans.petrocarga.services.UsuarioService;
 import com.cptrans.petrocarga.services.VeiculoService;
 
 import jakarta.validation.Valid;
@@ -31,9 +31,7 @@ public class VeiculoController {
     @Autowired
     private VeiculoService veiculoService;
 
-    @Autowired
-    private UsuarioService usuarioService;
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
     @GetMapping
     public ResponseEntity<List<VeiculoResponseDTO>> getAllVeiculos() {
         List<VeiculoResponseDTO> veiculos = veiculoService.findAll().stream()
@@ -42,53 +40,38 @@ public class VeiculoController {
         return ResponseEntity.ok(veiculos);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<VeiculoResponseDTO> getVeiculoById(@PathVariable UUID id) {
-        return veiculoService.findById(id)
-                .map(VeiculoResponseDTO::new)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'MOTORISTA', 'EMPRESA')")
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<List<VeiculoResponseDTO>> getVeiculoByUsuarioId(@PathVariable UUID usuarioId) {
+        List<VeiculoResponseDTO> veiculos = veiculoService.findByUsuarioId(usuarioId).stream().map(VeiculoResponseDTO::new).collect(Collectors.toList());
+        return ResponseEntity.ok(veiculos);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MOTORISTA', 'EMPRESA')")
     @PostMapping
     public ResponseEntity<VeiculoResponseDTO> createVeiculo(@RequestBody @Valid VeiculoRequestDTO veiculoRequestDTO) {
-        return usuarioService.findById(veiculoRequestDTO.getUsuarioId())
-                .map(usuario -> {
-                    Veiculo veiculo = veiculoRequestDTO.toEntity(usuario);
-                    Veiculo savedVeiculo = veiculoService.save(veiculo);
-                    return ResponseEntity.status(HttpStatus.CREATED).body(new VeiculoResponseDTO(savedVeiculo));
-                })
-                .orElse(ResponseEntity.badRequest().build()); // Or a more specific error
+        Veiculo novoVeiculo = veiculoService.createVeiculo(veiculoRequestDTO.toEntity(), veiculoRequestDTO.getUsuarioId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(novoVeiculo.toResponseDTO());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'MOTORISTA', 'EMPRESA')")
+    @GetMapping("/{id}")
+    public ResponseEntity<VeiculoResponseDTO> getVeiculoById(@PathVariable UUID id) {
+        Veiculo veiculo = veiculoService.findById(id);
+        return ResponseEntity.ok(veiculo.toResponseDTO());
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'MOTORISTA', 'EMPRESA')")
     @PutMapping("/{id}")
     public ResponseEntity<VeiculoResponseDTO> updateVeiculo(@PathVariable UUID id, @RequestBody @Valid VeiculoRequestDTO veiculoRequestDTO) {
-        return veiculoService.findById(id)
-                .map(existingVeiculo -> {
-                    return usuarioService.findById(veiculoRequestDTO.getUsuarioId())
-                            .map(usuario -> {
-                                existingVeiculo.setPlaca(veiculoRequestDTO.getPlaca());
-                                existingVeiculo.setMarca(veiculoRequestDTO.getMarca());
-                                existingVeiculo.setModelo(veiculoRequestDTO.getModelo());
-                                existingVeiculo.setTipo(veiculoRequestDTO.getTipo());
-                                existingVeiculo.setComprimento(veiculoRequestDTO.getComprimento());
-                                existingVeiculo.setUsuario(usuario);
-                                existingVeiculo.setCpfProprietario(veiculoRequestDTO.getCpfProprietario());
-                                existingVeiculo.setCnpjProprietario(veiculoRequestDTO.getCnpjProprietario());
-                                Veiculo updatedVeiculo = veiculoService.save(existingVeiculo);
-                                return ResponseEntity.ok(new VeiculoResponseDTO(updatedVeiculo));
-                            })
-                            .orElse(ResponseEntity.badRequest().build());
-                })
-                .orElse(ResponseEntity.notFound().build());
+        Veiculo veiculo = veiculoService.updateVeiculo(id, veiculoRequestDTO.toEntity(), veiculoRequestDTO.getUsuarioId());
+        return ResponseEntity.ok(veiculo.toResponseDTO());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR','MOTORISTA', 'EMPRESA')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVeiculo(@PathVariable UUID id) {
-        if (veiculoService.findById(id).isPresent()) {
-            veiculoService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        veiculoService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
