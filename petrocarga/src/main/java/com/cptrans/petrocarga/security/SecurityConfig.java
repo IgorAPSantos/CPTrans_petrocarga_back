@@ -27,16 +27,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .cors(cors -> cors.configurationSource(request -> {
-            var corsConfig = new org.springframework.web.cors.CorsConfiguration();
-            corsConfig.setAllowedOrigins(java.util.List.of("http://localhost:3000","https://cp-trans-petrocarga-front.vercel.app"));
-            corsConfig.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-            corsConfig.setAllowedHeaders(java.util.List.of("Authorization", "Content-Type"));
-            corsConfig.setAllowCredentials(true);
-            var source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
-            source.registerCorsConfiguration("/**", corsConfig);
-            return corsConfig;
-            }))
+            .cors(withDefaults -> {})
             .authorizeHttpRequests(auth -> auth
                  .requestMatchers(
                     "/auth/**",
@@ -53,6 +44,22 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+    @Bean
+public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+    var corsConfig = new org.springframework.web.cors.CorsConfiguration();
+    corsConfig.setAllowedOrigins(java.util.List.of(
+        "http://localhost:3000",
+        "https://cp-trans-petrocarga-front.vercel.app"
+    ));
+    corsConfig.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    corsConfig.setAllowedHeaders(java.util.List.of("Authorization", "Content-Type"));
+    corsConfig.setAllowCredentials(true);
+
+    var source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", corsConfig);
+    return source;
+}
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
