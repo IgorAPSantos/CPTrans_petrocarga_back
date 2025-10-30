@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -31,7 +32,6 @@ import jakarta.validation.Valid;
 
 
 import com.cptrans.petrocarga.models.Vaga; 
-import jakarta.persistence.EntityNotFoundException; 
 
 @RestController
 @RequestMapping("/vagas")
@@ -40,7 +40,8 @@ public class VagaController {
     @Autowired
     private VagaService vagaService;
 
-     @GetMapping("/all")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR','AGENTE','MOTORISTA','EMPRESA')")
+    @GetMapping("/all")
     @Operation(
         summary = "Listar todas as vagas.",
         description = "Retorna uma lista de todas as vagas registradas.",
@@ -51,15 +52,16 @@ public class VagaController {
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
         }
     )
-    public ResponseEntity<List<VagaResponseDTO>> listarTodasVagas(@RequestParam(required = false) StatusVagaEnum status) { 
+    public ResponseEntity<List<VagaResponseDTO>> findAll(@RequestParam(required = false) StatusVagaEnum status) { 
         if(status != null) {
-            List<VagaResponseDTO> vagas = vagaService.listarVagasByStatus(status).stream().map(VagaResponseDTO::new).toList();
+            List<VagaResponseDTO> vagas = vagaService.findAllByStatus(status).stream().map(VagaResponseDTO::new).toList();
             return ResponseEntity.ok(vagas);
         }
-        List<VagaResponseDTO> vagas = vagaService.listarVagas().stream().map(VagaResponseDTO::new).toList();
+        List<VagaResponseDTO> vagas = vagaService.findAll().stream().map(VagaResponseDTO::new).toList();
         return ResponseEntity.ok(vagas);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR','AGENTE','MOTORISTA','EMPRESA')")
     @GetMapping()
     @Operation(
         summary = "Listar todas as vagas com paginação",
@@ -71,15 +73,16 @@ public class VagaController {
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
         }
     )
-    public ResponseEntity<List<VagaResponseDTO>> listarVagasPaginadas(@RequestParam(defaultValue="0") Integer numeroPagina, @RequestParam(defaultValue="10") Integer tamanhoPagina, @RequestParam(defaultValue="endereco.logradouro") String ordenarPor, @RequestParam(required = false) StatusVagaEnum status) {
+    public ResponseEntity<List<VagaResponseDTO>> findAllPaginadas(@RequestParam(defaultValue="0") Integer numeroPagina, @RequestParam(defaultValue="10") Integer tamanhoPagina, @RequestParam(defaultValue="endereco.logradouro") String ordenarPor, @RequestParam(required = false) StatusVagaEnum status) {
         if(status != null) {
-            List<VagaResponseDTO> vagas = vagaService.listarVagasPaginadas(numeroPagina, tamanhoPagina, ordenarPor, status).stream().map(VagaResponseDTO::new).toList();
+            List<VagaResponseDTO> vagas = vagaService.findAllPaginadasByStatus(numeroPagina, tamanhoPagina, ordenarPor, status).stream().map(VagaResponseDTO::new).toList();
             return ResponseEntity.ok(vagas);
         }
-        List<VagaResponseDTO> vagas = vagaService.listarVagasPaginadas(numeroPagina, tamanhoPagina, ordenarPor).stream().map(VagaResponseDTO::new).toList();
+        List<VagaResponseDTO> vagas = vagaService.findAllPaginadas(numeroPagina, tamanhoPagina, ordenarPor).stream().map(VagaResponseDTO::new).toList();
         return ResponseEntity.ok(vagas);
     }
     
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR','AGENTE','MOTORISTA','EMPRESA')")
     @GetMapping("/{id}")
     @Operation(
         summary = "Buscar uma vaga pelo ID",
@@ -92,14 +95,12 @@ public class VagaController {
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
         }
     )
-    public ResponseEntity<VagaResponseDTO> buscarVagaPorId(@Valid @PathVariable UUID id) {
-        //return ResponseEntity.ok(new VagaResponseDTO(vagaService.buscarVagaPorId(id)));
-    	Vaga vaga = vagaService.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Vaga com ID " + id + " não encontrada."));
-        return ResponseEntity.ok(new VagaResponseDTO(vaga));
-    
+    public ResponseEntity<VagaResponseDTO> findById(@Valid @PathVariable UUID id) {
+        Vaga vaga = vagaService.findById(id);
+        return ResponseEntity.ok(vaga.toResponseDTO());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
     @PostMapping()
     @Operation(
         summary = "Cadastrar uma nova vaga",
@@ -117,12 +118,12 @@ public class VagaController {
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
         }
     )
-
-    public ResponseEntity<VagaResponseDTO> cadastrarVaga(@Valid @RequestBody VagaRequestDTO vagaRequest) {
-        Vaga vaga = vagaService.cadastrarVaga(vagaRequest);
+    public ResponseEntity<VagaResponseDTO> createVaga(@Valid @RequestBody VagaRequestDTO vagaRequest) {
+        Vaga vaga = vagaService.createVaga(vagaRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(new VagaResponseDTO(vaga));
     }
     
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(
         summary = "Deletar uma vaga pelo ID",
@@ -137,11 +138,12 @@ public class VagaController {
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
         }
     )
-    public ResponseEntity<?> deletarVaga(@Valid @PathVariable UUID id) {
-        vagaService.deletarVaga(id);
+    public ResponseEntity<?> deleteById(@Valid @PathVariable UUID id) {
+        vagaService.deleteById(id);
         return ResponseEntity.noContent().build(); 
     }
     
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
     @PatchMapping("/{id}")
     @Operation(
         summary = "Atualizar parcialmente uma vaga",
@@ -164,8 +166,8 @@ public class VagaController {
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
         }
     )
-    public ResponseEntity<VagaResponseDTO> atualizarParcialmenteVaga(@Valid @PathVariable UUID id,@Valid @RequestBody VagaRequestDTO vagaRequest) {
-        Vaga vagaAtualizada = vagaService.atualizarParcialmenteVaga(id, vagaRequest);
+    public ResponseEntity<VagaResponseDTO> updateById(@Valid @PathVariable UUID id,@Valid @RequestBody VagaRequestDTO vagaRequest) {
+        Vaga vagaAtualizada = vagaService.updateById(id, vagaRequest);
         return ResponseEntity.ok(new VagaResponseDTO(vagaAtualizada));
     }
 }

@@ -1,31 +1,32 @@
 package com.cptrans.petrocarga.dto;
 
+import com.cptrans.petrocarga.models.Agente;
+
+import io.micrometer.common.lang.NonNull;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import java.util.UUID;
 
 public class AgenteRequestDTO {
 
-    @NotNull
-    private UUID usuarioId;
+    @NonNull
+    @Valid
+    private UsuarioRequestDTO usuario;
 
     @NotBlank
     private String matricula;
 
     // Getters and Setters
-    public UUID getUsuarioId() {
-        return usuarioId;
+    public UsuarioRequestDTO getUsuario() {
+        return usuario;
     }
-
-    public void setUsuarioId(UUID usuarioId) {
-        this.usuarioId = usuarioId;
-    }
-
     public String getMatricula() {
         return matricula;
     }
-
-    public void setMatricula(String matricula) {
-        this.matricula = matricula;
+    
+    public Agente toEntity() {
+        Agente agente = new Agente();
+        agente.setUsuario(this.usuario.toEntity());
+        agente.setMatricula(this.matricula);
+        return agente;
     }
 }

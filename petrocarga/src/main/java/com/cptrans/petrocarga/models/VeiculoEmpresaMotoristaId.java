@@ -1,13 +1,14 @@
 package com.cptrans.petrocarga.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+
 @Embeddable
-public class VeiculoMotoristaId implements Serializable {
+public class VeiculoEmpresaMotoristaId implements Serializable {
 
     @Column(name = "veiculo_id")
     private UUID veiculoId;
@@ -15,9 +16,9 @@ public class VeiculoMotoristaId implements Serializable {
     @Column(name = "motorista_id")
     private UUID motoristaId;
 
-    public VeiculoMotoristaId() {}
+    public VeiculoEmpresaMotoristaId() {}
 
-    public VeiculoMotoristaId(UUID veiculoId, UUID motoristaId) {
+    public VeiculoEmpresaMotoristaId(UUID veiculoId, UUID motoristaId) {
         this.veiculoId = veiculoId;
         this.motoristaId = motoristaId;
     }
@@ -42,7 +43,7 @@ public class VeiculoMotoristaId implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        VeiculoMotoristaId that = (VeiculoMotoristaId) o;
+        VeiculoEmpresaMotoristaId that = (VeiculoEmpresaMotoristaId) o;
         return Objects.equals(veiculoId, that.veiculoId) &&
                Objects.equals(motoristaId, that.motoristaId);
     }

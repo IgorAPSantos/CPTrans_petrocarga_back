@@ -1,17 +1,33 @@
 package com.cptrans.petrocarga.models;
 
-import com.cptrans.petrocarga.enums.PermissoesEnum;
-import jakarta.persistence.*;
 import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.cptrans.petrocarga.dto.UsuarioResponseDTO;
+import com.cptrans.petrocarga.enums.PermissaoEnum;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 @Entity
-@Table(name = "Usuario")
-public class Usuario {
+@Table(name = "usuario")
+public class Usuario implements UserDetails{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "UniqueID")
+    @Column(name = "id")
     private UUID id;
 
     @Column(nullable = false)
@@ -20,7 +36,7 @@ public class Usuario {
     @Column(nullable = false, unique = true, length = 11)
     private String cpf;
 
-    @Column(length = 20)
+    @Column(length = 11)
     private String telefone;
 
     @Column(nullable = false, unique = true)
@@ -31,7 +47,7 @@ public class Usuario {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PermissoesEnum permissao;
+    private PermissaoEnum permissao;
 
     @Column(name = "criado_em", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime criadoEm;
@@ -97,11 +113,11 @@ public class Usuario {
         this.senha = senha;
     }
 
-    public PermissoesEnum getPermissao() {
+    public PermissaoEnum getPermissao() {
         return permissao;
     }
 
-    public void setPermissao(PermissoesEnum permissao) {
+    public void setPermissao(PermissaoEnum permissao) {
         this.permissao = permissao;
     }
 
@@ -127,5 +143,24 @@ public class Usuario {
 
     public void setDesativadoEm(OffsetDateTime desativadoEm) {
         this.desativadoEm = desativadoEm;
+    }
+
+    public UsuarioResponseDTO toResponseDTO() {
+        return new UsuarioResponseDTO(id, nome, cpf, telefone, email, permissao, criadoEm, ativo, desativadoEm);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+          return List.of(new SimpleGrantedAuthority("ROLE_" + permissao.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return senha;
+    }
+
+    @Override
+    public String getUsername() {
+       return email;
     }
 }

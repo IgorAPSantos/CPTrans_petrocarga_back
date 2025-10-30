@@ -1,32 +1,45 @@
 package com.cptrans.petrocarga.models;
 
-import com.cptrans.petrocarga.enums.StatusReservaEnum;
-import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.cptrans.petrocarga.dto.ReservaResponseDTO;
+import com.cptrans.petrocarga.enums.StatusReservaEnum;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
 @Entity
-@Table(name = "Reserva")
+@Table(name = "reserva")
 public class Reserva {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "UniqueID")
+    @Column(name = "id")
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "vaga_id", nullable = false)
     private Vaga vaga;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "motorista_id", nullable = false)
     private Motorista motorista;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "veiculo_id", nullable = false)
     private Veiculo veiculo;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "criado_por", nullable = false)
     private Usuario criadoPor;
 
@@ -49,7 +62,7 @@ public class Reserva {
     // Constructors
     public Reserva() {
         this.criadoEm = OffsetDateTime.now();
-        this.status = StatusReservaEnum.PENDENTE;
+        this.status = StatusReservaEnum.ATIVA;
     }
 
     // Getters and Setters
@@ -131,5 +144,9 @@ public class Reserva {
 
     public void setStatus(StatusReservaEnum status) {
         this.status = status;
+    }
+
+    public ReservaResponseDTO toResponseDTO() {
+        return new ReservaResponseDTO(this);
     }
 }

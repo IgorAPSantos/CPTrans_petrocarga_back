@@ -1,9 +1,9 @@
 package com.cptrans.petrocarga.dto;
 
+import java.util.UUID;
+
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
 import com.cptrans.petrocarga.models.Veiculo;
-import java.math.BigDecimal;
-import java.util.UUID;
 
 public class VeiculoResponseDTO {
 
@@ -12,7 +12,7 @@ public class VeiculoResponseDTO {
     private String marca;
     private String modelo;
     private TipoVeiculoEnum tipo;
-    private BigDecimal comprimento;
+    private Integer comprimento;
     private UUID usuarioId;
     private String cpfProprietario;
     private String cnpjProprietario;
@@ -73,11 +73,11 @@ public class VeiculoResponseDTO {
         this.tipo = tipo;
     }
 
-    public BigDecimal getComprimento() {
+    public Integer getComprimento() {
         return comprimento;
     }
 
-    public void setComprimento(BigDecimal comprimento) {
+    public void setComprimento(Integer comprimento) {
         this.comprimento = comprimento;
     }
 

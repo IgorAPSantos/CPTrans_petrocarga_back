@@ -1,27 +1,34 @@
 package com.cptrans.petrocarga.dto;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
 import com.cptrans.petrocarga.enums.TipoCnhEnum;
 import com.cptrans.petrocarga.models.Empresa;
 import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.models.Usuario;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+
+import io.micrometer.common.lang.NonNull;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDate;
-import java.util.UUID;
 
 public class MotoristaRequestDTO {
 
-    @NotNull
-    private UUID usuarioId;
+    @NonNull
+    @Valid
+    private UsuarioRequestDTO usuario;
 
+    @NonNull
     private TipoCnhEnum tipoCNH;
 
-    @Size(max = 20)
+    @Size(min = 9, max = 9, message = "Número da CNH deve ter exatamente 9 caracteres.")
     private String numeroCNH;
 
+    @NonNull
+    @Valid
     private LocalDate dataValidadeCNH;
 
+    @Valid
     private UUID empresaId;
 
     public Motorista toEntity(Usuario usuario, Empresa empresa) {
@@ -35,43 +42,19 @@ public class MotoristaRequestDTO {
     }
 
     // Getters and Setters
-    public UUID getUsuarioId() {
-        return usuarioId;
+    public UsuarioRequestDTO getUsuario() {
+        return usuario;
     }
-
-    public void setUsuarioId(UUID usuarioId) {
-        this.usuarioId = usuarioId;
-    }
-
     public TipoCnhEnum getTipoCNH() {
         return tipoCNH;
     }
-
-    public void setTipoCNH(TipoCnhEnum tipoCNH) {
-        this.tipoCNH = tipoCNH;
-    }
-
     public String getNumeroCNH() {
         return numeroCNH;
     }
-
-    public void setNumeroCNH(String numeroCNH) {
-        this.numeroCNH = numeroCNH;
-    }
-
     public LocalDate getDataValidadeCNH() {
         return dataValidadeCNH;
     }
-
-    public void setDataValidadeCNH(LocalDate dataValidadeCNH) {
-        this.dataValidadeCNH = dataValidadeCNH;
-    }
-
     public UUID getEmpresaId() {
         return empresaId;
-    }
-
-    public void setEmpresaId(UUID empresaId) {
-        this.empresaId = empresaId;
     }
 }

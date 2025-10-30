@@ -2,13 +2,14 @@ package com.cptrans.petrocarga.dto;
 
 import com.cptrans.petrocarga.enums.TipoCnhEnum;
 import com.cptrans.petrocarga.models.Motorista;
+
 import java.time.LocalDate;
 import java.util.UUID;
 
 public class MotoristaResponseDTO {
 
     private UUID id;
-    private UUID usuarioId;
+    private UsuarioResponseDTO usuario;
     private TipoCnhEnum tipoCNH;
     private String numeroCNH;
     private LocalDate dataValidadeCNH;
@@ -19,7 +20,7 @@ public class MotoristaResponseDTO {
 
     public MotoristaResponseDTO(Motorista motorista) {
         this.id = motorista.getId();
-        this.usuarioId = motorista.getUsuario().getId();
+        this.usuario = new UsuarioResponseDTO(motorista.getUsuario());
         this.tipoCNH = motorista.getTipoCNH();
         this.numeroCNH = motorista.getNumeroCNH();
         this.dataValidadeCNH = motorista.getDataValidadeCNH();
@@ -37,12 +38,12 @@ public class MotoristaResponseDTO {
         this.id = id;
     }
 
-    public UUID getUsuarioId() {
-        return usuarioId;
+    public UsuarioResponseDTO getUsuario() {
+        return usuario;
     }
 
-    public void setUsuarioId(UUID usuarioId) {
-        this.usuarioId = usuarioId;
+    public void setUsuario(UsuarioResponseDTO usuario) {
+        this.usuario = usuario;
     }
 
     public TipoCnhEnum getTipoCNH() {

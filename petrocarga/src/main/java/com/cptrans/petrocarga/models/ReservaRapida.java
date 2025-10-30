@@ -1,24 +1,37 @@
 package com.cptrans.petrocarga.models;
 
-import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
-import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.cptrans.petrocarga.enums.StatusReservaEnum;
+import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
 @Entity
-@Table(name = "Reserva_Rapida")
+@Table(name = "reserva_rapida")
 public class ReservaRapida {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "UniqueID")
+    @Column(name = "id")
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vaga_id", nullable = false)
     private Vaga vaga;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agente_id", nullable = false)
     private Agente agente;
 
@@ -26,7 +39,7 @@ public class ReservaRapida {
     @Column(name = "tipo_veiculo")
     private TipoVeiculoEnum tipoVeiculo;
 
-    @Column(length = 10)
+    @Column(length = 7, nullable = false)
     private String placa;
 
     @Column(nullable = false)
@@ -38,9 +51,14 @@ public class ReservaRapida {
     @Column(name = "criado_em", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime criadoEm;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private StatusReservaEnum status;
+
     // Constructors
     public ReservaRapida() {
         this.criadoEm = OffsetDateTime.now();
+        this.status = StatusReservaEnum.ATIVA;
     }
 
     // Getters and Setters
@@ -106,5 +124,13 @@ public class ReservaRapida {
 
     public void setCriadoEm(OffsetDateTime criadoEm) {
         this.criadoEm = criadoEm;
+    }
+
+    public StatusReservaEnum getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusReservaEnum status) {
+        this.status = status;
     }
 }

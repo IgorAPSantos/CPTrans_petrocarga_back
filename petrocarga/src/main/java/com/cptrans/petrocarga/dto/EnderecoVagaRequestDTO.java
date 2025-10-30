@@ -7,10 +7,10 @@ import jakarta.validation.constraints.Size;
 
 public class EnderecoVagaRequestDTO {
     @Valid
-    @Size(min = 3, max = 50, message="O campo 'codigoPMP' deve ter entre 3 e 50 caracteres.")
+    @Size(min = 6, max = 6, message="O campo 'codigoPMP' deve ter 6 caracteres.")
     @Schema(
         description = "Código PMP do endereço da vaga",
-        example = "Pb-1234"
+        example = "Pb-123"
     )
     private String codigoPmp;
 

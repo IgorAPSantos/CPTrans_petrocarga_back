@@ -1,10 +1,9 @@
 package com.cptrans.petrocarga.services;
-
+// TODO: Refatorar VagaService pro padrão DTO apenas no controller
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -13,13 +12,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.cptrans.petrocarga.dto.VagaRequestDTO;
+import com.cptrans.petrocarga.enums.DiaSemanaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
-import com.cptrans.petrocarga.models.Vaga;
-import com.cptrans.petrocarga.repositories.VagaRepository;
-
 import com.cptrans.petrocarga.models.EnderecoVaga;
 import com.cptrans.petrocarga.models.OperacaoVaga;
-import com.cptrans.petrocarga.enums.DiaSemanaEnum;
+import com.cptrans.petrocarga.models.Vaga;
+import com.cptrans.petrocarga.repositories.VagaRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional; 
@@ -30,48 +28,39 @@ public class VagaService {
     private VagaRepository vagaRepository;
     @Autowired
     private EnderecoVagaService enderecoVagaService;
-    @Autowired
-    private OperacaoVagaService operacaoVagaService; 
 
-    public List<Vaga> listarVagas() {
+
+    public List<Vaga> findAll() {
         return vagaRepository.findAll();
     }
 
-    public List<Vaga> listarVagasByStatus(StatusVagaEnum status) {
+    public List<Vaga> findAllByStatus(StatusVagaEnum status) {
         return vagaRepository.findByStatus(status);
     }
 
-    public List<Vaga> listarVagasPaginadas(Integer numeroPagina, Integer tamanhoPagina, String ordenarPor) {
+    public List<Vaga> findAllPaginadas(Integer numeroPagina, Integer tamanhoPagina, String ordenarPor) {
         Pageable pageable = PageRequest.of(numeroPagina, tamanhoPagina, Sort.by(ordenarPor).ascending());
         return vagaRepository.findAll(pageable).getContent();
     }
 
-    public List<Vaga> listarVagasPaginadas(Integer numeroPagina, Integer tamanhoPagina, String ordenarPor, StatusVagaEnum status) {
+    public List<Vaga> findAllPaginadasByStatus(Integer numeroPagina, Integer tamanhoPagina, String ordenarPor, StatusVagaEnum status) {
         Pageable pageable = PageRequest.of(numeroPagina, tamanhoPagina, Sort.by(ordenarPor).ascending());
         return vagaRepository.findByStatus(status, pageable);
     }
 
-    public Optional<Vaga> findById(UUID id) {
-        return vagaRepository.findById(id);
+    public Vaga findById(UUID id) {
+        return vagaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Vaga com ID " + id + " não encontrada."));
     }
     
-
-    // public Vaga buscarVagaPorId(UUID id) {
-    //      return vagaRepository.findById(id)
-    //          .orElseThrow(() -> new EntityNotFoundException("Vaga com ID " + id + " não encontrada."));
-    // }
-    
-    
-    public void deletarVaga(UUID id) {
+    public void deleteById(UUID id) {
         Vaga vaga = vagaRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Vaga com ID " + id + " não encontrada."));
         
         vagaRepository.deleteById(vaga.getId());
     }
 
-    
     @Transactional
-    public Vaga atualizarParcialmenteVaga(UUID id, VagaRequestDTO vagaRequest) {
+    public Vaga updateById(UUID id, VagaRequestDTO vagaRequest) {
         Vaga vagaExistente = vagaRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Vaga com ID " + id + " não encontrada."));
 
@@ -102,7 +91,7 @@ public class VagaService {
     }
     
     @Transactional()
-    public Vaga cadastrarVaga(VagaRequestDTO vagaRequest){
+    public Vaga createVaga(VagaRequestDTO vagaRequest){
         EnderecoVaga enderecoVaga = enderecoVagaService.cadastrarEnderecoVaga(vagaRequest.getEndereco());
         
         Vaga vaga = new Vaga();

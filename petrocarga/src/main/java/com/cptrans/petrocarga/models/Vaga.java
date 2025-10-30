@@ -1,6 +1,5 @@
 package com.cptrans.petrocarga.models;
 
-import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -33,10 +32,10 @@ public class Vaga {
     
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "UniqueID")
+    @Column(name = "id")
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "endereco_id", nullable = false)
     @JsonManagedReference
     private EnderecoVaga endereco;
@@ -61,9 +60,9 @@ public class Vaga {
     @Column(name = "referencia_geo_fim")
     private String referenciaGeoFim;
     
-    @Schema(description = "Comprimento máximo da vaga em metros", example = "5", minimum = "5", maximum = "30")
+    @Schema(description = "Comprimento máximo da vaga em metros", example = "5", minimum = "5")
     @Column(nullable=false, precision = 5, scale = 2)
-    private BigDecimal comprimento;
+    private Integer comprimento;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -75,7 +74,7 @@ public class Vaga {
     // GETTERS, SETTERS, CONSTRUTOR
     
     public Vaga() {
-        this.status = StatusVagaEnum.INATIVA;
+        this.status = StatusVagaEnum.DISPONIVEL;
     }
 
     public UUID getId() {
@@ -138,11 +137,11 @@ public class Vaga {
         this.referenciaGeoFim = referenciaGeoFim;
     }
 
-    public BigDecimal getComprimento() {
+    public Integer getComprimento() {
         return comprimento;
     }
 
-    public void setComprimento(BigDecimal comprimento) {
+    public void setComprimento(Integer comprimento) {
         this.comprimento = comprimento;
     }
 

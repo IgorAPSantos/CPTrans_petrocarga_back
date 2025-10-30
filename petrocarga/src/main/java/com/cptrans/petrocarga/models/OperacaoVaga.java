@@ -3,9 +3,8 @@ package com.cptrans.petrocarga.models;
 import java.time.LocalTime;
 import java.util.UUID;
 
-import com.cptrans.petrocarga.enums.DiaSemanaEnum;
 import com.cptrans.petrocarga.dto.OperacaoVagaResponseDTO;
-
+import com.cptrans.petrocarga.enums.DiaSemanaEnum;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.Column;
@@ -23,13 +22,13 @@ import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "operacao_vaga", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"vaga_id", "dia_semana", "hora_inicio"})
+    @UniqueConstraint(columnNames = {"vaga_id", "dia_semana"})
 })
 public class OperacaoVaga {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "operacao_id")
+    @Column(name = "id")
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -47,22 +46,15 @@ public class OperacaoVaga {
     @Column(name = "hora_fim")
     private LocalTime horaFim;
 
-    /**
-     * Construtor padrão exigido pelo JPA.
-     */
     public OperacaoVaga() {
     }
 
-    /**
-     * Construtor para criar uma nova operação de vaga.
-     */
     public OperacaoVaga(Vaga vaga, DiaSemanaEnum diaSemana, LocalTime horaInicio, LocalTime horaFim) {
         this.vaga = vaga;
         this.diaSemana = diaSemana;
         this.horaInicio = horaInicio;
         this.horaFim = horaFim;
     }
-
 
     // Getters e Setters
 

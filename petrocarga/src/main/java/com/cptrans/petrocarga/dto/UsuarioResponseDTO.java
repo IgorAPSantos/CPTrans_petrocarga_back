@@ -1,9 +1,10 @@
 package com.cptrans.petrocarga.dto;
 
-import com.cptrans.petrocarga.enums.PermissoesEnum;
-import com.cptrans.petrocarga.models.Usuario;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+
+import com.cptrans.petrocarga.enums.PermissaoEnum;
+import com.cptrans.petrocarga.models.Usuario;
 
 public class UsuarioResponseDTO {
 
@@ -12,12 +13,25 @@ public class UsuarioResponseDTO {
     private String cpf;
     private String telefone;
     private String email;
-    private PermissoesEnum permissao;
+    private PermissaoEnum permissao;
     private OffsetDateTime criadoEm;
     private Boolean ativo;
     private OffsetDateTime desativadoEm;
 
     public UsuarioResponseDTO() {
+    }
+
+    public UsuarioResponseDTO(UUID id, String nome, String cpf, String telefone, String email, PermissaoEnum permissao,
+            OffsetDateTime criadoEm, Boolean ativo, OffsetDateTime desativadoEm) {
+        this.id = id;
+        this.nome = nome;
+        this.cpf = cpf;
+        this.telefone = telefone;
+        this.email = email;
+        this.permissao = permissao;
+        this.criadoEm = criadoEm;
+        this.ativo = ativo;
+        this.desativadoEm = desativadoEm;
     }
 
     public UsuarioResponseDTO(Usuario usuario) {
@@ -73,11 +87,11 @@ public class UsuarioResponseDTO {
         this.email = email;
     }
 
-    public PermissoesEnum getPermissao() {
+    public PermissaoEnum getPermissao() {
         return permissao;
     }
 
-    public void setPermissao(PermissoesEnum permissao) {
+    public void setPermissao(PermissaoEnum permissao) {
         this.permissao = permissao;
     }
 

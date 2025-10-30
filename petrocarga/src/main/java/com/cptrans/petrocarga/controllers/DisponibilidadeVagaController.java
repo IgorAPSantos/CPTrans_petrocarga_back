@@ -1,26 +1,29 @@
 package com.cptrans.petrocarga.controllers;
 
 
-import com.cptrans.petrocarga.dto.DisponibilidadeVagaRequestDTO;
-import com.cptrans.petrocarga.dto.DisponibilidadeVagaResponseDTO;
-import com.cptrans.petrocarga.models.DisponibilidadeVaga;
-import com.cptrans.petrocarga.models.Usuario;
-import com.cptrans.petrocarga.models.Vaga;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
-import jakarta.persistence.EntityNotFoundException;
-import com.cptrans.petrocarga.services.DisponibilidadeVagaService;
-import com.cptrans.petrocarga.services.UsuarioService;
-import com.cptrans.petrocarga.services.VagaService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.cptrans.petrocarga.dto.DisponibilidadeVagaRequestDTO;
+import com.cptrans.petrocarga.dto.DisponibilidadeVagaResponseDTO;
+import com.cptrans.petrocarga.models.DisponibilidadeVaga;
+import com.cptrans.petrocarga.services.DisponibilidadeVagaService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/disponibilidade-vagas")
@@ -29,13 +32,7 @@ public class DisponibilidadeVagaController {
     @Autowired
     private DisponibilidadeVagaService disponibilidadeVagaService;
 
-    @Autowired
-    private VagaService vagaService;
-
-    @Autowired
-    private UsuarioService usuarioService;
-
-    
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE', 'MOTORISTA', 'EMPRESA')")
     @GetMapping
     public ResponseEntity<List<DisponibilidadeVagaResponseDTO>> getAllDisponibilidadeVagas() {
         List<DisponibilidadeVagaResponseDTO> disponibilidadeVagas = disponibilidadeVagaService.findAll().stream()
@@ -44,60 +41,39 @@ public class DisponibilidadeVagaController {
         return ResponseEntity.ok(disponibilidadeVagas);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE', 'MOTORISTA', 'EMPRESA')")
     @GetMapping("/{id}")
     public ResponseEntity<DisponibilidadeVagaResponseDTO> getDisponibilidadeVagaById(@PathVariable UUID id) {
-        return disponibilidadeVagaService.findById(id)
-                .map(DisponibilidadeVagaResponseDTO::new)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        DisponibilidadeVaga disponibilidadeVaga = disponibilidadeVagaService.findById(id);
+        return ResponseEntity.ok(disponibilidadeVaga.toResponseDTO());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE', 'MOTORISTA', 'EMPRESA')")
+    @GetMapping("/vaga/{vagaId}")
+    public ResponseEntity<List<DisponibilidadeVagaResponseDTO>> getDisponibilidadeVagaByVagaId(@PathVariable UUID vagaId) {
+        List<DisponibilidadeVagaResponseDTO> disponibilidadeVaga = disponibilidadeVagaService.findByVagaId(vagaId).stream().map(DisponibilidadeVagaResponseDTO::new).collect(Collectors.toList());
+        return ResponseEntity.ok(disponibilidadeVaga);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
     @PostMapping
     public ResponseEntity<DisponibilidadeVagaResponseDTO> createDisponibilidadeVaga(@RequestBody @Valid DisponibilidadeVagaRequestDTO disponibilidadeVagaRequestDTO) {
-        Optional<Vaga> vagaOpt = vagaService.findById(disponibilidadeVagaRequestDTO.getVagaId());
-        Optional<Usuario> usuarioOpt = usuarioService.findById(disponibilidadeVagaRequestDTO.getCriadoPorId());
-
-        if (vagaOpt.isPresent() && usuarioOpt.isPresent()) {
-            DisponibilidadeVaga disponibilidadeVaga = disponibilidadeVagaRequestDTO.toEntity(vagaOpt.get(), usuarioOpt.get());
-            DisponibilidadeVaga savedDisponibilidadeVaga = disponibilidadeVagaService.save(disponibilidadeVaga);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new DisponibilidadeVagaResponseDTO(savedDisponibilidadeVaga));
-        }
-        return ResponseEntity.badRequest().build(); // Or a more specific error
+        DisponibilidadeVaga savedDisponibilidadeVaga = disponibilidadeVagaService.createDisponibilidadeVaga(disponibilidadeVagaRequestDTO.toEntity(), disponibilidadeVagaRequestDTO.getVagaId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedDisponibilidadeVaga.toResponseDTO());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
     @PutMapping("/{id}")
     public ResponseEntity<DisponibilidadeVagaResponseDTO> updateDisponibilidadeVaga(@PathVariable UUID id, @RequestBody @Valid DisponibilidadeVagaRequestDTO disponibilidadeVagaRequestDTO) {
-        
-        Optional<DisponibilidadeVaga> existingOpt = disponibilidadeVagaService.findById(id);
-        if (existingOpt.isEmpty()) {
-            return ResponseEntity.notFound().build(); // 404 Not Found
-        }
-
-        Optional<Vaga> vagaOpt = vagaService.findById(disponibilidadeVagaRequestDTO.getVagaId());
-        Optional<Usuario> usuarioOpt = usuarioService.findById(disponibilidadeVagaRequestDTO.getCriadoPorId());
-
-        if (vagaOpt.isEmpty() || usuarioOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build(); 
-        }
-
-        DisponibilidadeVaga existingDisponibilidadeVaga = existingOpt.get();
-        existingDisponibilidadeVaga.setVaga(vagaOpt.get());
-        existingDisponibilidadeVaga.setInicio(disponibilidadeVagaRequestDTO.getInicio());
-        existingDisponibilidadeVaga.setFim(disponibilidadeVagaRequestDTO.getFim());
-        existingDisponibilidadeVaga.setCriadoPor(usuarioOpt.get());
-        
-        DisponibilidadeVaga updatedDisponibilidadeVaga = disponibilidadeVagaService.save(existingDisponibilidadeVaga);
-        
-        // 200 OK
-        return ResponseEntity.ok(new DisponibilidadeVagaResponseDTO(updatedDisponibilidadeVaga));
+        DisponibilidadeVaga disponibilidadeVaga = disponibilidadeVagaService.updateDisponibilidadeVaga(id, disponibilidadeVagaRequestDTO.toEntity(), disponibilidadeVagaRequestDTO.getVagaId());
+        return ResponseEntity.ok(disponibilidadeVaga.toResponseDTO());
+      
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDisponibilidadeVaga(@PathVariable UUID id) {
-        if (disponibilidadeVagaService.findById(id).isPresent()) {
-            disponibilidadeVagaService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        disponibilidadeVagaService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

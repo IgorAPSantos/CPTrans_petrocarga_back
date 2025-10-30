@@ -1,32 +1,35 @@
 package com.cptrans.petrocarga.dto;
 
-import com.cptrans.petrocarga.enums.PermissoesEnum;
+import org.hibernate.validator.constraints.br.CPF;
+
 import com.cptrans.petrocarga.models.Usuario;
+
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class UsuarioRequestDTO {
 
-    @NotBlank
+    @NotBlank(message="Nome não pode ser vazio.")
     private String nome;
 
     @NotBlank
-    @Size(min = 11, max = 11)
+    @Valid
+    @CPF(message="CPF inválido.")
     private String cpf;
 
+    @Size(min = 10, max = 11, message="Telefone deve conter entre 10 e 11 dígitos.")
     private String telefone;
 
     @NotBlank
-    @Email
+    @Valid
+    @Email(message="Email inválido.")
     private String email;
 
     @NotBlank
+    @Size(min = 6, message="Senha deve conter no mínimo 6 caracteres.")
     private String senha;
-
-    @NotNull
-    private PermissoesEnum permissao;
 
     public Usuario toEntity() {
         Usuario usuario = new Usuario();
@@ -35,7 +38,6 @@ public class UsuarioRequestDTO {
         usuario.setTelefone(this.telefone);
         usuario.setEmail(this.email);
         usuario.setSenha(this.senha);
-        usuario.setPermissao(this.permissao);
         return usuario;
     }
 
@@ -78,13 +80,5 @@ public class UsuarioRequestDTO {
 
     public void setSenha(String senha) {
         this.senha = senha;
-    }
-
-    public PermissoesEnum getPermissao() {
-        return permissao;
-    }
-
-    public void setPermissao(PermissoesEnum permissao) {
-        this.permissao = permissao;
     }
 }

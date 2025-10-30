@@ -1,8 +1,9 @@
 package com.cptrans.petrocarga.repositories;
 
-import com.cptrans.petrocarga.models.VeiculoMotoristaAssociacao;
-import com.cptrans.petrocarga.models.VeiculoMotoristaId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface VeiculoMotoristaAssociacaoRepository extends JpaRepository<VeiculoMotoristaAssociacao, VeiculoMotoristaId> {
+import com.cptrans.petrocarga.models.VeiculoEmpresaMotorista;
+import com.cptrans.petrocarga.models.VeiculoEmpresaMotoristaId;
+
+public interface VeiculoMotoristaAssociacaoRepository extends JpaRepository<VeiculoEmpresaMotorista, VeiculoEmpresaMotoristaId> {
 }
