@@ -31,22 +31,15 @@ public class UsuarioService {
         return usuarioRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuario não encontrado."));
     }
 
-    public Usuario createUsuario(Usuario usuario, PermissaoEnum permissao) {
-        if(usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
+    public Usuario createUsuario(Usuario novoUsuario, PermissaoEnum permissao) {
+        if(usuarioRepository.findByEmail(novoUsuario.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email já cadastrado");
         }
-        if(usuarioRepository.findByCpf(usuario.getCpf()).isPresent()) {
+        if(usuarioRepository.findByCpf(novoUsuario.getCpf()).isPresent()) {
             throw new IllegalArgumentException("CPF já cadastrado");
         }
-
-        Usuario novoUsuario = new Usuario();
-        novoUsuario.setNome(usuario.getNome());
-        novoUsuario.setCpf(usuario.getCpf());
-        novoUsuario.setTelefone(usuario.getTelefone());
-        novoUsuario.setEmail(usuario.getEmail());
-        novoUsuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         novoUsuario.setPermissao(permissao);
-
+        novoUsuario.setSenha(passwordEncoder.encode(novoUsuario.getSenha()));
         return usuarioRepository.save(novoUsuario);
     }
 

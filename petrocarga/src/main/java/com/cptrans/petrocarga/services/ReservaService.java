@@ -40,9 +40,12 @@ public class ReservaService {
     // private DisponibilidadeVagaService disponibilidadeVagaService;
 
 
-    public List<Reserva> findAll(StatusReservaEnum status) {
+    public List<Reserva> findAll(StatusReservaEnum status, UUID vagaId) {
+        if(vagaId != null) {
+            return findByVagaId(vagaId, status);
+        }
         if(status != null) {
-            return reservaRepository.findByStatus(status);
+            return findByStatus(status);
         }
         return reservaRepository.findAll();
     }
