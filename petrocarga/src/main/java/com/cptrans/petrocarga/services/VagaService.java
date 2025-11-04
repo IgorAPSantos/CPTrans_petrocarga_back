@@ -5,6 +5,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +40,7 @@ public class VagaService {
         return vagaRepository.findByStatus(status);
     }
 
-    public List<Vaga> findAllPaginadas(Integer numeroPagina, Integer tamanhoPagina, String ordenarPor) {
+   /* public List<Vaga> findAllPaginadas(Integer numeroPagina, Integer tamanhoPagina, String ordenarPor) {
         Pageable pageable = PageRequest.of(numeroPagina, tamanhoPagina, Sort.by(ordenarPor).ascending());
         return vagaRepository.findAll(pageable).getContent();
     }
@@ -46,6 +48,25 @@ public class VagaService {
     public List<Vaga> findAllPaginadasByStatus(Integer numeroPagina, Integer tamanhoPagina, String ordenarPor, StatusVagaEnum status) {
         Pageable pageable = PageRequest.of(numeroPagina, tamanhoPagina, Sort.by(ordenarPor).ascending());
         return vagaRepository.findByStatus(status, pageable);
+    }*/
+    
+    public List<Vaga> findAllPaginadas(Integer numeroPagina, Integer tamanhoPagina, String ordenarPor, StatusVagaEnum status, String logradouro) {
+        Pageable pageable = PageRequest.of(numeroPagina, tamanhoPagina, Sort.by(ordenarPor).ascending());
+
+        Page<Vaga> vagasPage;
+        boolean hasLogradouro = StringUtils.hasText(logradouro); 
+
+        if (status != null && hasLogradouro) {
+            vagasPage = vagaRepository.findByStatusAndEnderecoLogradouroContainingIgnoreCase(status, logradouro, pageable);
+        } else if (status != null) {
+            vagasPage = vagaRepository.findByStatus(status, pageable);
+        } else if (hasLogradouro) {
+            vagasPage = vagaRepository.findByEnderecoLogradouroContainingIgnoreCase(logradouro, pageable);
+        } else {
+            vagasPage = vagaRepository.findAll(pageable);
+        }
+
+        return vagasPage.getContent();
     }
 
     public Vaga findById(UUID id) {
