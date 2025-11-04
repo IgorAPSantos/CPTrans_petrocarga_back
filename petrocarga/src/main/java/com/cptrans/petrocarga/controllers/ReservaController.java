@@ -33,8 +33,8 @@ public class ReservaController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE')")
     @GetMapping
-    public ResponseEntity<List<ReservaResponseDTO>> getAllReservas(@RequestParam(required = false) StatusReservaEnum status) {
-        List<ReservaResponseDTO> reservas = reservaService.findAll(status).stream()
+    public ResponseEntity<List<ReservaResponseDTO>> getAllReservas(@RequestParam(required = false) StatusReservaEnum status, @RequestParam(required = false) UUID vagaId) {
+        List<ReservaResponseDTO> reservas = reservaService.findAll(status, vagaId).stream()
                 .map(ReservaResponseDTO::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(reservas);
