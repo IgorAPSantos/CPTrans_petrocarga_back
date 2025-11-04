@@ -65,21 +65,31 @@ public class VagaController {
     @GetMapping()
     @Operation(
         summary = "Listar todas as vagas com paginação",
-        description = "Retorna uma lista paginada de todas as vagas disponíveis.",
+        description = "Retorna uma lista paginada de todas as vagas disponíveis, com filtros opcionais por status e nome da rua (logradouro).",
         responses = {
             @ApiResponse(responseCode = "200", description = "Lista de vagas retornada com sucesso",
-                        content = @Content(mediaType = "application/json",
-                        array = @ArraySchema(schema = @Schema(implementation = VagaResponseDTO.class)))),
+                            content = @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = VagaResponseDTO.class)))),
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
         }
     )
-    public ResponseEntity<List<VagaResponseDTO>> findAllPaginadas(@RequestParam(defaultValue="0") Integer numeroPagina, @RequestParam(defaultValue="10") Integer tamanhoPagina, @RequestParam(defaultValue="endereco.logradouro") String ordenarPor, @RequestParam(required = false) StatusVagaEnum status) {
-        if(status != null) {
-            List<VagaResponseDTO> vagas = vagaService.findAllPaginadasByStatus(numeroPagina, tamanhoPagina, ordenarPor, status).stream().map(VagaResponseDTO::new).toList();
-            return ResponseEntity.ok(vagas);
-        }
-        List<VagaResponseDTO> vagas = vagaService.findAllPaginadas(numeroPagina, tamanhoPagina, ordenarPor).stream().map(VagaResponseDTO::new).toList();
-        return ResponseEntity.ok(vagas);
+    public ResponseEntity<List<VagaResponseDTO>> findAllPaginadas(
+            @RequestParam(defaultValue="0") Integer numeroPagina, 
+            @RequestParam(defaultValue="10") Integer tamanhoPagina, 
+            @RequestParam(defaultValue="endereco.logradouro") String ordenarPor, 
+            @RequestParam(required = false) StatusVagaEnum status,
+            
+            @Parameter(description = "Filtrar vagas pelo nome da rua (logradouro). Busca parcial e case-insensitive.", example = "Rua do Imperador")
+            @RequestParam(required = false) String logradouro) {
+        
+
+    	List<Vaga> vagasPaginadas = vagaService.findAllPaginadas(numeroPagina, tamanhoPagina, ordenarPor, status, logradouro);
+        
+        List<VagaResponseDTO> vagasDto = vagasPaginadas.stream()
+                                                      .map(VagaResponseDTO::new)
+                                                      .toList();
+        
+        return ResponseEntity.ok(vagasDto);
     }
     
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR','AGENTE','MOTORISTA','EMPRESA')")
