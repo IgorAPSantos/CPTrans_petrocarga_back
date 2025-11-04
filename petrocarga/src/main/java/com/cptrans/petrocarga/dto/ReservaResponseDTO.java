@@ -10,8 +10,8 @@ public class ReservaResponseDTO {
 
     private UUID id;
     private UUID vagaId;
-    private String referenciaGeoInicio;
-    private String referenciaGeoFim;
+    private String logradouro;
+    private String bairro;
     private UUID motoristaId;
     private UUID veiculoId;
     private UUID criadoPorId;
@@ -27,8 +27,8 @@ public class ReservaResponseDTO {
     public ReservaResponseDTO(Reserva reserva) {
         this.id = reserva.getId();
         this.vagaId = reserva.getVaga().getId();
-        this.referenciaGeoInicio = reserva.getVaga().getReferenciaGeoInicio();
-        this.referenciaGeoFim = reserva.getVaga().getReferenciaGeoFim();
+        this.logradouro = reserva.getVaga().getEndereco().getLogradouro();
+        this.bairro = reserva.getVaga().getEndereco().getBairro();
         this.motoristaId = reserva.getMotorista().getId();
         this.veiculoId = reserva.getVeiculo().getId();
         this.criadoPorId = reserva.getCriadoPor().getId();
@@ -56,20 +56,20 @@ public class ReservaResponseDTO {
         this.vagaId = vagaId;
     }
 
-    public String getReferenciaGeoInicio() {
-        return referenciaGeoInicio;
+    public String getLogradouro() {
+        return logradouro;
     }
 
-    public void setReferenciaGeoInicio(String referenciaGeoInicio) {
-        this.referenciaGeoInicio = referenciaGeoInicio;
+    public void setLogradouro(String logradouro) {
+        this.logradouro = logradouro;
     }
 
-    public String getReferenciaGeoFim() {
-        return referenciaGeoFim;
+    public String getBairro() {
+        return bairro;
     }
 
-    public void setReferenciaGeoFim(String referenciaGeoFim) {
-        this.referenciaGeoFim = referenciaGeoFim;
+    public void setBairro(String bairro) {
+        this.bairro = bairro;
     }
 
     public UUID getMotoristaId() {
