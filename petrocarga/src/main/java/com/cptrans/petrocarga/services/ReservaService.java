@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.services;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +19,7 @@ import com.cptrans.petrocarga.models.Vaga;
 import com.cptrans.petrocarga.models.Veiculo;
 import com.cptrans.petrocarga.repositories.ReservaRepository;
 import com.cptrans.petrocarga.security.UserAuthenticated;
+import com.cptrans.petrocarga.utils.DateUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -60,6 +62,15 @@ public class ReservaService {
             return reservaRepository.findByVagaAndStatus(vaga, status);
         }
         return reservaRepository.findByVaga(vaga);
+    }
+    
+    public List<Reserva> findAtivasByVagaIdAndData(UUID vagaId, LocalDate data) {
+        Vaga vaga = vagaService.findById(vagaId);
+        if(data != null) {
+            List<Reserva> reservas = reservaRepository.findByVagaAndStatus(vaga, StatusReservaEnum.ATIVA);
+            return reservas.stream().filter(reserva -> DateUtils.toLocalDateInBrazil(reserva.getInicio()).equals(data)).toList();
+        }
+        return reservaRepository.findByVagaAndStatus(vaga, StatusReservaEnum.ATIVA);
     }
 
     public Reserva findById(UUID reservaId) {

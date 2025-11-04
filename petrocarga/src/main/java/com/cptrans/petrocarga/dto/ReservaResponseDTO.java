@@ -1,14 +1,17 @@
 package com.cptrans.petrocarga.dto;
 
-import com.cptrans.petrocarga.enums.StatusReservaEnum;
-import com.cptrans.petrocarga.models.Reserva;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+
+import com.cptrans.petrocarga.enums.StatusReservaEnum;
+import com.cptrans.petrocarga.models.Reserva;
 
 public class ReservaResponseDTO {
 
     private UUID id;
     private UUID vagaId;
+    private String referenciaGeoInicio;
+    private String referenciaGeoFim;
     private UUID motoristaId;
     private UUID veiculoId;
     private UUID criadoPorId;
@@ -24,6 +27,8 @@ public class ReservaResponseDTO {
     public ReservaResponseDTO(Reserva reserva) {
         this.id = reserva.getId();
         this.vagaId = reserva.getVaga().getId();
+        this.referenciaGeoInicio = reserva.getVaga().getReferenciaGeoInicio();
+        this.referenciaGeoFim = reserva.getVaga().getReferenciaGeoFim();
         this.motoristaId = reserva.getMotorista().getId();
         this.veiculoId = reserva.getVeiculo().getId();
         this.criadoPorId = reserva.getCriadoPor().getId();
@@ -49,6 +54,22 @@ public class ReservaResponseDTO {
 
     public void setVagaId(UUID vagaId) {
         this.vagaId = vagaId;
+    }
+
+    public String getReferenciaGeoInicio() {
+        return referenciaGeoInicio;
+    }
+
+    public void setReferenciaGeoInicio(String referenciaGeoInicio) {
+        this.referenciaGeoInicio = referenciaGeoInicio;
+    }
+
+    public String getReferenciaGeoFim() {
+        return referenciaGeoFim;
+    }
+
+    public void setReferenciaGeoFim(String referenciaGeoFim) {
+        this.referenciaGeoFim = referenciaGeoFim;
     }
 
     public UUID getMotoristaId() {
