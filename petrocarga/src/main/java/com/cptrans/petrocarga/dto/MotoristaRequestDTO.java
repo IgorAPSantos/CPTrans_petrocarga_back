@@ -6,7 +6,6 @@ import java.util.UUID;
 import com.cptrans.petrocarga.enums.TipoCnhEnum;
 import com.cptrans.petrocarga.models.Empresa;
 import com.cptrans.petrocarga.models.Motorista;
-import com.cptrans.petrocarga.models.Usuario;
 
 import io.micrometer.common.lang.NonNull;
 import jakarta.validation.Valid;
@@ -31,13 +30,15 @@ public class MotoristaRequestDTO {
     @Valid
     private UUID empresaId;
 
-    public Motorista toEntity(Usuario usuario, Empresa empresa) {
+    public Motorista toEntity(Empresa empresa) {
         Motorista motorista = new Motorista();
-        motorista.setUsuario(usuario);
+        if (empresa != null){
+            motorista.setEmpresa(empresa);
+        }
+        motorista.setUsuario(this.usuario.toEntity());
         motorista.setTipoCNH(this.tipoCNH);
         motorista.setNumeroCNH(this.numeroCNH);
         motorista.setDataValidadeCNH(this.dataValidadeCNH);
-        motorista.setEmpresa(empresa);
         return motorista;
     }
 
