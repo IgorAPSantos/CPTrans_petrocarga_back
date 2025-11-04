@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.controllers;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,6 +36,15 @@ public class ReservaController {
     @GetMapping
     public ResponseEntity<List<ReservaResponseDTO>> getAllReservas(@RequestParam(required = false) StatusReservaEnum status, @RequestParam(required = false) UUID vagaId) {
         List<ReservaResponseDTO> reservas = reservaService.findAll(status, vagaId).stream()
+                .map(ReservaResponseDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(reservas);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE', 'MOTORISTA', 'EMPRESA')")
+    @GetMapping("/ativas/{vagaId}")
+    public ResponseEntity<List<ReservaResponseDTO>> getReservasAtivasByVagaIdAndData(@PathVariable UUID vagaId,@RequestParam(required = false) LocalDate data) {
+        List<ReservaResponseDTO> reservas = reservaService.findAtivasByVagaIdAndData(vagaId, data).stream()
                 .map(ReservaResponseDTO::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(reservas);
