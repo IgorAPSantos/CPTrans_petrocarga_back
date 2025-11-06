@@ -51,6 +51,7 @@ public class GlobalHandlerException {
             causeMessage = ex.getCause().getMessage();
         }
         error.put("cause", causeMessage);
+        ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
