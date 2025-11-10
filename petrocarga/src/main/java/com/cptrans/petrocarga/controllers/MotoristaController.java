@@ -49,14 +49,14 @@ public class MotoristaController {
 
     @PostMapping("/cadastro")
     public ResponseEntity<MotoristaResponseDTO> createMotorista(@RequestBody @Valid MotoristaRequestDTO motoristaRequestDTO) {
-        MotoristaResponseDTO savedMotorista = motoristaService.createMotorista(motoristaRequestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedMotorista);
+        Motorista savedMotorista = motoristaService.createMotorista(motoristaRequestDTO.toEntity(null));
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedMotorista.toResponseDTO());
     }
 
     @PreAuthorize("#usuarioId == authentication.principal.id or hasRole('ADMIN')")
     @PutMapping("/{usuarioId}")
     public ResponseEntity<MotoristaResponseDTO> updateMotorista(@PathVariable UUID usuarioId, @RequestBody @Valid MotoristaRequestDTO motoristaRequestDTO) {
-        Motorista updatedMotorista = motoristaService.updateMotorista(usuarioId, motoristaRequestDTO);
+        Motorista updatedMotorista = motoristaService.updateMotorista(usuarioId, motoristaRequestDTO.toEntity(null));
         return ResponseEntity.ok(new MotoristaResponseDTO(updatedMotorista));
     }
 

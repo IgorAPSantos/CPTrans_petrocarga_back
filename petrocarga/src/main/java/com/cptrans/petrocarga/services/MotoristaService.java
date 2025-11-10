@@ -8,10 +8,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.cptrans.petrocarga.dto.MotoristaRequestDTO;
-import com.cptrans.petrocarga.dto.MotoristaResponseDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
-import com.cptrans.petrocarga.models.Empresa;
 import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.repositories.MotoristaRepository;
@@ -28,8 +25,8 @@ public class MotoristaService {
     @Autowired
     private UsuarioService usuarioService;
 
-    @Autowired
-    private EmpresaService empresaService;
+    // @Autowired
+    // private EmpresaService empresaService;
 
     public List<Motorista> findAll() {
         return motoristaRepository.findAll();
@@ -43,30 +40,24 @@ public class MotoristaService {
     }
 
     @Transactional
-    public MotoristaResponseDTO createMotorista(MotoristaRequestDTO motorista) {
-        Usuario usuario = usuarioService.createUsuario(motorista.getUsuario().toEntity(), PermissaoEnum.MOTORISTA);
-        if(motoristaRepository.existsByNumeroCnh(motorista.getNumeroCNH())) {
+    public Motorista createMotorista(Motorista novoMotorista) {
+        Usuario usuario = usuarioService.createUsuario(novoMotorista.getUsuario(), PermissaoEnum.MOTORISTA);
+        novoMotorista.setUsuario(usuario);
+        if(motoristaRepository.existsByNumeroCnh(novoMotorista.getNumeroCNH())) {
             throw new IllegalArgumentException("Número da CNH já cadastrado");
         }
-        Motorista novoMotorista = new Motorista();
-
-        if(motorista.getEmpresaId() != null) {
-            Empresa empresa = empresaService.findById(motorista.getEmpresaId());
-            novoMotorista.setEmpresa(empresa);
-        }
-        if(motorista.getDataValidadeCNH().isBefore(LocalDate.now())) {
+        // if(novoMotorista.getEmpresa() != null) {
+        //     Empresa empresa = empresaService.findById(novoMotorista.getEmpresa().getId());
+        //     novoMotorista.setEmpresa(empresa);
+        // }
+        if(novoMotorista.getDataValidadeCNH().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("CNH vencida");
         }
-        novoMotorista.setUsuario(usuario);
-        novoMotorista.setTipoCNH(motorista.getTipoCNH());
-        novoMotorista.setNumeroCNH(motorista.getNumeroCNH());
-        novoMotorista.setDataValidadeCNH(motorista.getDataValidadeCNH());
-        Motorista motoristaSalvo = motoristaRepository.save(novoMotorista);
-        return new MotoristaResponseDTO(motoristaSalvo);
+        return  motoristaRepository.save(novoMotorista);
     }
 
     @Transactional
-    public Motorista updateMotorista(UUID usuarioId, MotoristaRequestDTO motoristaRequest) {
+    public Motorista updateMotorista(UUID usuarioId, Motorista motoristaRequest) {
         Usuario usuarioCadastrado  = usuarioService.findById(usuarioId);
         if(usuarioCadastrado.getAtivo() == false) {
             throw new IllegalArgumentException("Usuário desativado.");
@@ -84,18 +75,14 @@ public class MotoristaService {
             throw new IllegalArgumentException("Número da CNH já cadastrado");
         }
 
-        if (motoristaRequest.getEmpresaId() != null) {
-            Empresa empresa = empresaService.findById(motoristaRequest.getEmpresaId());
-            //TODO: Criar lógica de update no EmpresaService
-            motoristaCadastrado.setEmpresa(empresa);
-        }
+        // if (motoristaRequest.getEmpresa() != null) {
+        //     Empresa empresa = empresaService.findById(motoristaRequest.getEmpresa().getId());
+        //     //TODO: Criar lógica de update no EmpresaService
+        //     motoristaCadastrado.setEmpresa(empresa);
+        // }
 
-        Usuario usuarioAtualizado = usuarioService.updateUsuario(usuarioId, motoristaRequest.getUsuario().toEntity(), PermissaoEnum.MOTORISTA);
-
+        Usuario usuarioAtualizado = usuarioService.updateUsuario(usuarioId, motoristaRequest.getUsuario(), PermissaoEnum.MOTORISTA);
         motoristaCadastrado.setUsuario(usuarioAtualizado);
-        motoristaCadastrado.setTipoCNH(motoristaRequest.getTipoCNH());
-        motoristaCadastrado.setNumeroCNH(motoristaRequest.getNumeroCNH());
-        motoristaCadastrado.setDataValidadeCNH(motoristaRequest.getDataValidadeCNH());
 
         return motoristaRepository.save(motoristaCadastrado);
     }
