@@ -1,5 +1,7 @@
 package com.cptrans.petrocarga.security;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -48,9 +50,9 @@ public class SecurityConfig {
     @Bean
 public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
     var corsConfig = new org.springframework.web.cors.CorsConfiguration();
-    corsConfig.setAllowedOrigins(java.util.List.of(
+    corsConfig.setAllowedOriginPatterns(List.of(
         "http://localhost:3000",
-        "https://cp-trans-petrocarga-front.vercel.app"
+        "https://*.vercel.app"
     ));
     corsConfig.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     corsConfig.setAllowedHeaders(java.util.List.of("Authorization", "Content-Type"));
