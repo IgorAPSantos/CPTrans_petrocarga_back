@@ -74,7 +74,8 @@ public class ReservaService {
     }
 
     public Reserva findById(UUID reservaId) {
-        Reserva reserva =  reservaRepository.findById(reservaId).orElseThrow(()-> new EntityNotFoundException("Reserva não encontrada."));
+        // Substituí o método para usar o novo método com fetch joins
+        Reserva reserva = reservaRepository.findByIdWithJoins(reservaId);
         UserAuthenticated usuarioLogado = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<String> authorities = usuarioLogado.userDetails().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
         if(authorities.contains(PermissaoEnum.MOTORISTA.getRole())) {
