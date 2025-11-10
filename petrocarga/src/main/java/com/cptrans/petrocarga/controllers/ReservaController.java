@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cptrans.petrocarga.dto.ReservaRequestDTO;
 import com.cptrans.petrocarga.dto.ReservaResponseDTO;
+import com.cptrans.petrocarga.dto.ReservaDetailedResponseDTO;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.models.Reserva;
 import com.cptrans.petrocarga.services.ReservaService;
@@ -52,9 +53,12 @@ public class ReservaController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE', 'MOTORISTA', 'EMPRESA')")
     @GetMapping("/{id}")
-    public ResponseEntity<ReservaResponseDTO> getReservaById(@PathVariable UUID id) {
+    public ResponseEntity<ReservaDetailedResponseDTO> getReservaById(@PathVariable UUID id) {
+        // Busca a reserva e mantém as verificações de permissão no service
         Reserva reserva = reservaService.findById(id);
-        return ResponseEntity.ok(reserva.toResponseDTO());
+        // Converte para DTO detalhado que expõe nomes/placa para exibição amigável
+        ReservaDetailedResponseDTO dto = new ReservaDetailedResponseDTO(reserva);
+        return ResponseEntity.ok(dto);
     }
 
     @PreAuthorize("#usuarioId == authentication.principal.id or hasAnyRole('ADMIN', 'GESTOR')")

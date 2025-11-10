@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.models.Reserva;
@@ -18,4 +20,12 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
     public List<Reserva> findByCriadoPorAndStatus(Usuario criadoPor, StatusReservaEnum status);
     public List<Reserva> findByStatus(StatusReservaEnum status);
     public List<Reserva> findByVagaAndStatusAndInicio(Vaga vaga, StatusReservaEnum status, OffsetDateTime data);
+
+    @Query("SELECT r FROM Reserva r " +
+           "JOIN FETCH r.vaga " +
+           "JOIN FETCH r.motorista " +
+           "JOIN FETCH r.veiculo " +
+           "JOIN FETCH r.criadoPor " +
+           "WHERE r.id = :id")
+    Reserva findByIdWithJoins(@Param("id") UUID id);
 }
