@@ -1,19 +1,18 @@
 package com.cptrans.petrocarga.services;
 // TODO: Refatorar VagaService pro padrão DTO apenas no controller
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
-import org.springframework.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import com.cptrans.petrocarga.dto.VagaRequestDTO;
 import com.cptrans.petrocarga.enums.DiaSemanaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
 import com.cptrans.petrocarga.models.EnderecoVaga;
@@ -39,16 +38,6 @@ public class VagaService {
     public List<Vaga> findAllByStatus(StatusVagaEnum status) {
         return vagaRepository.findByStatus(status);
     }
-
-   /* public List<Vaga> findAllPaginadas(Integer numeroPagina, Integer tamanhoPagina, String ordenarPor) {
-        Pageable pageable = PageRequest.of(numeroPagina, tamanhoPagina, Sort.by(ordenarPor).ascending());
-        return vagaRepository.findAll(pageable).getContent();
-    }
-
-    public List<Vaga> findAllPaginadasByStatus(Integer numeroPagina, Integer tamanhoPagina, String ordenarPor, StatusVagaEnum status) {
-        Pageable pageable = PageRequest.of(numeroPagina, tamanhoPagina, Sort.by(ordenarPor).ascending());
-        return vagaRepository.findByStatus(status, pageable);
-    }*/
     
     public List<Vaga> findAllPaginadas(Integer numeroPagina, Integer tamanhoPagina, String ordenarPor, StatusVagaEnum status, String logradouro) {
         Pageable pageable = PageRequest.of(numeroPagina, tamanhoPagina, Sort.by(ordenarPor).ascending());
@@ -81,68 +70,58 @@ public class VagaService {
     }
 
     @Transactional
-    public Vaga updateById(UUID id, VagaRequestDTO vagaRequest) {
+    public Vaga updateById(UUID id, Vaga novaVaga) {
         Vaga vagaExistente = vagaRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Vaga com ID " + id + " não encontrada."));
 
-        if(vagaRequest.getEndereco() != null) vagaExistente.setEndereco(enderecoVagaService.cadastrarEnderecoVaga(vagaRequest.getEndereco()));
+        if(novaVaga.getEndereco() != null){
+            EnderecoVaga novoEndereco = enderecoVagaService.cadastrarEnderecoVaga(novaVaga.getEndereco());
+            vagaExistente.setEndereco(novoEndereco);
+        } 
         
-        if(vagaRequest.getArea() != null) vagaExistente.setArea(vagaRequest.getArea());
-        if(vagaRequest.getNumeroEndereco() != null) vagaExistente.setNumeroEndereco(vagaRequest.getNumeroEndereco());
-        if(vagaRequest.getReferenciaEndereco() != null) vagaExistente.setReferenciaEndereco(vagaRequest.getReferenciaEndereco());
-        if(vagaRequest.getTipoVaga() != null) vagaExistente.setTipoVaga(vagaRequest.getTipoVaga());
-        if(vagaRequest.getReferenciaGeoInicio() != null) vagaExistente.setReferenciaGeoInicio(vagaRequest.getReferenciaGeoInicio());
-        if(vagaRequest.getReferenciaGeoFim() != null) vagaExistente.setReferenciaGeoFim(vagaRequest.getReferenciaGeoFim());
-        if(vagaRequest.getComprimento() != null) vagaExistente.setComprimento(vagaRequest.getComprimento());
-        if(vagaRequest.getStatus() != null) vagaExistente.setStatus(vagaRequest.getStatus());
-        if(vagaRequest.getOperacoesVaga() != null && !vagaRequest.getOperacoesVaga().isEmpty()){
-            Set<OperacaoVaga> operacoes = vagaRequest.getOperacoesVaga().stream().map(dto -> {
-                OperacaoVaga op = new OperacaoVaga();
-                op.setDiaSemana(DiaSemanaEnum.toEnumByCodigo(dto.getCodigoDiaSemana()));
-                op.setHoraInicio(dto.getHoraInicio());
-                op.setHoraFim(dto.getHoraFim());
-                op.setVaga(vagaExistente); 
-                return op;
-            }).collect(Collectors.toSet());
-            vagaExistente.setOperacoesVaga(operacoes);
+        if(novaVaga.getArea() != null) vagaExistente.setArea(novaVaga.getArea());
+        if(novaVaga.getNumeroEndereco() != null) vagaExistente.setNumeroEndereco(novaVaga.getNumeroEndereco());
+        if(novaVaga.getReferenciaEndereco() != null) vagaExistente.setReferenciaEndereco(novaVaga.getReferenciaEndereco());
+        if(novaVaga.getTipoVaga() != null) vagaExistente.setTipoVaga(novaVaga.getTipoVaga());
+        if(novaVaga.getReferenciaGeoInicio() != null) vagaExistente.setReferenciaGeoInicio(novaVaga.getReferenciaGeoInicio());
+        if(novaVaga.getReferenciaGeoFim() != null) vagaExistente.setReferenciaGeoFim(novaVaga.getReferenciaGeoFim());
+        if(novaVaga.getComprimento() != null) vagaExistente.setComprimento(novaVaga.getComprimento());
+        if(novaVaga.getStatus() != null) vagaExistente.setStatus(novaVaga.getStatus());
+        if (novaVaga.getOperacoesVaga() != null) {
+            Map<DiaSemanaEnum, OperacaoVaga> mapaExistentes = vagaExistente.getOperacoesVaga()
+                .stream()
+                .collect(Collectors.toMap(OperacaoVaga::getDiaSemana, o -> o));
+
+            Map<DiaSemanaEnum, OperacaoVaga> mapaNovas = novaVaga.getOperacoesVaga()
+                .stream()
+                .collect(Collectors.toMap(OperacaoVaga::getDiaSemana, o -> o, (o1, o2) -> o1)); // caso venha duplicado, mantém o primeiro
+
+            for (OperacaoVaga novaOperacao : mapaNovas.values()) {
+                OperacaoVaga existente = mapaExistentes.get(novaOperacao.getDiaSemana());
+                if (existente != null) {
+                    existente.setHoraInicio(novaOperacao.getHoraInicio());
+                    existente.setHoraFim(novaOperacao.getHoraFim());
+                } else {
+                    novaOperacao.setVaga(vagaExistente);
+                    vagaExistente.getOperacoesVaga().add(novaOperacao);
+                }
+            }
+            vagaExistente.getOperacoesVaga().removeIf(
+                operacao -> !mapaNovas.containsKey(operacao.getDiaSemana())
+            );
         }
-        Vaga vagaAtualizada = vagaRepository.save(vagaExistente);
-        
-        return vagaAtualizada;
+        return vagaRepository.save(vagaExistente);
     }
     
     @Transactional()
-    public Vaga createVaga(VagaRequestDTO vagaRequest){
-        EnderecoVaga enderecoVaga = enderecoVagaService.cadastrarEnderecoVaga(vagaRequest.getEndereco());
+    public Vaga createVaga(Vaga novaVaga){
+        EnderecoVaga enderecoVaga = enderecoVagaService.cadastrarEnderecoVaga(novaVaga.getEndereco());
+        novaVaga.setEndereco(enderecoVaga);
         
-        Vaga vaga = new Vaga();
-        
-        if(vagaRequest.getComprimento() == null) {
+        if(novaVaga.getComprimento() == null) {
             throw new IllegalArgumentException("O campo 'comprimento' é obrigatório e não pode ser nulo ou vazio.");
         }
         
-        vaga.setEndereco(enderecoVaga);
-        vaga.setArea(vagaRequest.getArea());
-        vaga.setNumeroEndereco(vagaRequest.getNumeroEndereco());
-        vaga.setReferenciaEndereco(vagaRequest.getReferenciaEndereco());
-        vaga.setTipoVaga(vagaRequest.getTipoVaga());
-        vaga.setReferenciaGeoInicio(vagaRequest.getReferenciaGeoInicio());
-        vaga.setReferenciaGeoFim(vagaRequest.getReferenciaGeoFim());
-        vaga.setComprimento(vagaRequest.getComprimento());
-        vaga.setStatus(vagaRequest.getStatus());
-
-        if (vagaRequest.getOperacoesVaga() != null && !vagaRequest.getOperacoesVaga().isEmpty()) {
-            Set<OperacaoVaga> operacoes = vagaRequest.getOperacoesVaga().stream().map(dto -> {
-                OperacaoVaga op = new OperacaoVaga();
-                op.setDiaSemana(DiaSemanaEnum.toEnumByCodigo(dto.getCodigoDiaSemana()));
-                op.setHoraInicio(dto.getHoraInicio());
-                op.setHoraFim(dto.getHoraFim());
-                op.setVaga(vaga); 
-                return op;
-            }).collect(Collectors.toSet());
-            vaga.setOperacoesVaga(operacoes);
-        }
-        Vaga novaVaga = vagaRepository.save(vaga);
-        return novaVaga;
+        return vagaRepository.save(novaVaga);
     }
 }

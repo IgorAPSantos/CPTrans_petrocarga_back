@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cptrans.petrocarga.dto.VagaRequestDTO;
 import com.cptrans.petrocarga.dto.VagaResponseDTO;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
+import com.cptrans.petrocarga.models.Vaga;
 import com.cptrans.petrocarga.services.VagaService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,10 +29,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.validation.Valid;
-
-
-import com.cptrans.petrocarga.models.Vaga; 
+import jakarta.validation.Valid; 
 
 @RestController
 @RequestMapping("/vagas")
@@ -129,7 +127,7 @@ public class VagaController {
         }
     )
     public ResponseEntity<VagaResponseDTO> createVaga(@Valid @RequestBody VagaRequestDTO vagaRequest) {
-        Vaga vaga = vagaService.createVaga(vagaRequest);
+        Vaga vaga = vagaService.createVaga(vagaRequest.toEntity());
         return ResponseEntity.status(HttpStatus.CREATED).body(new VagaResponseDTO(vaga));
     }
     
@@ -177,7 +175,7 @@ public class VagaController {
         }
     )
     public ResponseEntity<VagaResponseDTO> updateById(@Valid @PathVariable UUID id,@Valid @RequestBody VagaRequestDTO vagaRequest) {
-        Vaga vagaAtualizada = vagaService.updateById(id, vagaRequest);
+        Vaga vagaAtualizada = vagaService.updateById(id, vagaRequest.toEntity());
         return ResponseEntity.ok(new VagaResponseDTO(vagaAtualizada));
     }
 }
