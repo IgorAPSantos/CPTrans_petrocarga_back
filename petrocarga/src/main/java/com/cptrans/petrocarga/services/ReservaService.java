@@ -21,8 +21,6 @@ import com.cptrans.petrocarga.repositories.ReservaRepository;
 import com.cptrans.petrocarga.security.UserAuthenticated;
 import com.cptrans.petrocarga.utils.DateUtils;
 
-import jakarta.persistence.EntityNotFoundException;
-
 @Service
 public class ReservaService {
 

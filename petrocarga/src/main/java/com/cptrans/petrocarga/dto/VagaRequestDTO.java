@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import com.cptrans.petrocarga.enums.AreaVagaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
 import com.cptrans.petrocarga.enums.TipoVagaEnum;
-import com.cptrans.petrocarga.models.EnderecoVaga;
 import com.cptrans.petrocarga.models.OperacaoVaga;
 import com.cptrans.petrocarga.models.Vaga;
 
@@ -59,21 +58,12 @@ public class VagaRequestDTO {
         vaga.setReferenciaGeoInicio(this.referenciaGeoInicio);
         vaga.setStatus(this.status);
         vaga.setTipoVaga(this.tipoVaga);
-
-        EnderecoVaga enderecoVaga = new EnderecoVaga();
-        enderecoVaga.setBairro(this.endereco.getBairro());
-        enderecoVaga.setCodigoPmp(this.endereco.getCodigoPmp());
-        enderecoVaga.setLogradouro(this.endereco.getLogradouro());
-        vaga.setEndereco(enderecoVaga);
+        vaga.setEndereco(this.endereco.toEntity());
 
         if (this.operacoesVaga != null) {
             Set<OperacaoVaga> operacoes = this.operacoesVaga.stream()
                     .map(dto -> {
-                        OperacaoVaga operacao = new OperacaoVaga();
-                        operacao.setDiaSemana(com.cptrans.petrocarga.enums.DiaSemanaEnum.toEnumByCodigo(dto.getCodigoDiaSemana()));
-                        operacao.setHoraInicio(dto.getHoraInicio());
-                        operacao.setHoraFim(dto.getHoraFim());
-                        return operacao;
+                        return dto.toEntity(vaga);
                     })
                     .collect(Collectors.toSet());
             vaga.setOperacoesVaga(operacoes);
