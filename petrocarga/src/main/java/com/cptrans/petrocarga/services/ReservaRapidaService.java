@@ -1,33 +1,60 @@
-// package com.cptrans.petrocarga.services;
-// TODO: Refatorar ReservaRapidaService
-// import com.cptrans.petrocarga.models.ReservaRapida;
-// import com.cptrans.petrocarga.repositories.ReservaRapidaRepository;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.stereotype.Service;
+package com.cptrans.petrocarga.services;
 
-// import java.util.List;
-// import java.util.Optional;
-// import java.util.UUID;
+import java.util.List;
 
-// @Service
-// public class ReservaRapidaService {
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
-//     @Autowired
-//     private ReservaRapidaRepository reservaRapidaRepository;
+import com.cptrans.petrocarga.enums.PermissaoEnum;
+import com.cptrans.petrocarga.enums.StatusReservaEnum;
+import com.cptrans.petrocarga.models.Agente;
+import com.cptrans.petrocarga.models.Reserva;
+import com.cptrans.petrocarga.models.ReservaRapida;
+import com.cptrans.petrocarga.models.Usuario;
+import com.cptrans.petrocarga.models.Vaga;
+import com.cptrans.petrocarga.repositories.ReservaRapidaRepository;
+import com.cptrans.petrocarga.repositories.ReservaRepository;
+import com.cptrans.petrocarga.security.UserAuthenticated;
+import com.cptrans.petrocarga.utils.ReservaRapidaUtils;
 
-//     public List<ReservaRapida> findAll() {
-//         return reservaRapidaRepository.findAll();
-//     }
+@Service
+public class ReservaRapidaService {
+    
+    @Autowired
+    private ReservaRapidaRepository reservaRapidaRepository;
+    @Autowired
+    private ReservaRepository reservaRepository;
+    @Autowired
+    private VagaService vagaService;
+    @Autowired
+    private ReservaRapidaUtils reservaRapidaUtils;
+    @Autowired
+    private UsuarioService usuarioService;
+    @Autowired
+    private AgenteService agenteService;
+ 
 
-//     public Optional<ReservaRapida> findById(UUID id) {
-//         return reservaRapidaRepository.findById(id);
-//     }
+    public List<ReservaRapida> findByVagaAndStatus(Vaga vaga, StatusReservaEnum status) {
+        return reservaRapidaRepository.findByVagaAndStatus(vaga, status);
+    }
 
-//     public ReservaRapida save(ReservaRapida reservaRapida) {
-//         return reservaRapidaRepository.save(reservaRapida);
-//     }
+    public ReservaRapida create(ReservaRapida novaReservaRapida) {
+        Integer quantidadeReservasRapidasPorPlaca = reservaRapidaRepository.countByPlaca(novaReservaRapida.getPlaca());
+        Vaga vagaReserva = vagaService.findById(novaReservaRapida.getVaga().getId());
+        List<Reserva>  reservasAtivasNaVaga = reservaRepository.findByVagaAndStatus(vagaReserva, StatusReservaEnum.ATIVA);
+        List<ReservaRapida> reservasRapidasAtivasNaVaga = findByVagaAndStatus(vagaReserva, StatusReservaEnum.ATIVA);
+        UserAuthenticated userAuthenticated = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Usuario usuarioLogado = usuarioService.findById(userAuthenticated.id());
+        if(usuarioLogado.getPermissao().equals(PermissaoEnum.AGENTE)){
+            Agente agenteLogado = agenteService.findByUsuarioId(usuarioLogado.getId());
+            novaReservaRapida.setAgente(agenteLogado);
+        }
 
-//     public void deleteById(UUID id) {
-//         reservaRapidaRepository.deleteById(id);
-//     }
-// }
+        reservaRapidaUtils.validarQuantidadeReservasPorPlaca(quantidadeReservasRapidasPorPlaca, novaReservaRapida);
+        reservaRapidaUtils.validarTempoMaximoReservaRapida(novaReservaRapida, novaReservaRapida.getVaga());
+        reservaRapidaUtils.validarEspacoDisponivelNaVaga(novaReservaRapida, vagaReserva, reservasAtivasNaVaga, reservasRapidasAtivasNaVaga);
+        return reservaRapidaRepository.save(novaReservaRapida);
+
+    }
+}

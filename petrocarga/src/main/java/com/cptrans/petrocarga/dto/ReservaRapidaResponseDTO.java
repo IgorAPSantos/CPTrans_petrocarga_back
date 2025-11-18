@@ -1,15 +1,18 @@
 package com.cptrans.petrocarga.dto;
 
-import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
-import com.cptrans.petrocarga.models.ReservaRapida;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+
+import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
+import com.cptrans.petrocarga.models.ReservaRapida;
 
 public class ReservaRapidaResponseDTO {
 
     private UUID id;
     private UUID vagaId;
     private UUID agenteId;
+    private String logradouro;
+    private String bairro;
     private TipoVeiculoEnum tipoVeiculo;
     private String placa;
     private OffsetDateTime inicio;
@@ -23,6 +26,8 @@ public class ReservaRapidaResponseDTO {
         this.id = reservaRapida.getId();
         this.vagaId = reservaRapida.getVaga().getId();
         this.agenteId = reservaRapida.getAgente().getId();
+        this.logradouro = reservaRapida.getVaga().getEndereco().getLogradouro();
+        this.bairro = reservaRapida.getVaga().getEndereco().getBairro();
         this.tipoVeiculo = reservaRapida.getTipoVeiculo();
         this.placa = reservaRapida.getPlaca();
         this.inicio = reservaRapida.getInicio();
@@ -53,6 +58,22 @@ public class ReservaRapidaResponseDTO {
 
     public void setAgenteId(UUID agenteId) {
         this.agenteId = agenteId;
+    }
+
+    public String getLogradouro() {
+        return logradouro;
+    }
+
+    public void setLogradouro(String logradouro) {
+        this.logradouro = logradouro;
+    }
+
+    public String getBairro() {
+        return bairro;
+    }
+
+    public void setBairro(String bairro) {
+        this.bairro = bairro;
     }
 
     public TipoVeiculoEnum getTipoVeiculo() {

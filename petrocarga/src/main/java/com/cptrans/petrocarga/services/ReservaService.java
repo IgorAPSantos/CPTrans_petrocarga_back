@@ -11,15 +11,16 @@ import org.springframework.stereotype.Service;
 
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
-import com.cptrans.petrocarga.models.Empresa;
 import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.models.Reserva;
+import com.cptrans.petrocarga.models.ReservaRapida;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.models.Vaga;
 import com.cptrans.petrocarga.models.Veiculo;
 import com.cptrans.petrocarga.repositories.ReservaRepository;
 import com.cptrans.petrocarga.security.UserAuthenticated;
 import com.cptrans.petrocarga.utils.DateUtils;
+import com.cptrans.petrocarga.utils.ReservaUtils;
 
 @Service
 public class ReservaService {
@@ -35,7 +36,9 @@ public class ReservaService {
     @Autowired
     private VagaService vagaService;
     @Autowired
-    private EmpresaService empresaService;
+    private ReservaRapidaService reservaRapidaService;
+    @Autowired
+    private ReservaUtils reservaUtils;
     // @Autowired
     // private DisponibilidadeVagaService disponibilidadeVagaService;
 
@@ -98,62 +101,27 @@ public class ReservaService {
         }
         return reservaRepository.findByCriadoPor(usuario);
     }
-    // TODO: Verificar disponibilidade da reserva ao criar
-    // TODO: Verificar se há reservaRádipa no mesmo horário
-    // TODO: Ver se falta algo e se dá pra melhorar o código
-    public Reserva createReserva(UUID vagaId, UUID motoristaId, UUID veiculoId, Reserva novaReserva) {
-        Vaga vagaReserva = vagaService.findById(vagaId);
+
+    public Reserva createReserva(Reserva novaReserva) {
         UserAuthenticated userAuthenticated = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Usuario usuarioLogado = usuarioService.findById(userAuthenticated.id());
-        Motorista motoristaDaReserva = motoristaService.findById(motoristaId);
-        Veiculo veiculoDaReserva = veiculoService.findById(veiculoId);
-        List<Reserva> reservasAtivasNaVaga = findByVagaId(vagaId, StatusReservaEnum.ATIVA);
-
-        if(novaReserva.getFim().toInstant().isBefore(novaReserva.getInicio().toInstant())) {
-            throw new IllegalArgumentException("Fim da reserva deve ser posterior ao inicio.");
-        }
-
-        Integer tempoReservaEmMinutos = (int) (novaReserva.getInicio().until(novaReserva.getFim(), java.time.temporal.ChronoUnit.MINUTES));
-        Boolean tempoValido = tempoReservaEmMinutos <= vagaReserva.getArea().getTempoMaximo() * 60;
-        if(!tempoValido){
-            throw new IllegalArgumentException("Tempo total de reserva inválido.");
-        }
-        
-        for(Reserva reserva : reservasAtivasNaVaga){
-            Boolean novaReservaIniciaAntesDeOutras = novaReserva.getInicio().toInstant().isBefore(reserva.getInicio().toInstant()) && novaReserva.getInicio().toInstant().isBefore(reserva.getFim().toInstant());
-            Boolean novaReservaFinalizaAntesDeOutras = novaReserva.getFim().toInstant().isBefore(reserva.getInicio().toInstant()) && novaReserva.getFim().toInstant().isBefore(reserva.getFim().toInstant());
-            Boolean novaReservaIniciaDepoisDeOutras = novaReserva.getInicio().toInstant().isAfter(reserva.getInicio().toInstant()) && novaReserva.getInicio().toInstant().isAfter(reserva.getFim().toInstant());
-            Boolean novaReservaFinalizaDepoisDeOutras = novaReserva.getFim().toInstant().isAfter(reserva.getInicio().toInstant()) && novaReserva.getFim().toInstant().isAfter(reserva.getFim().toInstant());
-            if(!(novaReservaIniciaAntesDeOutras && novaReservaFinalizaAntesDeOutras) && !(novaReservaIniciaDepoisDeOutras && novaReservaFinalizaDepoisDeOutras)){
-                throw new IllegalArgumentException("O horário da reserva não pode se sobrepor com outras reservas.");
-            }
-        }
-        
-        if(usuarioLogado.getPermissao().equals(PermissaoEnum.MOTORISTA) || usuarioLogado.getPermissao().equals(PermissaoEnum.EMPRESA)){
-            if(!veiculoDaReserva.getUsuario().getId().equals(usuarioLogado.getId())){
-                throw new IllegalArgumentException("Usuário não pode fazer reserva para um veículo de outro usuário.");
-            }
-        }
-        if(usuarioLogado.getPermissao().equals(PermissaoEnum.MOTORISTA)){
-            if(!motoristaDaReserva.getUsuario().getId().equals(usuarioLogado.getId())){
-                throw new IllegalArgumentException("Usuário não pode fazer reserva para outro motorista.");
-            }
-        }
-        if(usuarioLogado.getPermissao().equals(PermissaoEnum.EMPRESA)){
-            Empresa empresa = empresaService.findByUsuarioId(usuarioLogado.getId());
-            if(!motoristaDaReserva.getEmpresa().getId().equals(empresa.getId())){
-                throw new IllegalArgumentException("A empresa só pode fazer reserva para motoristas associados à ela.");
-            }
-        }
-
-        novaReserva.setVaga(vagaReserva);
-        novaReserva.setMotorista(motoristaDaReserva);
-        novaReserva.setVeiculo(veiculoDaReserva);
         novaReserva.setCriadoPor(usuarioLogado);
+        checarExcecoesReserva(novaReserva, novaReserva.getCriadoPor(), novaReserva.getMotorista(), novaReserva.getVeiculo());
+  
         return reservaRepository.save(novaReserva);
     }
 
     public void deleteById(UUID id) {
         reservaRepository.deleteById(id);
+    }
+
+    public void checarExcecoesReserva(Reserva novaReserva, Usuario usuarioLogado, Motorista motoristaDaReserva, Veiculo veiculoDaReserva) {
+        Vaga vagaReserva = novaReserva.getVaga();
+        List<Reserva> reservasAtivasNaVaga = reservaRepository.findByVagaAndStatus(vagaReserva, StatusReservaEnum.ATIVA);
+        List<ReservaRapida> reservasRapidasAtivasNaVaga = reservaRapidaService.findByVagaAndStatus(vagaReserva, StatusReservaEnum.ATIVA);
+   
+        reservaUtils.validarTempoMaximoReserva(novaReserva);
+        reservaUtils.validarEspacoDisponivelNaVaga(novaReserva, usuarioLogado, reservasAtivasNaVaga, reservasRapidasAtivasNaVaga);
+        reservaUtils.validarPermissoesReserva(usuarioLogado, motoristaDaReserva, veiculoDaReserva);
     }
 }

@@ -6,7 +6,6 @@ import java.util.UUID;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.models.Reserva;
-import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.models.Vaga;
 import com.cptrans.petrocarga.models.Veiculo;
 
@@ -26,19 +25,17 @@ public class ReservaRequestDTO {
     private OffsetDateTime inicio;
     @NotNull
     private OffsetDateTime fim;
-    @NotNull
-    private StatusReservaEnum status;
 
-    public Reserva toEntity(Vaga vaga, Motorista motorista, Veiculo veiculo, Usuario criadoPor) {
+
+    public Reserva toEntity(Vaga vaga, Motorista motorista, Veiculo veiculo) {
         Reserva reserva = new Reserva();
         reserva.setVaga(vaga);
         reserva.setMotorista(motorista);
         reserva.setVeiculo(veiculo);
-        reserva.setCriadoPor(criadoPor);
         reserva.setCidadeOrigem(this.cidadeOrigem);
         reserva.setInicio(this.inicio);
         reserva.setFim(this.fim);
-        reserva.setStatus(this.status);
+        reserva.setStatus(StatusReservaEnum.ATIVA);
         return reserva;
     }
 
@@ -47,7 +44,7 @@ public class ReservaRequestDTO {
         reserva.setCidadeOrigem(this.cidadeOrigem);
         reserva.setInicio(this.inicio);
         reserva.setFim(this.fim);
-        reserva.setStatus(this.status);
+        reserva.setStatus(StatusReservaEnum.ATIVA);
         return reserva;
     }
 
@@ -69,8 +66,5 @@ public class ReservaRequestDTO {
     }
     public OffsetDateTime getFim() {
         return fim;
-    }
-    public StatusReservaEnum getStatus() {
-        return status;
     }
 }
