@@ -3,6 +3,7 @@ package com.cptrans.petrocarga.models;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.cptrans.petrocarga.dto.ReservaRapidaResponseDTO;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
 
@@ -132,5 +133,9 @@ public class ReservaRapida {
 
     public void setStatus(StatusReservaEnum status) {
         this.status = status;
+    }
+
+    public ReservaRapidaResponseDTO toResponse() {
+        return new ReservaRapidaResponseDTO(this);
     }
 }

@@ -3,8 +3,8 @@ package com.cptrans.petrocarga.dto;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
-import com.cptrans.petrocarga.models.Agente;
 import com.cptrans.petrocarga.models.ReservaRapida;
 import com.cptrans.petrocarga.models.Vaga;
 
@@ -14,9 +14,6 @@ public class ReservaRapidaRequestDTO {
 
     @NotNull
     private UUID vagaId;
-
-    @NotNull
-    private UUID agenteId;
 
     private TipoVeiculoEnum tipoVeiculo;
 
@@ -29,16 +26,17 @@ public class ReservaRapidaRequestDTO {
     private OffsetDateTime fim;
 
     public ReservaRapidaRequestDTO() {
+        
     }
 
-    public ReservaRapida toEntity(Vaga vaga, Agente agente) {
+    public ReservaRapida toEntity(Vaga vaga) {
         ReservaRapida reservaRapida = new ReservaRapida();
         reservaRapida.setVaga(vaga);
-        reservaRapida.setAgente(agente);
         reservaRapida.setTipoVeiculo(this.tipoVeiculo);
         reservaRapida.setPlaca(this.placa);
         reservaRapida.setInicio(this.inicio);
         reservaRapida.setFim(this.fim);
+        reservaRapida.setStatus(StatusReservaEnum.ATIVA);
         return reservaRapida;
     }
 
@@ -49,14 +47,6 @@ public class ReservaRapidaRequestDTO {
 
     public void setVagaId(UUID vagaId) {
         this.vagaId = vagaId;
-    }
-
-    public UUID getAgenteId() {
-        return agenteId;
-    }
-
-    public void setAgenteId(UUID agenteId) {
-        this.agenteId = agenteId;
     }
 
     public TipoVeiculoEnum getTipoVeiculo() {

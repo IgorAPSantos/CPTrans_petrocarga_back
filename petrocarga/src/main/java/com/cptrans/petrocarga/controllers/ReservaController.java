@@ -17,12 +17,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cptrans.petrocarga.dto.ReservaDetailedResponseDTO;
 import com.cptrans.petrocarga.dto.ReservaRequestDTO;
 import com.cptrans.petrocarga.dto.ReservaResponseDTO;
-import com.cptrans.petrocarga.dto.ReservaDetailedResponseDTO;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
+import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.models.Reserva;
+import com.cptrans.petrocarga.models.Vaga;
+import com.cptrans.petrocarga.models.Veiculo;
+import com.cptrans.petrocarga.services.MotoristaService;
 import com.cptrans.petrocarga.services.ReservaService;
+import com.cptrans.petrocarga.services.VagaService;
+import com.cptrans.petrocarga.services.VeiculoService;
 
 import jakarta.validation.Valid;
 
@@ -32,6 +38,12 @@ public class ReservaController {
 
     @Autowired
     private ReservaService reservaService;
+    @Autowired
+    private VagaService vagaService;
+    @Autowired
+    private MotoristaService motoristaService;
+    @Autowired
+    private VeiculoService veiculoService;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE')")
     @GetMapping
@@ -73,10 +85,10 @@ public class ReservaController {
     @PreAuthorize("hasAnyRole('ADMIN','MOTORISTA', 'EMPRESA')")
     @PostMapping()
     public ResponseEntity<ReservaResponseDTO> createReserva(@RequestBody @Valid ReservaRequestDTO reservaRequestDTO) {
-        Reserva novaReserva = reservaService.createReserva( reservaRequestDTO.getVagaId(),
-                                                            reservaRequestDTO.getMotoristaId(),
-                                                            reservaRequestDTO.getVeiculoId(),
-                                                            reservaRequestDTO.toEntity());
+        Vaga vaga = vagaService.findById(reservaRequestDTO.getVagaId());
+        Motorista motorista = motoristaService.findById(reservaRequestDTO.getMotoristaId());
+        Veiculo veiculo = veiculoService.findById(reservaRequestDTO.getVeiculoId());
+        Reserva novaReserva = reservaService.createReserva(reservaRequestDTO.toEntity(vaga, motorista, veiculo));
                                                                 
         return ResponseEntity.status(HttpStatus.CREATED).body(novaReserva.toResponseDTO());
 
