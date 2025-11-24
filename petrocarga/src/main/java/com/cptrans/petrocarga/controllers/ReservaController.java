@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cptrans.petrocarga.dto.ReservaDetailedResponseDTO;
 import com.cptrans.petrocarga.dto.ReservaRequestDTO;
 import com.cptrans.petrocarga.dto.ReservaResponseDTO;
+import com.cptrans.petrocarga.dto.ReservasAtivasDTO;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
+import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
 import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.models.Reserva;
 import com.cptrans.petrocarga.models.Vaga;
@@ -56,11 +58,18 @@ public class ReservaController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE', 'MOTORISTA', 'EMPRESA')")
     @GetMapping("/ativas/{vagaId}")
-    public ResponseEntity<List<ReservaResponseDTO>> getReservasAtivasByVagaIdAndData(@PathVariable UUID vagaId,@RequestParam(required = false) LocalDate data) {
-        List<ReservaResponseDTO> reservas = reservaService.findAtivasByVagaIdAndData(vagaId, data).stream()
-                .map(ReservaResponseDTO::new)
-                .collect(Collectors.toList());
+    public ResponseEntity<List<ReservasAtivasDTO>> getReservasAtivasByVagaIdAndData(@PathVariable UUID vagaId,@RequestParam(required = false) LocalDate data) {
+        Vaga vaga = vagaService.findById(vagaId);
+        List<ReservasAtivasDTO> reservas = reservaService.getReservasAtivasByData(vaga, data);
         return ResponseEntity.ok(reservas);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','MOTORISTA', 'EMPRESA')")
+    @GetMapping("/bloqueios/{vagaId}")
+    public ResponseEntity<List<ReservaService.Intervalo>> getIntervalosBloqueados(@PathVariable UUID vagaId, @RequestParam LocalDate data, @RequestParam TipoVeiculoEnum tipoVeiculo) {
+        Vaga vaga = vagaService.findById(vagaId);
+        List<ReservaService.Intervalo> intervalosBloqueados = reservaService.getIntervalosBloqueados(vaga, data, tipoVeiculo);
+        return ResponseEntity.ok(intervalosBloqueados);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE', 'MOTORISTA', 'EMPRESA')")

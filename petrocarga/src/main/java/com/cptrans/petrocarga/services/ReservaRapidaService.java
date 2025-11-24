@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.services;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import com.cptrans.petrocarga.models.Vaga;
 import com.cptrans.petrocarga.repositories.ReservaRapidaRepository;
 import com.cptrans.petrocarga.repositories.ReservaRepository;
 import com.cptrans.petrocarga.security.UserAuthenticated;
+import com.cptrans.petrocarga.utils.DateUtils;
 import com.cptrans.petrocarga.utils.ReservaRapidaUtils;
 
 @Service
@@ -37,6 +39,17 @@ public class ReservaRapidaService {
 
     public List<ReservaRapida> findByVagaAndStatus(Vaga vaga, StatusReservaEnum status) {
         return reservaRapidaRepository.findByVagaAndStatus(vaga, status);
+    }
+
+    public List<ReservaRapida> findAtivasByVagaAndData(Vaga vaga, LocalDate data) {
+        List<ReservaRapida> reservasRapidasAtivas = reservaRapidaRepository.findByVagaAndStatus(vaga, StatusReservaEnum.ATIVA);
+        if(data!=null && reservasRapidasAtivas!=null && !reservasRapidasAtivas.isEmpty()) {
+            return reservasRapidasAtivas.stream()
+                .filter(reservaRapida -> DateUtils.toLocalDateInBrazil(reservaRapida.getInicio()).equals(data) || DateUtils.toLocalDateInBrazil(reservaRapida.getFim()).equals(data))
+                .toList();
+        } else {
+            return reservasRapidasAtivas;
+        }
     }
 
     public ReservaRapida create(ReservaRapida novaReservaRapida) {

@@ -1,7 +1,12 @@
 package com.cptrans.petrocarga.services;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +14,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.cptrans.petrocarga.dto.ReservasAtivasDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
+import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
 import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.models.Reserva;
 import com.cptrans.petrocarga.models.ReservaRapida;
@@ -67,11 +74,11 @@ public class ReservaService {
     
     public List<Reserva> findAtivasByVagaIdAndData(UUID vagaId, LocalDate data) {
         Vaga vaga = vagaService.findById(vagaId);
+        List<Reserva> reservas = reservaRepository.findByVagaAndStatus(vaga, StatusReservaEnum.ATIVA);
         if(data != null) {
-            List<Reserva> reservas = reservaRepository.findByVagaAndStatus(vaga, StatusReservaEnum.ATIVA);
             return reservas.stream().filter(reserva -> DateUtils.toLocalDateInBrazil(reserva.getInicio()).equals(data)).toList();
         }
-        return reservaRepository.findByVagaAndStatus(vaga, StatusReservaEnum.ATIVA);
+        return reservas;
     }
 
     public Reserva findById(UUID reservaId) {
@@ -124,4 +131,100 @@ public class ReservaService {
         reservaUtils.validarEspacoDisponivelNaVaga(novaReserva, usuarioLogado, reservasAtivasNaVaga, reservasRapidasAtivasNaVaga);
         reservaUtils.validarPermissoesReserva(usuarioLogado, motoristaDaReserva, veiculoDaReserva);
     }
+
+    public List<ReservasAtivasDTO> getReservasAtivasByData(Vaga vaga, LocalDate data){
+        List<Reserva> reservasAtivasNaVaga = findAtivasByVagaIdAndData(vaga.getId(), data);
+        List<ReservaRapida> reservasRapidasAtivasNaVaga = reservaRapidaService.findAtivasByVagaAndData(vaga, data);
+        List<ReservasAtivasDTO> listaReservasAtivas = new ArrayList<>();
+        
+        if(reservasRapidasAtivasNaVaga != null && !reservasRapidasAtivasNaVaga.isEmpty()) {
+            reservasRapidasAtivasNaVaga.forEach(rr -> listaReservasAtivas.add(new ReservasAtivasDTO(vaga, rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca())));
+        }
+
+        if(reservasAtivasNaVaga != null && !reservasAtivasNaVaga.isEmpty()) {
+            reservasAtivasNaVaga.forEach(r-> listaReservasAtivas.add(new ReservasAtivasDTO(vaga, r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca())));
+        }
+        
+        return listaReservasAtivas;
+    }
+
+    public List<Intervalo> getIntervalosBloqueados(Vaga vaga, LocalDate data, TipoVeiculoEnum tipoVeiculo  ) {
+        int capacidadeTotal = vaga.getComprimento();
+        int comprimentoVeiculoDesejado = tipoVeiculo.getComprimento();
+
+        List<ReservasAtivasDTO> reservas = getReservasAtivasByData(vaga, data);
+        if (reservas.isEmpty()) {
+            return List.of(); // nada reservado → nenhum bloqueio
+        }
+        // 1) coleta todos os pontos de corte
+        TreeSet<Instant> pontos = new TreeSet<>();
+        reservas.forEach(r -> {
+            pontos.add(r.getInicio().toInstant());
+            pontos.add(r.getFim().toInstant());
+        });
+
+        List<Instant> timeline = new ArrayList<>(pontos);
+
+        // 2) calcula segmentos e marca os bloqueados
+        List<Intervalo> intervalosBloqueados = new ArrayList<>();
+        Intervalo atual = null;
+
+        for (int i = 0; i < timeline.size() - 1; i++) {
+            Instant inicio = timeline.get(i);
+            Instant fim = timeline.get(i + 1);
+
+            if (inicio.equals(fim)) continue;
+
+            int ocupacaoAtual = 0;
+
+            for (ReservasAtivasDTO res : reservas) {
+                boolean sobrepoe = res.getInicio().toInstant().isBefore(fim)
+                        && res.getFim().toInstant().isAfter(inicio);
+
+                if (sobrepoe) {
+                    ocupacaoAtual += res.getTamanhoVeiculo();
+                }
+            }
+
+            int espacoRestante = capacidadeTotal - ocupacaoAtual;
+            boolean cabe = espacoRestante >= comprimentoVeiculoDesejado;
+
+            if (!cabe) {
+                OffsetDateTime dtoIni = OffsetDateTime.ofInstant(inicio, ZoneOffset.of("-03:00"));
+                OffsetDateTime dtoFim = OffsetDateTime.ofInstant(fim, ZoneOffset.of("-03:00"));
+
+                if (atual == null) {
+                    atual = new Intervalo(dtoIni, dtoFim);
+                } else {
+                    atual.setFim(dtoFim);
+                }
+            } else {
+                if (atual != null) {
+                    intervalosBloqueados.add(atual);
+                    atual = null;
+                }
+            }
+        }
+
+        if (atual != null) intervalosBloqueados.add(atual);
+
+        return intervalosBloqueados;
+}
+
+/* Auxiliares */
+
+public static class Intervalo {
+    private OffsetDateTime inicio;
+    private OffsetDateTime fim;
+
+    public Intervalo(OffsetDateTime inicio, OffsetDateTime fim) {
+        this.inicio = inicio;
+        this.fim = fim;
+    }
+
+    public OffsetDateTime getInicio() { return inicio; }
+    public OffsetDateTime getFim() { return fim; }
+    public void setInicio(OffsetDateTime inicio) { this.inicio = inicio; }
+    public void setFim(OffsetDateTime fim) { this.fim = fim; }
+}
 }
