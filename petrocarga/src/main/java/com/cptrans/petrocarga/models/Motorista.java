@@ -34,7 +34,7 @@ public class Motorista {
     private Usuario usuario;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_cnh", length=1, nullable = false)
+    @Column(name = "tipo_cnh", length=2, nullable = false)
     private TipoCnhEnum tipoCnh;
 
     @Column(name = "numero_cnh", unique = true, length = 9, nullable = false)

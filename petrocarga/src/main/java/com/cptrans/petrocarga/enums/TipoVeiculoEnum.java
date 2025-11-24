@@ -5,8 +5,7 @@ public enum TipoVeiculoEnum {
     VUC("Veículo Urbano de Carga",7),
     CAMINHONETA("Caminhoneta",8),
     CAMINHAO_MEDIO("Caminhão Médio",12),
-    CAMINHAO_LONGO("Caminhão Longo",18),
-    CARRETA("Carreta",30);
+    CAMINHAO_LONGO("Caminhão Longo",19);
 
     private final String descricao;
     private final Integer comprimento;
