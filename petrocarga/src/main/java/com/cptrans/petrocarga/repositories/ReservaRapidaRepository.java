@@ -11,5 +11,6 @@ import com.cptrans.petrocarga.models.Vaga;
 
 public interface ReservaRapidaRepository extends JpaRepository<ReservaRapida, UUID> {
     public List<ReservaRapida> findByVagaAndStatus(Vaga vaga, StatusReservaEnum status);
+    public List<ReservaRapida> findByPlacaIgnoringCaseAndStatus(String placa, StatusReservaEnum status);
     public Integer countByPlaca(String placa);
 }

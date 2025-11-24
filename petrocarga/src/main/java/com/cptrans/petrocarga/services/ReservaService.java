@@ -14,7 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.cptrans.petrocarga.dto.ReservasAtivasDTO;
+import com.cptrans.petrocarga.dto.ReservaAtivaDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
@@ -132,27 +132,47 @@ public class ReservaService {
         reservaUtils.validarPermissoesReserva(usuarioLogado, motoristaDaReserva, veiculoDaReserva);
     }
 
-    public List<ReservasAtivasDTO> getReservasAtivasByData(Vaga vaga, LocalDate data){
+    public List<ReservaAtivaDTO> getReservasAtivasByData(Vaga vaga, LocalDate data){
         List<Reserva> reservasAtivasNaVaga = findAtivasByVagaIdAndData(vaga.getId(), data);
         List<ReservaRapida> reservasRapidasAtivasNaVaga = reservaRapidaService.findAtivasByVagaAndData(vaga, data);
-        List<ReservasAtivasDTO> listaReservasAtivas = new ArrayList<>();
+        List<ReservaAtivaDTO> listaReservasAtivas = new ArrayList<>();
         
         if(reservasRapidasAtivasNaVaga != null && !reservasRapidasAtivasNaVaga.isEmpty()) {
-            reservasRapidasAtivasNaVaga.forEach(rr -> listaReservasAtivas.add(new ReservasAtivasDTO(vaga, rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca())));
+            reservasRapidasAtivasNaVaga.forEach(rr -> listaReservasAtivas.add(new ReservaAtivaDTO(vaga, rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca())));
         }
 
         if(reservasAtivasNaVaga != null && !reservasAtivasNaVaga.isEmpty()) {
-            reservasAtivasNaVaga.forEach(r-> listaReservasAtivas.add(new ReservasAtivasDTO(vaga, r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca())));
+            reservasAtivasNaVaga.forEach(r-> listaReservasAtivas.add(new ReservaAtivaDTO(vaga, r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca())));
         }
         
         return listaReservasAtivas;
+    }
+
+    public List<ReservaAtivaDTO> getReservasAtivasByDataAndPlaca(Vaga vaga, LocalDate data, String placa){
+        List<ReservaAtivaDTO> reservasAtivas = getReservasAtivasByData(vaga, data);
+        return reservasAtivas.stream()
+                .filter(r -> r.getPlacaVeiculo().equalsIgnoreCase(placa))
+                .toList();
+    }
+
+    public List<ReservaAtivaDTO> getReservasAtivasByPlaca(String placa){
+        List<Reserva> reservasPorPlaca = reservaRepository.findByVeiculoPlacaIgnoringCaseAndStatus(placa, StatusReservaEnum.ATIVA);
+        List<ReservaRapida> reservasRapidasPorPlaca = reservaRapidaService.findByPlaca(placa);
+        List<ReservaAtivaDTO> listaReservasAtivasPorPlaca = new ArrayList<>();
+        if(reservasRapidasPorPlaca != null && !reservasRapidasPorPlaca.isEmpty()) {
+            reservasRapidasPorPlaca.forEach(rr -> listaReservasAtivasPorPlaca.add(new ReservaAtivaDTO(rr.getVaga(), rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca())));
+        }
+        if(reservasPorPlaca != null && !reservasPorPlaca.isEmpty()) {
+            reservasPorPlaca.forEach(r-> listaReservasAtivasPorPlaca.add(new ReservaAtivaDTO(r.getVaga(), r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca())));
+        }
+        return listaReservasAtivasPorPlaca;
     }
 
     public List<Intervalo> getIntervalosBloqueados(Vaga vaga, LocalDate data, TipoVeiculoEnum tipoVeiculo  ) {
         int capacidadeTotal = vaga.getComprimento();
         int comprimentoVeiculoDesejado = tipoVeiculo.getComprimento();
 
-        List<ReservasAtivasDTO> reservas = getReservasAtivasByData(vaga, data);
+        List<ReservaAtivaDTO> reservas = getReservasAtivasByData(vaga, data);
         if (reservas.isEmpty()) {
             return List.of(); // nada reservado → nenhum bloqueio
         }
@@ -177,7 +197,7 @@ public class ReservaService {
 
             int ocupacaoAtual = 0;
 
-            for (ReservasAtivasDTO res : reservas) {
+            for (ReservaAtivaDTO res : reservas) {
                 boolean sobrepoe = res.getInicio().toInstant().isBefore(fim)
                         && res.getFim().toInstant().isAfter(inicio);
 

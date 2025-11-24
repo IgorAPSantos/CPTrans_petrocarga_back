@@ -52,6 +52,10 @@ public class ReservaRapidaService {
         }
     }
 
+    public List<ReservaRapida> findByPlaca(String placa) {
+        return reservaRapidaRepository.findByPlacaIgnoringCaseAndStatus(placa,StatusReservaEnum.ATIVA);
+    }
+
     public ReservaRapida create(ReservaRapida novaReservaRapida) {
         Integer quantidadeReservasRapidasPorPlaca = reservaRapidaRepository.countByPlaca(novaReservaRapida.getPlaca());
         Vaga vagaReserva = vagaService.findById(novaReservaRapida.getVaga().getId());

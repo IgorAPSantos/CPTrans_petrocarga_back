@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cptrans.petrocarga.dto.ReservaAtivaDTO;
 import com.cptrans.petrocarga.dto.ReservaDetailedResponseDTO;
 import com.cptrans.petrocarga.dto.ReservaRequestDTO;
 import com.cptrans.petrocarga.dto.ReservaResponseDTO;
-import com.cptrans.petrocarga.dto.ReservasAtivasDTO;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
 import com.cptrans.petrocarga.models.Motorista;
@@ -56,15 +56,26 @@ public class ReservaController {
         return ResponseEntity.ok(reservas);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE', 'MOTORISTA', 'EMPRESA')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE')")
     @GetMapping("/ativas/{vagaId}")
-    public ResponseEntity<List<ReservasAtivasDTO>> getReservasAtivasByVagaIdAndData(@PathVariable UUID vagaId,@RequestParam(required = false) LocalDate data) {
+    public ResponseEntity<List<ReservaAtivaDTO>> getReservasAtivasByVagaIdAndDataAndPlaca(@PathVariable UUID vagaId,@RequestParam(required = false) LocalDate data, @RequestParam(required = false) String placa) {
         Vaga vaga = vagaService.findById(vagaId);
-        List<ReservasAtivasDTO> reservas = reservaService.getReservasAtivasByData(vaga, data);
+        if(placa != null) {
+            List<ReservaAtivaDTO> reservas = reservaService.getReservasAtivasByDataAndPlaca(vaga, data, placa);
+            return ResponseEntity.ok(reservas);
+        }
+        List<ReservaAtivaDTO> reservas = reservaService.getReservasAtivasByData(vaga, data);
+        return ResponseEntity.ok(reservas);
+    }
+    
+    @PreAuthorize("hasAnyRole('ADMIN','AGENTE')")
+    @GetMapping("/placa")
+    public ResponseEntity<List<ReservaAtivaDTO>> getReservasAtivasByPlaca(@RequestParam(required = true) String placa) {
+        List<ReservaAtivaDTO> reservas = reservaService.getReservasAtivasByPlaca(placa);
         return ResponseEntity.ok(reservas);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','MOTORISTA', 'EMPRESA')")
+    @PreAuthorize("hasAnyRole('ADMIN','AGENTE','MOTORISTA', 'EMPRESA')")
     @GetMapping("/bloqueios/{vagaId}")
     public ResponseEntity<List<ReservaService.Intervalo>> getIntervalosBloqueados(@PathVariable UUID vagaId, @RequestParam LocalDate data, @RequestParam TipoVeiculoEnum tipoVeiculo) {
         Vaga vaga = vagaService.findById(vagaId);
