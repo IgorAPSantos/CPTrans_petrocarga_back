@@ -1,21 +1,19 @@
 package com.cptrans.petrocarga.services;
 
-import com.cptrans.petrocarga.models.Agente;
-import com.cptrans.petrocarga.repositories.AgenteRepository;
-
-import jakarta.transaction.Transactional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.cptrans.petrocarga.enums.PermissaoEnum;
+import com.cptrans.petrocarga.models.Agente;
 import com.cptrans.petrocarga.models.Usuario;
+import com.cptrans.petrocarga.repositories.AgenteRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
 public class AgenteService {
@@ -30,6 +28,11 @@ public class AgenteService {
        return agenteRepository.findAll();
     }
 
+    public Agente findById(UUID id) {
+        return agenteRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Agente nao encontrado"));
+    }
+
     public Agente findByUsuarioId(UUID usuarioId) {
         Usuario usuario = usuarioService.findById(usuarioId);
         return agenteRepository.findByUsuario(usuario)
@@ -37,14 +40,13 @@ public class AgenteService {
     }
 
     @Transactional
-    public Agente createAgente(Agente agente) {
-        if(agenteRepository.existsByMatricula(agente.getMatricula())) {
+    public Agente createAgente(Agente novoAgente) {
+        if(agenteRepository.existsByMatricula(novoAgente.getMatricula())) {
             throw new IllegalArgumentException("Matrícula já cadastrada");
         }
-        Usuario usuario = usuarioService.createUsuario(agente.getUsuario(), PermissaoEnum.AGENTE);
-        Agente novoAgente = new Agente();
+        Usuario usuario = usuarioService.createUsuario(novoAgente.getUsuario(), PermissaoEnum.AGENTE);
         novoAgente.setUsuario(usuario);
-        novoAgente.setMatricula(agente.getMatricula());
+        novoAgente.setMatricula(novoAgente.getMatricula());
         return agenteRepository.save(novoAgente);
     }
 

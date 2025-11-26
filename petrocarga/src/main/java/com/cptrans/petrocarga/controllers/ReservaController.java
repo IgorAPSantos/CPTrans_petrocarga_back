@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cptrans.petrocarga.dto.ReservaAtivaDTO;
+import com.cptrans.petrocarga.dto.ReservaDTO;
 import com.cptrans.petrocarga.dto.ReservaDetailedResponseDTO;
 import com.cptrans.petrocarga.dto.ReservaRequestDTO;
 import com.cptrans.petrocarga.dto.ReservaResponseDTO;
@@ -49,7 +49,7 @@ public class ReservaController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE')")
     @GetMapping
-    public ResponseEntity<List<ReservaResponseDTO>> getAllReservas(@RequestParam(required = false) StatusReservaEnum status, @RequestParam(required = false) UUID vagaId) {
+    public ResponseEntity<List<ReservaResponseDTO>> getReservas(@RequestParam(required = false) StatusReservaEnum status, @RequestParam(required = false) UUID vagaId) {
         List<ReservaResponseDTO> reservas = reservaService.findAll(status, vagaId).stream()
                 .map(ReservaResponseDTO::new)
                 .collect(Collectors.toList());
@@ -57,21 +57,21 @@ public class ReservaController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE')")
-    @GetMapping("/ativas/{vagaId}")
-    public ResponseEntity<List<ReservaAtivaDTO>> getReservasAtivasByVagaIdAndDataAndPlaca(@PathVariable UUID vagaId,@RequestParam(required = false) LocalDate data, @RequestParam(required = false) String placa) {
+    @GetMapping("/all/{vagaId}")
+    public ResponseEntity<List<ReservaDTO>> getAllReservasWithFilters(@PathVariable UUID vagaId,@RequestParam(required = false) LocalDate data, @RequestParam(required = false) String placa,@RequestParam(required = false) StatusReservaEnum status) {
         Vaga vaga = vagaService.findById(vagaId);
         if(placa != null) {
-            List<ReservaAtivaDTO> reservas = reservaService.getReservasAtivasByDataAndPlaca(vaga, data, placa);
+            List<ReservaDTO> reservas = reservaService.getReservasAtivasByDataAndPlaca(vaga, data, placa, status);
             return ResponseEntity.ok(reservas);
         }
-        List<ReservaAtivaDTO> reservas = reservaService.getReservasAtivasByData(vaga, data);
+        List<ReservaDTO> reservas = reservaService.getReservasByData(vaga, data, status);
         return ResponseEntity.ok(reservas);
     }
     
     @PreAuthorize("hasAnyRole('ADMIN','AGENTE')")
     @GetMapping("/placa")
-    public ResponseEntity<List<ReservaAtivaDTO>> getReservasAtivasByPlaca(@RequestParam(required = true) String placa) {
-        List<ReservaAtivaDTO> reservas = reservaService.getReservasAtivasByPlaca(placa);
+    public ResponseEntity<List<ReservaDTO>> getAllReservasByPlaca(@RequestParam(required = true) String placa) {
+        List<ReservaDTO> reservas = reservaService.getReservasAtivasByPlaca(placa);
         return ResponseEntity.ok(reservas);
     }
 

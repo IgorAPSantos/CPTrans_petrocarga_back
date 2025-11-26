@@ -31,6 +31,14 @@ public class UsuarioService {
         return usuarioRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuario não encontrado."));
     }
 
+    public List<Usuario> findByPermissao(PermissaoEnum permissao) {
+        return usuarioRepository.findByPermissao(permissao);
+    }
+
+    public List<Usuario> findByPermissaoAndAtivo(PermissaoEnum permissao, Boolean ativo) {
+        return usuarioRepository.findByPermissaoAndAtivo(permissao, ativo);
+    }
+
     public Usuario createUsuario(Usuario novoUsuario, PermissaoEnum permissao) {
         if(usuarioRepository.findByEmail(novoUsuario.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email já cadastrado");
