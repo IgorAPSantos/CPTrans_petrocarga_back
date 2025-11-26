@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cptrans.petrocarga.dto.DisponibilidadeVagaRequestDTO;
 import com.cptrans.petrocarga.dto.DisponibilidadeVagaResponseDTO;
+import com.cptrans.petrocarga.dto.MultiplasDisponibilidadesVagaRequestDTO;
 import com.cptrans.petrocarga.models.DisponibilidadeVaga;
 import com.cptrans.petrocarga.services.DisponibilidadeVagaService;
 
@@ -60,6 +61,16 @@ public class DisponibilidadeVagaController {
     public ResponseEntity<DisponibilidadeVagaResponseDTO> createDisponibilidadeVaga(@RequestBody @Valid DisponibilidadeVagaRequestDTO disponibilidadeVagaRequestDTO) {
         DisponibilidadeVaga savedDisponibilidadeVaga = disponibilidadeVagaService.createDisponibilidadeVaga(disponibilidadeVagaRequestDTO.toEntity(), disponibilidadeVagaRequestDTO.getVagaId());
         return ResponseEntity.status(HttpStatus.CREATED).body(savedDisponibilidadeVaga.toResponseDTO());
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
+    @PostMapping("/vagas")
+    public ResponseEntity<List<DisponibilidadeVagaResponseDTO>> createMultipleDisponibilidadeVagas(@RequestBody @Valid MultiplasDisponibilidadesVagaRequestDTO multiplasDisponibilidadesVagaRequestDTO) {
+        List<DisponibilidadeVaga> savedDisponibilidadeVagas = disponibilidadeVagaService.createMultipleDisponibilidadeVagas(multiplasDisponibilidadesVagaRequestDTO.toEntity(), multiplasDisponibilidadesVagaRequestDTO.getListaVagaId());
+        List<DisponibilidadeVagaResponseDTO> response = savedDisponibilidadeVagas.stream()
+                .map(DisponibilidadeVaga::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")

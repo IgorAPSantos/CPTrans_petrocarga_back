@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,6 +49,33 @@ public class DisponibilidadeVagaService {
         novaDisponibilidadeVaga.setCriadoPor(usuario);
 
         return disponibilidadeVagaRepository.save(novaDisponibilidadeVaga);
+    }
+
+    public List<DisponibilidadeVaga> createMultipleDisponibilidadeVagas(DisponibilidadeVaga novaDisponibilidadeVaga, List<UUID> listaVagaId) {
+        UserAuthenticated userAuthenticated = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Usuario usuarioLogado = usuarioService.findById(userAuthenticated.id());
+        List<Vaga> listaVagas = new ArrayList<>();
+        List<DisponibilidadeVaga> disponibilidadesCriadas = new ArrayList<>();
+
+        if(listaVagaId.isEmpty()) throw new IllegalArgumentException("A lista de vagas não pode estar vazia.");
+        
+        listaVagaId.forEach(id -> {
+            Vaga vaga = vagaService.findById(id);
+            listaVagas.add(vaga);
+        });
+
+        for(Vaga vaga : listaVagas) {
+            if(disponibilidadeValida(novaDisponibilidadeVaga, vaga)) {
+                DisponibilidadeVaga disponibilidadeVaga = new DisponibilidadeVaga();
+                disponibilidadeVaga.setInicio(novaDisponibilidadeVaga.getInicio());
+                disponibilidadeVaga.setFim(novaDisponibilidadeVaga.getFim());
+                disponibilidadeVaga.setVaga(vaga);
+                disponibilidadeVaga.setCriadoPor(usuarioLogado);
+                disponibilidadesCriadas.add(disponibilidadeVaga);
+            } 
+        }
+        if(disponibilidadesCriadas.isEmpty()) throw new IllegalArgumentException("Nenhuma disponibilidade foi criada. Verifique os dados informados.");
+        return disponibilidadeVagaRepository.saveAll(disponibilidadesCriadas);
     }
 
     public DisponibilidadeVaga updateDisponibilidadeVaga(UUID disponibilidaId, DisponibilidadeVaga novaDisponibilidadeVaga, UUID vagaId) {
