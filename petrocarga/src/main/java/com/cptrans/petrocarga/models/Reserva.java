@@ -59,10 +59,17 @@ public class Reserva {
     @Column(nullable = false)
     private StatusReservaEnum status;
 
+    @Column(name = "checked_in", nullable = false)
+    private Boolean checkedIn = false;
+
+    @Column(name = "check_in_em")
+    private OffsetDateTime checkInEm;
+
     // Constructors
     public Reserva() {
         this.criadoEm = OffsetDateTime.now();
         this.status = StatusReservaEnum.ATIVA;
+        this.checkedIn = false;
     }
 
     // Getters and Setters
@@ -144,6 +151,22 @@ public class Reserva {
 
     public void setStatus(StatusReservaEnum status) {
         this.status = status;
+    }
+
+    public Boolean getCheckedIn() {
+        return checkedIn;
+    }
+
+    public void setCheckedIn(Boolean checkedIn) {
+        this.checkedIn = checkedIn;
+    }
+
+    public OffsetDateTime getCheckInEm() {
+        return checkInEm;
+    }
+
+    public void setCheckInEm(OffsetDateTime checkInEm) {
+        this.checkInEm = checkInEm;
     }
 
     public ReservaResponseDTO toResponseDTO() {
