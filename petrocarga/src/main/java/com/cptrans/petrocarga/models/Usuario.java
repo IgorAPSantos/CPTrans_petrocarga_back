@@ -63,6 +63,16 @@ public class Usuario implements UserDetails{
         this.criadoEm = OffsetDateTime.now();
         this.ativo = true;
     }
+    public Usuario(String nome, String cpf, String telefone, String email, String senha, PermissaoEnum permissao) {
+        this.nome = nome;
+        this.cpf = cpf;
+        this.telefone = telefone;
+        this.email = email;
+        this.senha = senha;
+        this.permissao = permissao;
+        this.criadoEm = OffsetDateTime.now();
+        this.ativo = true;
+    }
 
     // Getters and Setters
     public UUID getId() {

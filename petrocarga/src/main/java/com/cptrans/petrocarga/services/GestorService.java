@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.services;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,18 @@ import com.cptrans.petrocarga.models.Usuario;
 public class GestorService {
     @Autowired
     private UsuarioService usuarioService;
+
+    public List<Usuario> findAll() {
+        return usuarioService.findByPermissao(PermissaoEnum.GESTOR);
+    }
+
+    public List<Usuario> findAllByAtivo(Boolean ativo) {
+        return usuarioService.findByPermissaoAndAtivo(PermissaoEnum.GESTOR, ativo);
+    }
+
+    public Usuario findByUsuarioId(UUID usuarioId) {
+        return usuarioService.findById(usuarioId);
+    }
 
     public Usuario createGestor(Usuario novoGestor) {
         return usuarioService.createUsuario(novoGestor, PermissaoEnum.GESTOR);
