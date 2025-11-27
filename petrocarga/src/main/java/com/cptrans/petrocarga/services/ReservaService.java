@@ -69,25 +69,6 @@ public class ReservaService {
         return reservas;
     }
 
-    // public List<ReservaDTO> getAllReservasByVagaAndFilters(Vaga vaga, StatusReservaEnum status, String ano, String mes, String dia, String placa){
-    //     List<ReservaDTO> reservasNaVaga = getReservasByData(vaga, null, status);
-    //     Map<String, Object> filtros = new HashMap<>();
-        
-    //     if(!reservasNaVaga.isEmpty()) {
-    //         if(status != null) filtros.put("status", status);
-    //         if(ano != null) filtros.put("ano", ano);
-    //         if(mes != null) filtros.put("mes", mes);
-    //         if(dia != null) filtros.put("dia", dia);
-    //         if(placa != null) filtros.put("placa", placa); 
-            
-    //         List<ReservaDTO> reservasFiltradas = reservasNaVaga.stream().filter(reserva -> {
-    //             if(filtros.containsKey(filtros))
-    //         })
-    //     }
-
-    //     return reservaUtils.filtrarReservasComParametros(reservasFiltradas, ano, mes, dia, placa);
-    // }
-
     public List<Reserva> findByStatus(StatusReservaEnum status) {
         return reservaRepository.findByStatus(status);
     }
