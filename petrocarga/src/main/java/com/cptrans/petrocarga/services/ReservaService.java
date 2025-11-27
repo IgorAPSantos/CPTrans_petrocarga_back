@@ -60,24 +60,14 @@ public class ReservaService {
         return reservaRepository.findAll();
     }
 
-    // public List<ReservaDTO> getAllReservasByVagaAndFilters(Vaga vaga, StatusReservaEnum status, String ano, String mes, String dia, String placa){
-    //     List<ReservaDTO> reservasNaVaga = getReservasByData(vaga, null, status);
-    //     Map<String, Object> filtros = new HashMap<>();
-        
-    //     if(!reservasNaVaga.isEmpty()) {
-    //         if(status != null) filtros.put("status", status);
-    //         if(ano != null) filtros.put("ano", ano);
-    //         if(mes != null) filtros.put("mes", mes);
-    //         if(dia != null) filtros.put("dia", dia);
-    //         if(placa != null) filtros.put("placa", placa); 
-            
-    //         List<ReservaDTO> reservasFiltradas = reservasNaVaga.stream().filter(reserva -> {
-    //             if(filtros.containsKey(filtros))
-    //         })
-    //     }
-
-    //     return reservaUtils.filtrarReservasComParametros(reservasFiltradas, ano, mes, dia, placa);
-    // }
+    public List<Reserva> findAllByData(LocalDate data, StatusReservaEnum status, UUID vagaId) {
+        List<Reserva> reservas = findAll(status, vagaId);
+        if(reservas.isEmpty()) return reservas;
+        if(data != null) {
+            return reservas.stream().filter(reserva -> DateUtils.toLocalDateInBrazil(reserva.getInicio()).equals(data) || DateUtils.toLocalDateInBrazil(reserva.getFim()).equals(data)).toList();
+        }
+        return reservas;
+    }
 
     public List<Reserva> findByStatus(StatusReservaEnum status) {
         return reservaRepository.findByStatus(status);
@@ -154,7 +144,7 @@ public class ReservaService {
         reservaUtils.validarPermissoesReserva(usuarioLogado, motoristaDaReserva, veiculoDaReserva);
     }
 
-    public List<ReservaDTO> getReservasByData(Vaga vaga, LocalDate data, StatusReservaEnum status) {
+    public List<ReservaDTO> getReservasByVagaAndData(Vaga vaga, LocalDate data, StatusReservaEnum status) {
         List<Reserva> reservas = findByVagaIdAndDataAndStatus(vaga.getId(), data, status);
         List<ReservaRapida> reservasRapidas = reservaRapidaService.findByVagaAndDataAndStatus(vaga, data, status);
         List<ReservaDTO> listaFinalReservas = new ArrayList<>();
@@ -170,9 +160,32 @@ public class ReservaService {
         return listaFinalReservas;
     }
 
-    public List<ReservaDTO> getReservasAtivasByDataAndPlaca(Vaga vaga, LocalDate data, String placa, StatusReservaEnum status) {
-        List<ReservaDTO> reservasAtivas = getReservasByData(vaga, data, status);
-        return reservasAtivas.stream()
+    public List<ReservaDTO> getAllReservasByData(LocalDate data, StatusReservaEnum status) {
+        List<Reserva> reservas = findAllByData(data, status, null);
+        List<ReservaRapida> reservasRapidas = reservaRapidaService.findAllByData( data, status);
+        List<ReservaDTO> listaFinalReservas = new ArrayList<>();
+        
+        if(reservasRapidas != null && !reservasRapidas.isEmpty()) {
+            reservasRapidas.forEach(rr -> listaFinalReservas.add(new ReservaDTO(rr.getVaga(), rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca(), rr.getStatus())));
+        }
+
+        if(reservas != null && !reservas.isEmpty()) {
+            reservas.forEach(r-> listaFinalReservas.add(new ReservaDTO(r.getVaga(), r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca(), r.getStatus())));
+        }
+        
+        return listaFinalReservas;
+    }
+
+    public List<ReservaDTO> getReservasByVagaDataAndPlaca(Vaga vaga, LocalDate data, String placa, StatusReservaEnum status) {
+        List<ReservaDTO> reservas = getReservasByVagaAndData(vaga, data, status);
+        return reservas.stream()
+                .filter(r -> r.getPlacaVeiculo().equalsIgnoreCase(placa))
+                .toList();
+    }
+
+    public List<ReservaDTO> getAllReservasByDataAndPlaca(LocalDate data, String placa, StatusReservaEnum status) {
+        List<ReservaDTO> reservas = getAllReservasByData( data, status);
+        return reservas.stream()
                 .filter(r -> r.getPlacaVeiculo().equalsIgnoreCase(placa))
                 .toList();
     }
@@ -194,7 +207,7 @@ public class ReservaService {
         int capacidadeTotal = vaga.getComprimento();
         int comprimentoVeiculoDesejado = tipoVeiculo.getComprimento();
 
-        List<ReservaDTO> reservas = getReservasByData(vaga, data, StatusReservaEnum.ATIVA);
+        List<ReservaDTO> reservas = getReservasByVagaAndData(vaga, data, StatusReservaEnum.ATIVA);
         if (reservas.isEmpty()) {
             return List.of(); // nada reservado → nenhum bloqueio
         }

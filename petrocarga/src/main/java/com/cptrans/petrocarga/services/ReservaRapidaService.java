@@ -35,9 +35,30 @@ public class ReservaRapidaService {
     private UsuarioService usuarioService;
     @Autowired
     private AgenteService agenteService;
- 
+    
+    public List<ReservaRapida> findAll(StatusReservaEnum status) {
+        if(status != null) {
+            return reservaRapidaRepository.findByStatus(status);
+        }
+        return reservaRapidaRepository.findAll();
+    }
+
+    public List<ReservaRapida> findAllByData(LocalDate data, StatusReservaEnum status) {
+        List<ReservaRapida> reservasRapidas = findAll(status);
+        if(reservasRapidas.isEmpty()) return reservasRapidas;
+        if(data != null) {
+            return reservasRapidas.stream()
+                .filter(reservaRapida -> DateUtils.toLocalDateInBrazil(reservaRapida.getInicio()).equals(data) || DateUtils.toLocalDateInBrazil(reservaRapida.getFim()).equals(data))
+                .toList();
+        }
+        return reservasRapidas;
+        
+    }
 
     public List<ReservaRapida> findByVagaAndStatus(Vaga vaga, StatusReservaEnum status) {
+        if(status == null) {
+            return reservaRapidaRepository.findByVaga(vaga);
+        }
         return reservaRapidaRepository.findByVagaAndStatus(vaga, status);
     }
 
