@@ -8,6 +8,7 @@ import com.cptrans.petrocarga.models.Vaga;
 
 
 public class ReservaDTO {
+    private UUID id;
     private UUID vagaId;
     private String numeroEndereco;
     private String referenciaEndereco;
@@ -20,7 +21,8 @@ public class ReservaDTO {
 
     public ReservaDTO() {
     }
-    public ReservaDTO(Vaga vaga,OffsetDateTime inicio, OffsetDateTime fim, Integer tamanhoVeiculo, String placaVeiculo, StatusReservaEnum status) {
+    public ReservaDTO(UUID reservaId, Vaga vaga, OffsetDateTime inicio, OffsetDateTime fim, Integer tamanhoVeiculo, String placaVeiculo, StatusReservaEnum status) {
+        this.id = reservaId;
         this.vagaId = vaga.getId();
         this.numeroEndereco = vaga.getNumeroEndereco();
         this.referenciaEndereco = vaga.getReferenciaEndereco();
@@ -30,6 +32,13 @@ public class ReservaDTO {
         this.tamanhoVeiculo = tamanhoVeiculo;
         this.placaVeiculo = placaVeiculo;
         this.status = status;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+    public void setId(UUID reservaId) {
+        this.id = reservaId;
     }
     public UUID getVaga() {
         return vagaId;

@@ -150,11 +150,11 @@ public class ReservaService {
         List<ReservaDTO> listaFinalReservas = new ArrayList<>();
         
         if(reservasRapidas != null && !reservasRapidas.isEmpty()) {
-            reservasRapidas.forEach(rr -> listaFinalReservas.add(new ReservaDTO(vaga, rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca(), rr.getStatus())));
+            reservasRapidas.forEach(rr -> listaFinalReservas.add(new ReservaDTO(rr.getId(), vaga, rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca(), rr.getStatus())));
         }
 
         if(reservas != null && !reservas.isEmpty()) {
-            reservas.forEach(r-> listaFinalReservas.add(new ReservaDTO(vaga, r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca(), r.getStatus())));
+            reservas.forEach(r-> listaFinalReservas.add(new ReservaDTO(r.getId(), vaga, r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca(), r.getStatus())));
         }
         
         return listaFinalReservas;
@@ -166,11 +166,11 @@ public class ReservaService {
         List<ReservaDTO> listaFinalReservas = new ArrayList<>();
         
         if(reservasRapidas != null && !reservasRapidas.isEmpty()) {
-            reservasRapidas.forEach(rr -> listaFinalReservas.add(new ReservaDTO(rr.getVaga(), rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca(), rr.getStatus())));
+            reservasRapidas.forEach(rr -> listaFinalReservas.add(new ReservaDTO(rr.getId(), rr.getVaga(), rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca(), rr.getStatus())));
         }
 
         if(reservas != null && !reservas.isEmpty()) {
-            reservas.forEach(r-> listaFinalReservas.add(new ReservaDTO(r.getVaga(), r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca(), r.getStatus())));
+            reservas.forEach(r-> listaFinalReservas.add(new ReservaDTO(r.getId(), r.getVaga(), r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca(), r.getStatus())));
         }
         
         return listaFinalReservas;
@@ -195,10 +195,10 @@ public class ReservaService {
         List<ReservaRapida> reservasRapidasPorPlaca = reservaRapidaService.findByPlaca(placa);
         List<ReservaDTO> listaReservasAtivasPorPlaca = new ArrayList<>();
         if(reservasRapidasPorPlaca != null && !reservasRapidasPorPlaca.isEmpty()) {
-            reservasRapidasPorPlaca.forEach(rr -> listaReservasAtivasPorPlaca.add(new ReservaDTO(rr.getVaga(), rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca(), rr.getStatus())));
+            reservasRapidasPorPlaca.forEach(rr -> listaReservasAtivasPorPlaca.add(new ReservaDTO(rr.getId(), rr.getVaga(), rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca(), rr.getStatus())));
         }
         if(reservasPorPlaca != null && !reservasPorPlaca.isEmpty()) {
-            reservasPorPlaca.forEach(r-> listaReservasAtivasPorPlaca.add(new ReservaDTO(r.getVaga(), r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca(), r.getStatus())));
+            reservasPorPlaca.forEach(r-> listaReservasAtivasPorPlaca.add(new ReservaDTO(r.getId(),r.getVaga(), r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca(), r.getStatus())));
         }
         return listaReservasAtivasPorPlaca;
     }
