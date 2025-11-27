@@ -68,19 +68,19 @@ public class ReservaDetailedResponseDTO {
     public String getBairro() { return bairro; }
     public void setBairro(String bairro) { this.bairro = bairro; }
     public UUID getMotoristaId() {
-        return null; // Retorno nulo para evitar exposição
+        return motoristaId;
     }
     public void setMotoristaId(UUID motoristaId) { this.motoristaId = motoristaId; }
     public String getMotoristaNome() { return motoristaNome; }
     public void setMotoristaNome(String motoristaNome) { this.motoristaNome = motoristaNome; }
     public UUID getVeiculoId() {
-        return null; // Retorno nulo para evitar exposição
+        return veiculoId;
     }
     public void setVeiculoId(UUID veiculoId) { this.veiculoId = veiculoId; }
     public String getVeiculoPlaca() { return veiculoPlaca; }
     public void setVeiculoPlaca(String veiculoPlaca) { this.veiculoPlaca = veiculoPlaca; }
     public UUID getCriadoPorId() {
-        return null; // Retorno nulo para evitar exposição
+        return criadoPorId;
     }
     public void setCriadoPorId(UUID criadoPorId) { this.criadoPorId = criadoPorId; }
     public String getCriadoPorNome() { return criadoPorNome; }

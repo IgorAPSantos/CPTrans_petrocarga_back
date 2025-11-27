@@ -269,4 +269,118 @@ public static class Intervalo {
     public void setInicio(OffsetDateTime inicio) { this.inicio = inicio; }
     public void setFim(OffsetDateTime fim) { this.fim = fim; }
 }
+
+    /**
+     * Finaliza uma reserva de forma forçada por um AGENTE/ADMIN ou pelo job automático.
+     * Regras:
+     *  - Reserva deve existir e estar ATIVA
+     *  - A finalização só é bloqueada se ainda não começou
+     *  - Usuário autenticado deve possuir ROLE_AGENTE ou ROLE_ADMIN (garantido por @PreAuthorize no controller)
+     * Efeitos:
+     *  - Atualiza status para CONCLUIDA
+     *  - Não altera o campo "fim" para evitar impacto em relatórios existentes
+     */
+    public Reserva finalizarForcado(UUID reservaId) {
+        Reserva reserva = findById(reservaId);
+
+        if (!StatusReservaEnum.ATIVA.equals(reserva.getStatus())) {
+            throw new IllegalStateException("Reserva não está ativa e não pode ser finalizada.");
+        }
+
+        OffsetDateTime agora = OffsetDateTime.now();
+        // Bloqueia apenas finalizações ANTES do início (não faz sentido finalizar algo que não começou)
+        if (agora.isBefore(reserva.getInicio())) {
+            throw new IllegalStateException("Não é possível finalizar uma reserva que ainda não começou.");
+        }
+
+        reserva.setStatus(StatusReservaEnum.CONCLUIDA);
+        return reservaRepository.save(reserva);
+    }
+
+    /**
+     * Realiza o check-in de uma reserva.
+     * Regras:
+     *  - Reserva deve existir e estar ATIVA
+     *  - Não pode já ter feito check-in
+     *  - Check-in só é permitido dentro do período da reserva (ou poucos minutos antes)
+     */
+    public Reserva realizarCheckIn(UUID reservaId) {
+        Reserva reserva = findById(reservaId);
+
+        if (!StatusReservaEnum.ATIVA.equals(reserva.getStatus())) {
+            throw new IllegalStateException("Reserva não está ativa.");
+        }
+
+        if (Boolean.TRUE.equals(reserva.getCheckedIn())) {
+            throw new IllegalStateException("Check-in já foi realizado para esta reserva.");
+        }
+
+        OffsetDateTime agora = OffsetDateTime.now();
+        // Permite check-in até 5 minutos antes do início
+        OffsetDateTime limiteAntes = reserva.getInicio().minusMinutes(5);
+        
+        if (agora.isBefore(limiteAntes) || agora.isAfter(reserva.getFim())) {
+            throw new IllegalStateException("Check-in só pode ser realizado próximo ao horário da reserva.");
+        }
+
+        // Validar permissões do usuário
+        UserAuthenticated userAuthenticated = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Usuario usuarioLogado = usuarioService.findById(userAuthenticated.id());
+        List<String> authorities = userAuthenticated.userDetails().getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).toList();
+
+        // MOTORISTA só pode fazer check-in em sua própria reserva
+        if (authorities.contains(PermissaoEnum.MOTORISTA.getRole())) {
+            Motorista motorista = motoristaService.findByUsuarioId(usuarioLogado.getId());
+            if (!reserva.getMotorista().getId().equals(motorista.getId())) {
+                throw new IllegalArgumentException("Motorista só pode fazer check-in em suas próprias reservas.");
+            }
+        }
+
+        // EMPRESA só pode fazer check-in em reservas de seus veículos
+        if (authorities.contains(PermissaoEnum.EMPRESA.getRole())) {
+            if (!reserva.getCriadoPor().getId().equals(usuarioLogado.getId())) {
+                throw new IllegalArgumentException("Empresa só pode fazer check-in em reservas criadas por ela.");
+            }
+        }
+
+        // AGENTE e ADMIN podem fazer check-in em qualquer reserva (já permitido)
+
+        reserva.setCheckedIn(true);
+        reserva.setCheckInEm(agora);
+        return reservaRepository.save(reserva);
+    }
+
+    /**
+     * Processa reservas elegíveis para no-show (sem check-in após grace period).
+     * Chamado pelo scheduler automaticamente.
+     * @param graceMinutes minutos de tolerância após o início
+     * @return quantidade de reservas finalizadas
+     */
+    public int processarNoShow(int graceMinutes) {
+        OffsetDateTime agora = OffsetDateTime.now();
+
+        List<Reserva> candidatas = reservaRepository.findNoShowCandidates(
+            StatusReservaEnum.ATIVA,
+            graceMinutes,
+            agora
+        );
+
+        int finalizadas = 0;
+        for (Reserva reserva : candidatas) {
+            try {
+                finalizarForcado(reserva.getId());
+                finalizadas++;
+            } catch (Exception e) {
+                // Log e continua para não bloquear outras reservas
+                System.err.println("Erro ao finalizar reserva " + reserva.getId() + ": " + e.getMessage());
+            }
+        }
+
+        if (finalizadas > 0) {
+            System.out.println("No-show: " + finalizadas + " reserva(s) finalizada(s) automaticamente.");
+        }
+
+        return finalizadas;
+    }
 }

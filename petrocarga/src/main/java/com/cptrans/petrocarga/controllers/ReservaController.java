@@ -114,6 +114,20 @@ public class ReservaController {
 
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','AGENTE')")
+    @PostMapping("/{id}/finalizar-forcado")
+    public ResponseEntity<ReservaResponseDTO> finalizarReservaForcado(@PathVariable UUID id) {
+        Reserva reservaFinalizada = reservaService.finalizarForcado(id);
+        return ResponseEntity.ok(reservaFinalizada.toResponseDTO());
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','AGENTE','MOTORISTA','EMPRESA')")
+    @PostMapping("/{id}/checkin")
+    public ResponseEntity<ReservaResponseDTO> realizarCheckIn(@PathVariable UUID id) {
+        Reserva reserva = reservaService.realizarCheckIn(id);
+        return ResponseEntity.ok(reserva.toResponseDTO());
+    }
+
     // TODO: Refatorar Rota PUT
     // @PutMapping("/{id}")
     // public ResponseEntity<ReservaResponseDTO> updateReserva(@PathVariable UUID id, @RequestBody @Valid ReservaRequestDTO reservaRequestDTO) {

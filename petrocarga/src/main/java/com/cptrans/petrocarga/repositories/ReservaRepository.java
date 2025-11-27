@@ -29,4 +29,16 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
            "JOIN FETCH r.criadoPor " +
            "WHERE r.id = :id")
     Reserva findByIdWithJoins(@Param("id") UUID id);
+
+    @Query("SELECT r FROM Reserva r " +
+           "WHERE r.status = :status " +
+           "AND r.checkedIn = false " +
+           "AND r.inicio < :agora " +
+           "AND FUNCTION('TIMESTAMPADD', MINUTE, :graceMinutes, r.inicio) <= :agora " +
+           "AND r.fim > :agora")
+    List<Reserva> findNoShowCandidates(
+        @Param("status") StatusReservaEnum status,
+        @Param("graceMinutes") int graceMinutes,
+        @Param("agora") OffsetDateTime agora
+    );
 }
