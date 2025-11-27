@@ -58,13 +58,24 @@ public class ReservaController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE')")
     @GetMapping("/all/{vagaId}")
-    public ResponseEntity<List<ReservaDTO>> getAllReservasWithFilters(@PathVariable UUID vagaId,@RequestParam(required = false) LocalDate data, @RequestParam(required = false) String placa,@RequestParam(required = false) StatusReservaEnum status) {
+    public ResponseEntity<List<ReservaDTO>> getAllReservasWithFiltersByVaga(@PathVariable UUID vagaId,@RequestParam(required = false) LocalDate data, @RequestParam(required = false) String placa,@RequestParam(required = false) StatusReservaEnum status) {
         Vaga vaga = vagaService.findById(vagaId);
         if(placa != null) {
-            List<ReservaDTO> reservas = reservaService.getReservasAtivasByDataAndPlaca(vaga, data, placa, status);
+            List<ReservaDTO> reservas = reservaService.getReservasByVagaDataAndPlaca(vaga, data, placa, status);
             return ResponseEntity.ok(reservas);
         }
-        List<ReservaDTO> reservas = reservaService.getReservasByData(vaga, data, status);
+        List<ReservaDTO> reservas = reservaService.getReservasByVagaAndData(vaga, data, status);
+        return ResponseEntity.ok(reservas);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE')")
+    @GetMapping("/all")
+    public ResponseEntity<List<ReservaDTO>> getAllReservasWithFilters(@RequestParam(required = false) LocalDate data, @RequestParam(required = false) String placa,@RequestParam(required = false) StatusReservaEnum status) {
+        if(placa != null) {
+            List<ReservaDTO> reservas = reservaService.getAllReservasByDataAndPlaca( data, placa, status);
+            return ResponseEntity.ok(reservas);
+        }
+        List<ReservaDTO> reservas = reservaService.getAllReservasByData( data, status);
         return ResponseEntity.ok(reservas);
     }
     
