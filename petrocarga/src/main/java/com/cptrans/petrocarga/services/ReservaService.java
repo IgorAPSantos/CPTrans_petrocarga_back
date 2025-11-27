@@ -14,7 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.cptrans.petrocarga.dto.ReservaAtivaDTO;
+import com.cptrans.petrocarga.dto.ReservaDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
@@ -60,6 +60,25 @@ public class ReservaService {
         return reservaRepository.findAll();
     }
 
+    // public List<ReservaDTO> getAllReservasByVagaAndFilters(Vaga vaga, StatusReservaEnum status, String ano, String mes, String dia, String placa){
+    //     List<ReservaDTO> reservasNaVaga = getReservasByData(vaga, null, status);
+    //     Map<String, Object> filtros = new HashMap<>();
+        
+    //     if(!reservasNaVaga.isEmpty()) {
+    //         if(status != null) filtros.put("status", status);
+    //         if(ano != null) filtros.put("ano", ano);
+    //         if(mes != null) filtros.put("mes", mes);
+    //         if(dia != null) filtros.put("dia", dia);
+    //         if(placa != null) filtros.put("placa", placa); 
+            
+    //         List<ReservaDTO> reservasFiltradas = reservasNaVaga.stream().filter(reserva -> {
+    //             if(filtros.containsKey(filtros))
+    //         })
+    //     }
+
+    //     return reservaUtils.filtrarReservasComParametros(reservasFiltradas, ano, mes, dia, placa);
+    // }
+
     public List<Reserva> findByStatus(StatusReservaEnum status) {
         return reservaRepository.findByStatus(status);
     }
@@ -72,9 +91,12 @@ public class ReservaService {
         return reservaRepository.findByVaga(vaga);
     }
     
-    public List<Reserva> findAtivasByVagaIdAndData(UUID vagaId, LocalDate data) {
+    public List<Reserva> findByVagaIdAndDataAndStatus(UUID vagaId, LocalDate data, StatusReservaEnum status) {
         Vaga vaga = vagaService.findById(vagaId);
-        List<Reserva> reservas = reservaRepository.findByVagaAndStatus(vaga, StatusReservaEnum.ATIVA);
+        List<Reserva> reservas = reservaRepository.findByVaga(vaga);
+        if(status != null) {
+            reservas = reservaRepository.findByVagaAndStatus(vaga, status);
+        }
         if(data != null) {
             return reservas.stream().filter(reserva -> DateUtils.toLocalDateInBrazil(reserva.getInicio()).equals(data)).toList();
         }
@@ -132,38 +154,38 @@ public class ReservaService {
         reservaUtils.validarPermissoesReserva(usuarioLogado, motoristaDaReserva, veiculoDaReserva);
     }
 
-    public List<ReservaAtivaDTO> getReservasAtivasByData(Vaga vaga, LocalDate data){
-        List<Reserva> reservasAtivasNaVaga = findAtivasByVagaIdAndData(vaga.getId(), data);
-        List<ReservaRapida> reservasRapidasAtivasNaVaga = reservaRapidaService.findAtivasByVagaAndData(vaga, data);
-        List<ReservaAtivaDTO> listaReservasAtivas = new ArrayList<>();
+    public List<ReservaDTO> getReservasByData(Vaga vaga, LocalDate data, StatusReservaEnum status) {
+        List<Reserva> reservas = findByVagaIdAndDataAndStatus(vaga.getId(), data, status);
+        List<ReservaRapida> reservasRapidas = reservaRapidaService.findByVagaAndDataAndStatus(vaga, data, status);
+        List<ReservaDTO> listaFinalReservas = new ArrayList<>();
         
-        if(reservasRapidasAtivasNaVaga != null && !reservasRapidasAtivasNaVaga.isEmpty()) {
-            reservasRapidasAtivasNaVaga.forEach(rr -> listaReservasAtivas.add(new ReservaAtivaDTO(vaga, rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca())));
+        if(reservasRapidas != null && !reservasRapidas.isEmpty()) {
+            reservasRapidas.forEach(rr -> listaFinalReservas.add(new ReservaDTO(vaga, rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca(), rr.getStatus())));
         }
 
-        if(reservasAtivasNaVaga != null && !reservasAtivasNaVaga.isEmpty()) {
-            reservasAtivasNaVaga.forEach(r-> listaReservasAtivas.add(new ReservaAtivaDTO(vaga, r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca())));
+        if(reservas != null && !reservas.isEmpty()) {
+            reservas.forEach(r-> listaFinalReservas.add(new ReservaDTO(vaga, r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca(), r.getStatus())));
         }
         
-        return listaReservasAtivas;
+        return listaFinalReservas;
     }
 
-    public List<ReservaAtivaDTO> getReservasAtivasByDataAndPlaca(Vaga vaga, LocalDate data, String placa){
-        List<ReservaAtivaDTO> reservasAtivas = getReservasAtivasByData(vaga, data);
+    public List<ReservaDTO> getReservasAtivasByDataAndPlaca(Vaga vaga, LocalDate data, String placa, StatusReservaEnum status) {
+        List<ReservaDTO> reservasAtivas = getReservasByData(vaga, data, status);
         return reservasAtivas.stream()
                 .filter(r -> r.getPlacaVeiculo().equalsIgnoreCase(placa))
                 .toList();
     }
 
-    public List<ReservaAtivaDTO> getReservasAtivasByPlaca(String placa){
+    public List<ReservaDTO> getReservasAtivasByPlaca(String placa){
         List<Reserva> reservasPorPlaca = reservaRepository.findByVeiculoPlacaIgnoringCaseAndStatus(placa, StatusReservaEnum.ATIVA);
         List<ReservaRapida> reservasRapidasPorPlaca = reservaRapidaService.findByPlaca(placa);
-        List<ReservaAtivaDTO> listaReservasAtivasPorPlaca = new ArrayList<>();
+        List<ReservaDTO> listaReservasAtivasPorPlaca = new ArrayList<>();
         if(reservasRapidasPorPlaca != null && !reservasRapidasPorPlaca.isEmpty()) {
-            reservasRapidasPorPlaca.forEach(rr -> listaReservasAtivasPorPlaca.add(new ReservaAtivaDTO(rr.getVaga(), rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca())));
+            reservasRapidasPorPlaca.forEach(rr -> listaReservasAtivasPorPlaca.add(new ReservaDTO(rr.getVaga(), rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca(), rr.getStatus())));
         }
         if(reservasPorPlaca != null && !reservasPorPlaca.isEmpty()) {
-            reservasPorPlaca.forEach(r-> listaReservasAtivasPorPlaca.add(new ReservaAtivaDTO(r.getVaga(), r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca())));
+            reservasPorPlaca.forEach(r-> listaReservasAtivasPorPlaca.add(new ReservaDTO(r.getVaga(), r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca(), r.getStatus())));
         }
         return listaReservasAtivasPorPlaca;
     }
@@ -172,7 +194,7 @@ public class ReservaService {
         int capacidadeTotal = vaga.getComprimento();
         int comprimentoVeiculoDesejado = tipoVeiculo.getComprimento();
 
-        List<ReservaAtivaDTO> reservas = getReservasAtivasByData(vaga, data);
+        List<ReservaDTO> reservas = getReservasByData(vaga, data, StatusReservaEnum.ATIVA);
         if (reservas.isEmpty()) {
             return List.of(); // nada reservado → nenhum bloqueio
         }
@@ -197,7 +219,7 @@ public class ReservaService {
 
             int ocupacaoAtual = 0;
 
-            for (ReservaAtivaDTO res : reservas) {
+            for (ReservaDTO res : reservas) {
                 boolean sobrepoe = res.getInicio().toInstant().isBefore(fim)
                         && res.getFim().toInstant().isAfter(inicio);
 
@@ -249,10 +271,10 @@ public static class Intervalo {
 }
 
     /**
-     * Finaliza uma reserva de forma forçada por um AGENTE/ADMIN.
+     * Finaliza uma reserva de forma forçada por um AGENTE/ADMIN ou pelo job automático.
      * Regras:
      *  - Reserva deve existir e estar ATIVA
-     *  - A finalização deve ocorrer durante o período da reserva (agora ∈ [inicio, fim])
+     *  - A finalização só é bloqueada se ainda não começou
      *  - Usuário autenticado deve possuir ROLE_AGENTE ou ROLE_ADMIN (garantido por @PreAuthorize no controller)
      * Efeitos:
      *  - Atualiza status para CONCLUIDA
@@ -266,8 +288,9 @@ public static class Intervalo {
         }
 
         OffsetDateTime agora = OffsetDateTime.now();
-        if (agora.isBefore(reserva.getInicio()) || agora.isAfter(reserva.getFim())) {
-            throw new IllegalStateException("Finalização forçada só é permitida durante o período da reserva.");
+        // Bloqueia apenas finalizações ANTES do início (não faz sentido finalizar algo que não começou)
+        if (agora.isBefore(reserva.getInicio())) {
+            throw new IllegalStateException("Não é possível finalizar uma reserva que ainda não começou.");
         }
 
         reserva.setStatus(StatusReservaEnum.CONCLUIDA);
@@ -336,11 +359,10 @@ public static class Intervalo {
      */
     public int processarNoShow(int graceMinutes) {
         OffsetDateTime agora = OffsetDateTime.now();
-        OffsetDateTime limiteInicio = agora.minusMinutes(graceMinutes);
 
         List<Reserva> candidatas = reservaRepository.findNoShowCandidates(
             StatusReservaEnum.ATIVA,
-            limiteInicio,
+            graceMinutes,
             agora
         );
 

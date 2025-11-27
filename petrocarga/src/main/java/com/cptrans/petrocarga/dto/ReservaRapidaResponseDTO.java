@@ -3,6 +3,7 @@ package com.cptrans.petrocarga.dto;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
 import com.cptrans.petrocarga.models.ReservaRapida;
 
@@ -18,6 +19,7 @@ public class ReservaRapidaResponseDTO {
     private OffsetDateTime inicio;
     private OffsetDateTime fim;
     private OffsetDateTime criadoEm;
+    private StatusReservaEnum status;
 
     public ReservaRapidaResponseDTO() {
     }
@@ -33,6 +35,7 @@ public class ReservaRapidaResponseDTO {
         this.inicio = reservaRapida.getInicio();
         this.fim = reservaRapida.getFim();
         this.criadoEm = reservaRapida.getCriadoEm();
+        this.status = reservaRapida.getStatus();
     }
 
     // Getters and Setters
@@ -114,5 +117,11 @@ public class ReservaRapidaResponseDTO {
 
     public void setCriadoEm(OffsetDateTime criadoEm) {
         this.criadoEm = criadoEm;
+    }
+    public StatusReservaEnum getStatus() {
+        return status;
+    }
+    public void setStatus(StatusReservaEnum status) {
+        this.status = status;
     }
 }

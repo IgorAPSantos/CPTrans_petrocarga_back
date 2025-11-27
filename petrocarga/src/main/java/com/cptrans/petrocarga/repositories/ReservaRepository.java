@@ -33,11 +33,12 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
     @Query("SELECT r FROM Reserva r " +
            "WHERE r.status = :status " +
            "AND r.checkedIn = false " +
-           "AND r.inicio <= :limiteInicio " +
+           "AND r.inicio < :agora " +
+           "AND FUNCTION('TIMESTAMPADD', MINUTE, :graceMinutes, r.inicio) <= :agora " +
            "AND r.fim > :agora")
     List<Reserva> findNoShowCandidates(
         @Param("status") StatusReservaEnum status,
-        @Param("limiteInicio") OffsetDateTime limiteInicio,
+        @Param("graceMinutes") int graceMinutes,
         @Param("agora") OffsetDateTime agora
     );
 }

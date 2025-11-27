@@ -41,19 +41,26 @@ public class ReservaRapidaService {
         return reservaRapidaRepository.findByVagaAndStatus(vaga, status);
     }
 
-    public List<ReservaRapida> findAtivasByVagaAndData(Vaga vaga, LocalDate data) {
-        List<ReservaRapida> reservasRapidasAtivas = reservaRapidaRepository.findByVagaAndStatus(vaga, StatusReservaEnum.ATIVA);
-        if(data!=null && reservasRapidasAtivas!=null && !reservasRapidasAtivas.isEmpty()) {
-            return reservasRapidasAtivas.stream()
+    public List<ReservaRapida> findByVagaAndDataAndStatus(Vaga vaga, LocalDate data, StatusReservaEnum status) {
+        List<ReservaRapida> reservasRapidas = reservaRapidaRepository.findByVaga(vaga);
+        if(status != null) {
+            reservasRapidas = reservaRapidaRepository.findByVagaAndStatus(vaga, status);
+        }
+        if(data!=null && reservasRapidas!=null && !reservasRapidas.isEmpty()) {
+            return reservasRapidas.stream()
                 .filter(reservaRapida -> DateUtils.toLocalDateInBrazil(reservaRapida.getInicio()).equals(data) || DateUtils.toLocalDateInBrazil(reservaRapida.getFim()).equals(data))
                 .toList();
         } else {
-            return reservasRapidasAtivas;
+            return reservasRapidas;
         }
     }
 
     public List<ReservaRapida> findByPlaca(String placa) {
         return reservaRapidaRepository.findByPlacaIgnoringCaseAndStatus(placa,StatusReservaEnum.ATIVA);
+    }
+
+    public List<ReservaRapida> findByAgente(Agente agente) {
+        return reservaRapidaRepository.findByAgente(agente);
     }
 
     public ReservaRapida create(ReservaRapida novaReservaRapida) {
