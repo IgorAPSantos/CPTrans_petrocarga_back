@@ -8,15 +8,19 @@ import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
 import com.cptrans.petrocarga.models.ReservaRapida;
 import com.cptrans.petrocarga.models.Vaga;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class ReservaRapidaRequestDTO {
 
     @NotNull
     private UUID vagaId;
 
+    @Valid
     private TipoVeiculoEnum tipoVeiculo;
 
+    @Size(min = 7, max = 10, message = "Placa deve ter entre 7 e 10 caracteres.")
     private String placa;
 
     @NotNull

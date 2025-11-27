@@ -2,6 +2,7 @@ package com.cptrans.petrocarga.dto;
 
 import org.hibernate.validator.constraints.br.CPF;
 
+import com.cptrans.petrocarga.models.Agente;
 import com.cptrans.petrocarga.models.Usuario;
 
 import jakarta.validation.Valid;
@@ -9,8 +10,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public class UsuarioRequestDTO {
-
+public class AgentePUTRequestDTO {
     @NotBlank(message="Nome não pode ser vazio.")
     private String nome;
 
@@ -28,57 +28,45 @@ public class UsuarioRequestDTO {
     private String email;
 
     @NotBlank
+    private String matricula;
+    
     @Size(min = 6, max = 100, message="Senha deve conter no mínimo 6 caracteres.")
     private String senha;
 
-    public Usuario toEntity() {
+    public Agente toEntity(){
+        Agente agente = new Agente();
         Usuario usuario = new Usuario();
         usuario.setNome(this.nome);
         usuario.setCpf(this.cpf);
         usuario.setTelefone(this.telefone);
         usuario.setEmail(this.email);
         usuario.setSenha(this.senha);
-        return usuario;
+        agente.setUsuario(usuario);
+        agente.setMatricula(this.matricula);
+        return agente;
     }
 
-    // Getters and Setters
     public String getNome() {
         return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
     }
 
     public String getCpf() {
         return cpf;
     }
 
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
-    }
-
     public String getTelefone() {
         return telefone;
-    }
-
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getSenha() {
         return senha;
     }
 
-    public void setSenha(String senha) {
-        this.senha = senha;
+    public String getMatricula() {
+        return matricula;
     }
 }

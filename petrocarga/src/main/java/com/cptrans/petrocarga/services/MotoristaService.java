@@ -83,6 +83,9 @@ public class MotoristaService {
 
         Usuario usuarioAtualizado = usuarioService.updateUsuario(usuarioId, motoristaRequest.getUsuario(), PermissaoEnum.MOTORISTA);
         motoristaCadastrado.setUsuario(usuarioAtualizado);
+        motoristaCadastrado.setTipoCNH(motoristaRequest.getTipoCNH());
+        motoristaCadastrado.setNumeroCNH(motoristaRequest.getNumeroCNH());
+        motoristaCadastrado.setDataValidadeCNH(motoristaRequest.getDataValidadeCNH());
 
         return motoristaRepository.save(motoristaCadastrado);
     }
