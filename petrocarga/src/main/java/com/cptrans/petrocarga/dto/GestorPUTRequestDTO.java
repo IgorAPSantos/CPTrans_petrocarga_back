@@ -5,6 +5,7 @@ import org.hibernate.validator.constraints.br.CPF;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.models.Usuario;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -13,16 +14,18 @@ public class GestorPUTRequestDTO {
     @NotBlank
     private String nome;
 
+    @Valid
     @Email(message = "Informe um email válido.")
     private String email;
 
+    @Valid
     @CPF(message = "Informe um CPF válido.")
     private String cpf;
 
     @Size(min = 10, max = 11,message= "Telefone deve conter entre 10 e 11 dígitos.")
     private String telefone;
 
-    @Size(min = 6, message = "Senha deve conter no mínimo 6 caracteres.")
+    @Size(min = 6, max = 100, message = "Senha deve conter no mínimo 6 caracteres.")
     private String senha;
 
     public Usuario toEntity() {

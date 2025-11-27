@@ -18,6 +18,7 @@ public class MotoristaRequestDTO {
     private UsuarioRequestDTO usuario;
 
     @NonNull
+    @Valid
     private TipoCnhEnum tipoCNH;
 
     @Size(min = 9, max = 9, message = "Número da CNH deve ter exatamente 9 caracteres.")

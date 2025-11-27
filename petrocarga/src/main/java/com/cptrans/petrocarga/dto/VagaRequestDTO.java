@@ -42,6 +42,7 @@ public class VagaRequestDTO {
     @Schema(description = "Comprimento máximo em metros permitido para a vaga", example = "12")
     private Integer comprimento;
     
+    @Valid
     @Schema(description = "Status inicial da vaga (Ex: DISPONIVEL, OCUPADA)", example= "DISPONIVEL")
     private StatusVagaEnum status;
 

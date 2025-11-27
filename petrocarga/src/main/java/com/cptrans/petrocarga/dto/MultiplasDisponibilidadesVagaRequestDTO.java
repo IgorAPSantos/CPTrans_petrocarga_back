@@ -6,8 +6,10 @@ import java.util.UUID;
 
 import com.cptrans.petrocarga.models.DisponibilidadeVaga;
 
+import jakarta.validation.Valid;
+
 public class MultiplasDisponibilidadesVagaRequestDTO {
-    
+    @Valid
     private List<UUID> listaVagaId;
     private OffsetDateTime inicio;
     private OffsetDateTime fim;

@@ -8,21 +8,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cptrans.petrocarga.dto.AgentePUTRequestDTO;
 import com.cptrans.petrocarga.dto.AgenteRequestDTO;
 import com.cptrans.petrocarga.dto.AgenteResponseDTO;
 import com.cptrans.petrocarga.models.Agente;
 import com.cptrans.petrocarga.services.AgenteService;
 
 import jakarta.validation.Valid;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 
 
 @RestController
@@ -54,10 +54,10 @@ public class AgenteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedAgente.toResponseDTO());
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR') or #usuarioId == authentication.principal.id")
     @PutMapping("/{usuarioId}")
-    public ResponseEntity<AgenteResponseDTO> updateAgente(@PathVariable UUID id, @RequestBody @Valid AgenteRequestDTO agenteRequestDTO) {
-        Agente updatedAgente = agenteService.updateAgente(id, agenteRequestDTO.toEntity());
+    public ResponseEntity<AgenteResponseDTO> updateAgente(@PathVariable UUID usuarioId, @RequestBody @Valid AgentePUTRequestDTO agenteRequestDTO) {
+        Agente updatedAgente = agenteService.updateAgente(usuarioId, agenteRequestDTO.toEntity());
         return ResponseEntity.ok(updatedAgente.toResponseDTO());
     }
 

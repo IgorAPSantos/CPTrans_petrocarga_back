@@ -5,6 +5,7 @@ import org.hibernate.validator.constraints.br.CPF;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.models.Usuario;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -13,9 +14,11 @@ public class GestorRequestDTO {
     @NotBlank
     private String nome;
 
+    @Valid
     @Email(message = "Informe um email válido.")
     private String email;
 
+    @Valid
     @CPF(message = "Informe um CPF válido.")
     private String cpf;
 

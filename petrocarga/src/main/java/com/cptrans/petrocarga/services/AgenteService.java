@@ -59,9 +59,9 @@ public class AgenteService {
             throw new IllegalArgumentException("Matrícula já cadastrada");
         }
     
-        Usuario novoUsuario = usuarioService.updateUsuario(usuarioId, novoAgente.getUsuario(), PermissaoEnum.AGENTE);
+        Usuario usuarioAtualizado = usuarioService.updateUsuario(usuarioId, novoAgente.getUsuario(), PermissaoEnum.AGENTE);
 
-        agenteCadastrado.setUsuario(novoUsuario);
+        agenteCadastrado.setUsuario(usuarioAtualizado);
         agenteCadastrado.setMatricula(novoAgente.getMatricula());
 
         return agenteRepository.save(agenteCadastrado);
