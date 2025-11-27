@@ -9,6 +9,7 @@ import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
 import com.cptrans.petrocarga.models.Veiculo;
 
 import jakarta.annotation.Nonnull;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 
 
@@ -29,10 +30,12 @@ public class VeiculoRequestDTO {
     @Nonnull
     private UUID usuarioId;
 
+    @Valid
     @CPF(message = "CPF inválido.")
     private String cpfProprietario;
 
-    @CNPJ
+    @Valid
+    @CNPJ(message = "CNPJ inválido.")
     private String cnpjProprietario;
 
     public Veiculo toEntity() {
