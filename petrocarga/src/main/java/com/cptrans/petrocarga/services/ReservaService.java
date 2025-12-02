@@ -29,6 +29,8 @@ import com.cptrans.petrocarga.security.UserAuthenticated;
 import com.cptrans.petrocarga.utils.DateUtils;
 import com.cptrans.petrocarga.utils.ReservaUtils;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class ReservaService {
 
@@ -294,7 +296,7 @@ public static class Intervalo {
      *  - Não altera o campo "fim" para evitar impacto em relatórios existentes
      */
     public Reserva finalizarForcado(UUID reservaId) {
-        Reserva reserva = findById(reservaId);
+        Reserva reserva = reservaRepository.findById(reservaId).orElseThrow(() -> new EntityNotFoundException("Reserva não encontrada."));
 
         if (!StatusReservaEnum.ATIVA.equals(reserva.getStatus())) {
             throw new IllegalStateException("Reserva não está ativa e não pode ser finalizada.");

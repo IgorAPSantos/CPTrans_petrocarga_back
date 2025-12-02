@@ -23,7 +23,7 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','GESTOR')")
     @GetMapping
     public ResponseEntity<List<UsuarioResponseDTO>> getAllUsuarios() {
         List<UsuarioResponseDTO> usuarios = usuarioService.findAll().stream()
@@ -32,7 +32,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarios);
     }
 
-    @PreAuthorize(" #id == authentication.principal.id or hasRole('ADMIN')")
+    @PreAuthorize(" #id == authentication.principal.id or hasAnyRole('ADMIN', 'GESTOR')")
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> getUsuarioById(@PathVariable UUID id) {
         Usuario usuario = usuarioService.findById(id);

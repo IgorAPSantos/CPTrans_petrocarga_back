@@ -31,7 +31,6 @@ public class NoShowSchedulerConfig {
             reservaService.processarNoShow(graceMinutes);
         } catch (Exception e) {
             System.err.println("Erro no job de no-show: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 }
