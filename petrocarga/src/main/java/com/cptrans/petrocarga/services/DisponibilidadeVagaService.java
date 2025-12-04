@@ -86,6 +86,8 @@ public class DisponibilidadeVagaService {
         if(!disponibilidadeValida(novaDisponibilidadeVaga, vaga)) throw new IllegalArgumentException("Informações inválidas.");
         disponibilidadeCadastrada.setVaga(vaga);
         disponibilidadeCadastrada.setCriadoPor(usuario);
+        disponibilidadeCadastrada.setInicio(novaDisponibilidadeVaga.getInicio());
+        disponibilidadeCadastrada.setFim(novaDisponibilidadeVaga.getFim());
         return disponibilidadeVagaRepository.save(disponibilidadeCadastrada);
     }
 
