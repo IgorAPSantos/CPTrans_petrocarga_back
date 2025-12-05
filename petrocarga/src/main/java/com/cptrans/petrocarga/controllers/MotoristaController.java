@@ -10,15 +10,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cptrans.petrocarga.dto.MotoristaRequestDTO;
 import com.cptrans.petrocarga.dto.MotoristaResponseDTO;
+import com.cptrans.petrocarga.dto.UsuarioPATCHRequestDTO;
 import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.services.MotoristaService;
 
@@ -54,9 +55,9 @@ public class MotoristaController {
     }
 
     @PreAuthorize("#usuarioId == authentication.principal.id or hasRole('ADMIN')")
-    @PutMapping("/{usuarioId}")
-    public ResponseEntity<MotoristaResponseDTO> updateMotorista(@PathVariable UUID usuarioId, @RequestBody @Valid MotoristaRequestDTO motoristaRequestDTO) {
-        Motorista updatedMotorista = motoristaService.updateMotorista(usuarioId, motoristaRequestDTO.toEntity(null));
+    @PatchMapping("/{usuarioId}")
+    public ResponseEntity<MotoristaResponseDTO> updateMotorista(@PathVariable UUID usuarioId, @RequestBody UsuarioPATCHRequestDTO motoristaRequestDTO) {
+        Motorista updatedMotorista = motoristaService.updateMotorista(usuarioId, motoristaRequestDTO);
         return ResponseEntity.ok(new MotoristaResponseDTO(updatedMotorista));
     }
 

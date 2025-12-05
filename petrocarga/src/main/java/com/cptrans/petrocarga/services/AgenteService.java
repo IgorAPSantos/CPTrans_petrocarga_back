@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.cptrans.petrocarga.dto.UsuarioPATCHRequestDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.models.Agente;
 import com.cptrans.petrocarga.models.Usuario;
@@ -51,19 +52,20 @@ public class AgenteService {
     }
 
     @Transactional
-    public Agente updateAgente(UUID usuarioId, Agente novoAgente) {
+    public Agente updateAgente(UUID usuarioId, UsuarioPATCHRequestDTO novoAgente) {
         Agente agenteCadastrado = findByUsuarioId(usuarioId);
-        Optional<Agente> agenteByMatricula = agenteRepository.findByMatricula(novoAgente.getMatricula());
-        
-        if(agenteByMatricula.isPresent() && !agenteByMatricula.get().getId().equals(agenteCadastrado.getId())) {
-            throw new IllegalArgumentException("Matrícula já cadastrada");
+
+        if (novoAgente.getMatricula() != null) {
+            Optional<Agente> agenteByMatricula = agenteRepository.findByMatricula(novoAgente.getMatricula());
+            if(agenteByMatricula.isPresent() && !agenteByMatricula.get().getId().equals(agenteCadastrado.getId())) {
+                throw new IllegalArgumentException("Matrícula já cadastrada");
+            }
+            agenteCadastrado.setMatricula(novoAgente.getMatricula());
         }
     
-        Usuario usuarioAtualizado = usuarioService.updateUsuario(usuarioId, novoAgente.getUsuario(), PermissaoEnum.AGENTE);
-
+        Usuario usuarioAtualizado = usuarioService.patchUpdate(usuarioId, PermissaoEnum.AGENTE, novoAgente);
         agenteCadastrado.setUsuario(usuarioAtualizado);
-        agenteCadastrado.setMatricula(novoAgente.getMatricula());
-
+        
         return agenteRepository.save(agenteCadastrado);
     }
 

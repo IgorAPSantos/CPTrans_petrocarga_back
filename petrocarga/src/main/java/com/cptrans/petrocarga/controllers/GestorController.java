@@ -8,16 +8,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cptrans.petrocarga.dto.GestorPUTRequestDTO;
 import com.cptrans.petrocarga.dto.GestorRequestDTO;
+import com.cptrans.petrocarga.dto.UsuarioPATCHRequestDTO;
 import com.cptrans.petrocarga.dto.UsuarioResponseDTO;
 import com.cptrans.petrocarga.services.GestorService;
 
@@ -55,8 +55,8 @@ public class GestorController {
     }
 
     @PreAuthorize("#usuarioId == authentication.principal.id or hasRole('ADMIN')")
-    @PutMapping("/{usuarioId}")
-    public ResponseEntity<UsuarioResponseDTO> updateGestor(@PathVariable UUID usuarioId, @RequestBody GestorPUTRequestDTO gestorRequestDTO) {
-        return ResponseEntity.ok(gestorService.updateGestor(usuarioId, gestorRequestDTO.toEntity()).toResponseDTO());
+    @PatchMapping("/{usuarioId}")
+    public ResponseEntity<UsuarioResponseDTO> updateGestor(@PathVariable UUID usuarioId, @RequestBody UsuarioPATCHRequestDTO gestorRequestDTO) {
+        return ResponseEntity.ok(gestorService.updateGestor(usuarioId, gestorRequestDTO).toResponseDTO());
     }
 }
