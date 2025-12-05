@@ -1,0 +1,13 @@
+ALTER TABLE reserva
+ALTER COLUMN status SET DEFAULT 'RESERVADA';
+
+ALTER TABLE reserva_rapida
+ALTER COLUMN status SET DEFAULT 'RESERVADA';
+
+UPDATE reserva
+SET status = 'CONCLUIDA'
+WHERE fim < CURRENT_TIMESTAMP AND status = 'ATIVA';
+
+UPDATE reserva_rapida
+SET status = 'CONCLUIDA'
+WHERE fim < CURRENT_TIMESTAMP AND status = 'ATIVA';
