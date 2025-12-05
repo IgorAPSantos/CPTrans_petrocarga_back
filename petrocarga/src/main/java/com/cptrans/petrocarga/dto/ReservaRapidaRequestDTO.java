@@ -3,7 +3,6 @@ package com.cptrans.petrocarga.dto;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
 import com.cptrans.petrocarga.models.ReservaRapida;
 import com.cptrans.petrocarga.models.Vaga;
@@ -40,7 +39,6 @@ public class ReservaRapidaRequestDTO {
         reservaRapida.setPlaca(this.placa);
         reservaRapida.setInicio(this.inicio);
         reservaRapida.setFim(this.fim);
-        reservaRapida.setStatus(StatusReservaEnum.ATIVA);
         return reservaRapida;
     }
 

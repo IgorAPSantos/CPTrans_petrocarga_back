@@ -68,7 +68,7 @@ public class Reserva {
     // Constructors
     public Reserva() {
         this.criadoEm = OffsetDateTime.now();
-        this.status = StatusReservaEnum.ATIVA;
+        this.status = StatusReservaEnum.RESERVADA;
         this.checkedIn = false;
     }
 

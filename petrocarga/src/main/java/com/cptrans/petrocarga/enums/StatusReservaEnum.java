@@ -1,5 +1,5 @@
 package com.cptrans.petrocarga.enums;
 
 public enum StatusReservaEnum {
-    ATIVA, CONCLUIDA
+    RESERVADA, ATIVA, CONCLUIDA, REMOVIDA, CANCELADA
 }

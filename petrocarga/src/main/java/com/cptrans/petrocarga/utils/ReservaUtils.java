@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.utils;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,13 @@ public class ReservaUtils {
 
     public void validarTempoMaximoReserva(Reserva novaReserva) {
         Vaga vagaReserva = novaReserva.getVaga();
+        OffsetDateTime agora = OffsetDateTime.now(DateUtils.FUSO_BRASIL);
         if(novaReserva.getFim().toInstant().isBefore(novaReserva.getInicio().toInstant())) {
             throw new IllegalArgumentException("Fim da reserva deve ser posterior ao inicio.");
+        }
+
+        if(novaReserva.getFim().toInstant().isBefore(agora.toInstant())) {
+            throw new IllegalArgumentException("Fim da reserva deve ser posterior ao horário atual.");
         }
 
         Integer tempoReservaEmMinutos = (int) (novaReserva.getInicio().toInstant().until(novaReserva.getFim().toInstant(), java.time.temporal.ChronoUnit.MINUTES));
