@@ -1,6 +1,7 @@
 package com.cptrans.petrocarga.services;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,14 +37,14 @@ public class ReservaRapidaService {
     @Autowired
     private AgenteService agenteService;
     
-    public List<ReservaRapida> findAll(StatusReservaEnum status) {
-        if(status != null) {
-            return reservaRapidaRepository.findByStatus(status);
+    public List<ReservaRapida> findAll(List<StatusReservaEnum> status) {
+        if(!status.isEmpty()) {
+            return reservaRapidaRepository.findByStatusIn(status);
         }
         return reservaRapidaRepository.findAll();
     }
 
-    public List<ReservaRapida> findAllByData(LocalDate data, StatusReservaEnum status) {
+    public List<ReservaRapida> findAllByData(LocalDate data, List<StatusReservaEnum> status) {
         List<ReservaRapida> reservasRapidas = findAll(status);
         if(reservasRapidas.isEmpty()) return reservasRapidas;
         if(data != null) {
@@ -55,17 +56,17 @@ public class ReservaRapidaService {
         
     }
 
-    public List<ReservaRapida> findByVagaAndStatus(Vaga vaga, StatusReservaEnum status) {
-        if(status == null) {
+    public List<ReservaRapida> findByVagaAndStatusIn(Vaga vaga, List<StatusReservaEnum> status) {
+        if(status.isEmpty()) {
             return reservaRapidaRepository.findByVaga(vaga);
         }
-        return reservaRapidaRepository.findByVagaAndStatus(vaga, status);
+        return reservaRapidaRepository.findByVagaAndStatusIn(vaga, status);
     }
 
-    public List<ReservaRapida> findByVagaAndDataAndStatus(Vaga vaga, LocalDate data, StatusReservaEnum status) {
+    public List<ReservaRapida> findByVagaAndDataAndStatusIn(Vaga vaga, LocalDate data, List<StatusReservaEnum> status) {
         List<ReservaRapida> reservasRapidas = reservaRapidaRepository.findByVaga(vaga);
         if(status != null) {
-            reservasRapidas = reservaRapidaRepository.findByVagaAndStatus(vaga, status);
+            reservasRapidas = reservaRapidaRepository.findByVagaAndStatusIn(vaga, status);
         }
         if(data!=null && reservasRapidas!=null && !reservasRapidas.isEmpty()) {
             return reservasRapidas.stream()
@@ -77,7 +78,7 @@ public class ReservaRapidaService {
     }
 
     public List<ReservaRapida> findByPlaca(String placa) {
-        return reservaRapidaRepository.findByPlacaIgnoringCaseAndStatus(placa,StatusReservaEnum.ATIVA);
+        return reservaRapidaRepository.findByPlacaIgnoringCaseAndStatus(placa, StatusReservaEnum.ATIVA);
     }
 
     public List<ReservaRapida> findByAgente(Agente agente) {
@@ -88,7 +89,7 @@ public class ReservaRapidaService {
         Integer quantidadeReservasRapidasPorPlaca = reservaRapidaRepository.countByPlaca(novaReservaRapida.getPlaca());
         Vaga vagaReserva = vagaService.findById(novaReservaRapida.getVaga().getId());
         List<Reserva>  reservasAtivasNaVaga = reservaRepository.findByVagaAndStatus(vagaReserva, StatusReservaEnum.ATIVA);
-        List<ReservaRapida> reservasRapidasAtivasNaVaga = findByVagaAndStatus(vagaReserva, StatusReservaEnum.ATIVA);
+        List<ReservaRapida> reservasRapidasAtivasNaVaga = findByVagaAndStatusIn(vagaReserva, new ArrayList<>(List.of(StatusReservaEnum.ATIVA)));//reservaRapidaRepository.findByVagaAndStatus(vagaReserva, StatusReservaEnum.ATIVA);
         UserAuthenticated userAuthenticated = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Usuario usuarioLogado = usuarioService.findById(userAuthenticated.id());
         if(usuarioLogado.getPermissao().equals(PermissaoEnum.AGENTE)){

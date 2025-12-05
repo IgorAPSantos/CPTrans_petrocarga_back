@@ -1,0 +1,2 @@
+ALTER TABLE veiculo
+DROP CONSTRAINT veiculo_placa_usuario_id_key;

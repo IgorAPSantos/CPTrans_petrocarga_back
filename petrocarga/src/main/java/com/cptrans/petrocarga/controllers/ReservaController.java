@@ -49,7 +49,7 @@ public class ReservaController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE')")
     @GetMapping
-    public ResponseEntity<List<ReservaResponseDTO>> getReservas(@RequestParam(required = false) StatusReservaEnum status, @RequestParam(required = false) UUID vagaId) {
+    public ResponseEntity<List<ReservaResponseDTO>> getReservas(@RequestParam(required = false) List<StatusReservaEnum> status, @RequestParam(required = false) UUID vagaId) {
         List<ReservaResponseDTO> reservas = reservaService.findAll(status, vagaId).stream()
                 .map(ReservaResponseDTO::new)
                 .collect(Collectors.toList());
@@ -58,7 +58,7 @@ public class ReservaController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE')")
     @GetMapping("/all/{vagaId}")
-    public ResponseEntity<List<ReservaDTO>> getAllReservasWithFiltersByVaga(@PathVariable UUID vagaId,@RequestParam(required = false) LocalDate data, @RequestParam(required = false) String placa,@RequestParam(required = false) StatusReservaEnum status) {
+    public ResponseEntity<List<ReservaDTO>> getAllReservasWithFiltersByVaga(@PathVariable UUID vagaId,@RequestParam(required = false) LocalDate data, @RequestParam(required = false) String placa,@RequestParam(required = false) List<StatusReservaEnum> status) {
         Vaga vaga = vagaService.findById(vagaId);
         if(placa != null) {
             List<ReservaDTO> reservas = reservaService.getReservasByVagaDataAndPlaca(vaga, data, placa, status);
@@ -70,7 +70,7 @@ public class ReservaController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE')")
     @GetMapping("/all")
-    public ResponseEntity<List<ReservaDTO>> getAllReservasWithFilters(@RequestParam(required = false) LocalDate data, @RequestParam(required = false) String placa,@RequestParam(required = false) StatusReservaEnum status) {
+    public ResponseEntity<List<ReservaDTO>> getAllReservasWithFilters(@RequestParam(required = false) LocalDate data, @RequestParam(required = false) String placa,@RequestParam(required = false) List<StatusReservaEnum> status) {
         if(placa != null) {
             List<ReservaDTO> reservas = reservaService.getAllReservasByDataAndPlaca( data, placa, status);
             return ResponseEntity.ok(reservas);
@@ -106,7 +106,7 @@ public class ReservaController {
 
     @PreAuthorize("#usuarioId == authentication.principal.id or hasAnyRole('ADMIN', 'GESTOR')")
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<ReservaResponseDTO>> getReservasByUsuarioId(@PathVariable UUID usuarioId, @RequestParam(required = false) StatusReservaEnum status) {
+    public ResponseEntity<List<ReservaResponseDTO>> getReservasByUsuarioId(@PathVariable UUID usuarioId, @RequestParam(required = false) List<StatusReservaEnum> status) {
         List<ReservaResponseDTO> reservas = reservaService.findByUsuarioId(usuarioId, status).stream()
                 .map(ReservaResponseDTO::new)
                 .collect(Collectors.toList());
@@ -125,7 +125,7 @@ public class ReservaController {
 
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','AGENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN','GESTOR','AGENTE')")
     @PostMapping("/{id}/finalizar-forcado")
     public ResponseEntity<ReservaResponseDTO> finalizarReservaForcado(@PathVariable UUID id) {
         Reserva reservaFinalizada = reservaService.finalizarForcado(id);

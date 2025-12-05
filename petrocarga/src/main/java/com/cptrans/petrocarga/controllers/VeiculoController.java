@@ -10,9 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,10 +47,10 @@ public class VeiculoController {
         return ResponseEntity.ok(veiculos);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'MOTORISTA', 'EMPRESA')")
-    @PostMapping
-    public ResponseEntity<VeiculoResponseDTO> createVeiculo(@RequestBody @Valid VeiculoRequestDTO veiculoRequestDTO) {
-        Veiculo novoVeiculo = veiculoService.createVeiculo(veiculoRequestDTO.toEntity(), veiculoRequestDTO.getUsuarioId());
+    @PreAuthorize("#usuarioId == authentication.principal.id or hasRole('ADMIN')")
+    @PostMapping({"/{usuarioId}"})
+    public ResponseEntity<VeiculoResponseDTO> createVeiculo(@PathVariable UUID usuarioId, @RequestBody @Valid VeiculoRequestDTO veiculoRequestDTO) {
+        Veiculo novoVeiculo = veiculoService.createVeiculo(veiculoRequestDTO.toEntity(), usuarioId);
         return ResponseEntity.status(HttpStatus.CREATED).body(novoVeiculo.toResponseDTO());
     }
 
@@ -61,10 +61,10 @@ public class VeiculoController {
         return ResponseEntity.ok(veiculo.toResponseDTO());
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'MOTORISTA', 'EMPRESA')")
-    @PutMapping("/{id}")
-    public ResponseEntity<VeiculoResponseDTO> updateVeiculo(@PathVariable UUID id, @RequestBody @Valid VeiculoRequestDTO veiculoRequestDTO) {
-        Veiculo veiculo = veiculoService.updateVeiculo(id, veiculoRequestDTO.toEntity(), veiculoRequestDTO.getUsuarioId());
+    @PreAuthorize("#usuarioId == authentication.principal.id or hasAnyRole('ADMIN', 'GESTOR')")
+    @PatchMapping("/{id}/{usuarioId}")
+    public ResponseEntity<VeiculoResponseDTO> updateVeiculo(@PathVariable UUID id, @PathVariable UUID usuarioId, @RequestBody VeiculoRequestDTO veiculoRequestDTO) {
+        Veiculo veiculo = veiculoService.updateVeiculo(id, usuarioId, veiculoRequestDTO);
         return ResponseEntity.ok(veiculo.toResponseDTO());
     }
 

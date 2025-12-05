@@ -67,27 +67,27 @@ public class Motorista {
         this.usuario = usuario;
     }
 
-    public TipoCnhEnum getTipoCNH() {
+    public TipoCnhEnum getTipoCnh() {
         return tipoCnh;
     }
 
-    public void setTipoCNH(TipoCnhEnum tipoCnh) {
+    public void setTipoCnh(TipoCnhEnum tipoCnh) {
         this.tipoCnh = tipoCnh;
     }
 
-    public String getNumeroCNH() {
+    public String getNumeroCnh() {
         return numeroCnh;
     }
 
-    public void setNumeroCNH(String numeroCnh) {
+    public void setNumeroCnh(String numeroCnh) {
         this.numeroCnh = numeroCnh;
     }
 
-    public LocalDate getDataValidadeCNH() {
+    public LocalDate getDataValidadeCnh() {
         return dataValidadeCnh;
     }
 
-    public void setDataValidadeCNH(LocalDate dataValidadeCnh) {
+    public void setDataValidadeCnh(LocalDate dataValidadeCnh) {
         this.dataValidadeCnh = dataValidadeCnh;
     }
 

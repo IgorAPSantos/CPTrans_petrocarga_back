@@ -16,11 +16,12 @@ import com.cptrans.petrocarga.models.Vaga;
 public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
     public List<Reserva> findByVaga(Vaga vaga);
     public List<Reserva> findByVagaAndStatus(Vaga vaga, StatusReservaEnum status);
+    public List<Reserva> findByVagaAndStatusIn(Vaga vaga, List<StatusReservaEnum> status);
     public List<Reserva> findByCriadoPor(Usuario criadoPor);
-    public List<Reserva> findByCriadoPorAndStatus(Usuario criadoPor, StatusReservaEnum status);
-    public List<Reserva> findByStatus(StatusReservaEnum status);
+    public List<Reserva> findByCriadoPorAndStatusIn(Usuario criadoPor, List<StatusReservaEnum> status);
+    public List<Reserva> findByStatusIn(List<StatusReservaEnum> status);
     public List<Reserva> findByVagaAndStatusAndInicio(Vaga vaga, StatusReservaEnum status, OffsetDateTime data);
-    public List<Reserva> findByVeiculoPlacaIgnoringCaseAndStatus(String placa, StatusReservaEnum status);
+    public List<Reserva> findByVeiculoPlacaIgnoringCaseAndStatusIn(String placa, List<StatusReservaEnum> status);
 
     @Query("SELECT r FROM Reserva r " +
            "JOIN FETCH r.vaga " +

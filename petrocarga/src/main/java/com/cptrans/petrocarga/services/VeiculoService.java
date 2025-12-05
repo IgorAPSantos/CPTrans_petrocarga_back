@@ -1,20 +1,19 @@
 package com.cptrans.petrocarga.services;
 
-import com.cptrans.petrocarga.models.Veiculo;
-import com.cptrans.petrocarga.repositories.VeiculoRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
+import com.cptrans.petrocarga.dto.VeiculoRequestDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.models.Usuario;
+import com.cptrans.petrocarga.models.Veiculo;
+import com.cptrans.petrocarga.repositories.VeiculoRepository;
 import com.cptrans.petrocarga.security.UserAuthenticated;
 
 @Service
@@ -59,7 +58,7 @@ public class VeiculoService {
 
     public Veiculo createVeiculo(Veiculo novoVeiculo, UUID usuarioId) {
         Usuario usuario = usuarioService.findById(usuarioId);
-        Optional<Veiculo> veiculoByPlaca = veiculoRepository.findByPlaca(novoVeiculo.getPlaca());
+        Optional<Veiculo> veiculoByPlaca = veiculoRepository.findByPlacaAndUsuario(novoVeiculo.getPlaca(), usuario);
         
         UserAuthenticated usuarioLogado = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<String> authorities = usuarioLogado.userDetails().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
@@ -78,29 +77,35 @@ public class VeiculoService {
         return veiculoRepository.save(novoVeiculo);
     }
 
-    public Veiculo updateVeiculo(UUID veiculoId, Veiculo novoVeiculo, UUID usuarioId) {
+    public Veiculo updateVeiculo(UUID veiculoId, UUID usuarioId, VeiculoRequestDTO novoVeiculo) {
         Veiculo veiculoRegistrado = findById(veiculoId);
-        Usuario usuario = usuarioService.findById(usuarioId);
+        Usuario usuarioRegistrado = usuarioService.findById(usuarioId);
         UserAuthenticated usuarioLogado = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<String> authorities = usuarioLogado.userDetails().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-        if(authorities.contains(PermissaoEnum.MOTORISTA.getRole()) || authorities.contains(PermissaoEnum.EMPRESA.getRole())) {
-            if(!usuario.getId().equals(usuarioLogado.id())) {
+        if (!veiculoRegistrado.getUsuario().getId().equals(usuarioRegistrado.getId()) && (!authorities.contains(PermissaoEnum.ADMIN.getRole()) || !authorities.contains(PermissaoEnum.GESTOR.getRole()))) {
                 throw new IllegalArgumentException("Usuário não pode editar veículo de outro usuário.");
-            }
         }
-        Optional<Veiculo> veiculoByPlaca = veiculoRepository.findByPlaca(novoVeiculo.getPlaca());
 
-        if(veiculoByPlaca.isPresent() && !veiculoByPlaca.get().getId().equals(veiculoRegistrado.getId())) {
-            throw new IllegalArgumentException("Você já possui um veículo cadastrado com essa placa.");
+        if(novoVeiculo.getCpfProprietario() != null && novoVeiculo.getCnpjProprietario() != null) {
+            throw new IllegalArgumentException("Veiculo não pode ter CPF e CNPJ.");
         }
-        veiculoRegistrado.setPlaca(novoVeiculo.getPlaca());
-        veiculoRegistrado.setMarca(novoVeiculo.getMarca());
-        veiculoRegistrado.setModelo(novoVeiculo.getModelo());
-        veiculoRegistrado.setTipo(novoVeiculo.getTipo());
-        veiculoRegistrado.setComprimento(novoVeiculo.getComprimento());
-        veiculoRegistrado.setCpfProprietario(novoVeiculo.getCpfProprietario());
-        veiculoRegistrado.setCnpjProprietario(novoVeiculo.getCnpjProprietario());
-        veiculoRegistrado.setUsuario(usuario);
+
+        if (novoVeiculo.getPlaca() != null){
+            Optional<Veiculo> veiculoByPlaca = veiculoRepository.findByPlacaAndUsuario(novoVeiculo.getPlaca(), usuarioRegistrado);
+            if(veiculoByPlaca.isPresent() && !veiculoByPlaca.get().getId().equals(veiculoRegistrado.getId())) {
+                throw new IllegalArgumentException("Você já possui um veículo cadastrado com essa placa.");
+            }
+            veiculoRegistrado.setPlaca(novoVeiculo.getPlaca());
+        }
+        if (novoVeiculo.getTipo() != null){
+            veiculoRegistrado.setTipo(novoVeiculo.getTipo());
+            veiculoRegistrado.setComprimento(novoVeiculo.getTipo().getComprimento());
+        }
+        if (novoVeiculo.getMarca() != null) veiculoRegistrado.setMarca(novoVeiculo.getMarca());
+        if (novoVeiculo.getModelo() != null) veiculoRegistrado.setModelo(novoVeiculo.getModelo());
+        if (novoVeiculo.getCpfProprietario() != null) veiculoRegistrado.setCpfProprietario(novoVeiculo.getCpfProprietario());
+        if (novoVeiculo.getCnpjProprietario() != null) veiculoRegistrado.setCnpjProprietario(novoVeiculo.getCnpjProprietario());
+     
         return veiculoRepository.save(veiculoRegistrado);
     }
 

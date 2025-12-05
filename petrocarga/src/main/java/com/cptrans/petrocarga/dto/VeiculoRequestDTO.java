@@ -1,7 +1,5 @@
 package com.cptrans.petrocarga.dto;
 
-import java.util.UUID;
-
 import org.hibernate.validator.constraints.br.CNPJ;
 import org.hibernate.validator.constraints.br.CPF;
 
@@ -26,9 +24,6 @@ public class VeiculoRequestDTO {
 
     @Nonnull
     private TipoVeiculoEnum tipo;
-
-    @Nonnull
-    private UUID usuarioId;
 
     @Valid
     @CPF(message = "CPF inválido.")
@@ -62,9 +57,6 @@ public class VeiculoRequestDTO {
     }
     public TipoVeiculoEnum getTipo() {
         return tipo;
-    }
-    public UUID getUsuarioId() {
-        return usuarioId;
     }
     public String getCpfProprietario() {
         return cpfProprietario;

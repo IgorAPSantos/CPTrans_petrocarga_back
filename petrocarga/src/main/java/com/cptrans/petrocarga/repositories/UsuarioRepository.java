@@ -16,4 +16,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {
     public Boolean existsByCpf(String cpf);
     public List<Usuario> findByPermissao(PermissaoEnum permissao);
     public List<Usuario> findByPermissaoAndAtivo(PermissaoEnum permissao, Boolean ativo);
+    public Optional<Usuario> findByIdAndAtivo(UUID id, Boolean ativo);
 }

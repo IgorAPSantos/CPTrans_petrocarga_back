@@ -19,14 +19,14 @@ public class MotoristaRequestDTO {
 
     @NonNull
     @Valid
-    private TipoCnhEnum tipoCNH;
+    private TipoCnhEnum tipoCnh;
 
     @Size(min = 9, max = 9, message = "Número da CNH deve ter exatamente 9 caracteres.")
-    private String numeroCNH;
+    private String numeroCnh;
 
     @NonNull
     @Valid
-    private LocalDate dataValidadeCNH;
+    private LocalDate dataValidadeCnh;
 
     @Valid
     private UUID empresaId;
@@ -37,9 +37,9 @@ public class MotoristaRequestDTO {
             motorista.setEmpresa(empresa);
         }
         motorista.setUsuario(this.usuario.toEntity());
-        motorista.setTipoCNH(this.tipoCNH);
-        motorista.setNumeroCNH(this.numeroCNH);
-        motorista.setDataValidadeCNH(this.dataValidadeCNH);
+        motorista.setTipoCnh(this.tipoCnh);
+        motorista.setNumeroCnh(this.numeroCnh);
+        motorista.setDataValidadeCnh(this.dataValidadeCnh);
         return motorista;
     }
 
@@ -47,14 +47,14 @@ public class MotoristaRequestDTO {
     public UsuarioRequestDTO getUsuario() {
         return usuario;
     }
-    public TipoCnhEnum getTipoCNH() {
-        return tipoCNH;
+    public TipoCnhEnum getTipoCnh() {
+        return tipoCnh;
     }
-    public String getNumeroCNH() {
-        return numeroCNH;
+    public String getNumeroCnh() {
+        return numeroCnh;
     }
-    public LocalDate getDataValidadeCNH() {
-        return dataValidadeCNH;
+    public LocalDate getDataValidadeCnh() {
+        return dataValidadeCnh;
     }
     public UUID getEmpresaId() {
         return empresaId;

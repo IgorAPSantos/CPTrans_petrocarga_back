@@ -35,7 +35,6 @@ public class ReservaRequestDTO {
         reserva.setCidadeOrigem(this.cidadeOrigem);
         reserva.setInicio(this.inicio);
         reserva.setFim(this.fim);
-        reserva.setStatus(StatusReservaEnum.ATIVA);
         return reserva;
     }
 

@@ -105,4 +105,16 @@ public class GlobalHandlerException {
         error.put("cause", causeMessage);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalStateException(IllegalStateException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("erro", ex.getMessage());
+        String causeMessage = "unknown";
+        if (ex.getCause() != null && ex.getCause().getMessage() != null) {
+            causeMessage = ex.getCause().getMessage();
+        }
+        error.put("cause", causeMessage);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 }   

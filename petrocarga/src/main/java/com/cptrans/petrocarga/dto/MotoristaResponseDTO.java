@@ -1,18 +1,18 @@
 package com.cptrans.petrocarga.dto;
 
-import com.cptrans.petrocarga.enums.TipoCnhEnum;
-import com.cptrans.petrocarga.models.Motorista;
-
 import java.time.LocalDate;
 import java.util.UUID;
+
+import com.cptrans.petrocarga.enums.TipoCnhEnum;
+import com.cptrans.petrocarga.models.Motorista;
 
 public class MotoristaResponseDTO {
 
     private UUID id;
     private UsuarioResponseDTO usuario;
-    private TipoCnhEnum tipoCNH;
-    private String numeroCNH;
-    private LocalDate dataValidadeCNH;
+    private TipoCnhEnum tipoCnh;
+    private String numeroCnh;
+    private LocalDate dataValidadeCnh;
     private UUID empresaId;
 
     public MotoristaResponseDTO() {
@@ -21,9 +21,9 @@ public class MotoristaResponseDTO {
     public MotoristaResponseDTO(Motorista motorista) {
         this.id = motorista.getId();
         this.usuario = new UsuarioResponseDTO(motorista.getUsuario());
-        this.tipoCNH = motorista.getTipoCNH();
-        this.numeroCNH = motorista.getNumeroCNH();
-        this.dataValidadeCNH = motorista.getDataValidadeCNH();
+        this.tipoCnh = motorista.getTipoCnh();
+        this.numeroCnh = motorista.getNumeroCnh();
+        this.dataValidadeCnh = motorista.getDataValidadeCnh();
         if (motorista.getEmpresa() != null) {
             this.empresaId = motorista.getEmpresa().getId();
         }
@@ -46,28 +46,28 @@ public class MotoristaResponseDTO {
         this.usuario = usuario;
     }
 
-    public TipoCnhEnum getTipoCNH() {
-        return tipoCNH;
+    public TipoCnhEnum getTipoCnh() {
+        return tipoCnh;
     }
 
-    public void setTipoCNH(TipoCnhEnum tipoCNH) {
-        this.tipoCNH = tipoCNH;
+    public void setTipoCnh(TipoCnhEnum tipoCnh) {
+        this.tipoCnh = tipoCnh;
     }
 
-    public String getNumeroCNH() {
-        return numeroCNH;
+    public String getNumeroCnh() {
+        return numeroCnh;
     }
 
-    public void setNumeroCNH(String numeroCNH) {
-        this.numeroCNH = numeroCNH;
+    public void setNumeroCnh(String numeroCnh) {
+        this.numeroCnh = numeroCnh;
     }
 
-    public LocalDate getDataValidadeCNH() {
-        return dataValidadeCNH;
+    public LocalDate getDataValidadeCnh() {
+        return dataValidadeCnh;
     }
 
-    public void setDataValidadeCNH(LocalDate dataValidadeCNH) {
-        this.dataValidadeCNH = dataValidadeCNH;
+    public void setDataValidadeCnh(LocalDate dataValidadeCnh) {
+        this.dataValidadeCnh = dataValidadeCnh;
     }
 
     public UUID getEmpresaId() {
