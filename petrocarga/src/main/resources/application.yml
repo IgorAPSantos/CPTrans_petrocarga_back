@@ -1,0 +1,48 @@
+spring:
+    application:
+        name: petrocarga
+    
+    jackson:
+        time-zone: America/Sao_Paulo
+        date-format: dd-MM-yyyy
+    
+    jpa:
+        hibernate:
+            ddl-auto: validate
+        show-sql: true
+        open-in-view: true
+    
+    flyway:
+        enabled: true
+        locations: classpath:db/migration
+        validate-on-migrate: false
+        baseline-on-migrate: true
+        ignore-migration-patterns: "*:missing"
+        connect-retries: 3
+        clean-disabled: true
+
+server:
+    port: ${PORT:8000}
+    servlet:
+        context-path: /petrocarga
+    forward-headers-strategy: framework
+
+logging:
+    level:
+        root: info
+        org:
+            springframework:
+                web: info
+            hibernate:
+                SQL: info
+
+jwt:
+  secret: ${JWT_SECRET:72f9a128dd6f4c4a9c82e36df3ba62a9d12f1c3b9475a1f0e9d54d7e1b2a3c4d}
+  expiration: 86400000
+
+app:
+    reservas:
+        noshow:
+            enabled: false
+            grace-minutes: 10
+            scan-ms: 1800000
