@@ -22,7 +22,7 @@ spring:
         clean-disabled: true
 
 server:
-    port: ${PORT:8000}
+    port: ${PORT:8080}
     servlet:
         context-path: /petrocarga
     forward-headers-strategy: framework
