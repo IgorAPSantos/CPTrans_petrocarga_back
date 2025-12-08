@@ -1,0 +1,17 @@
+spring:
+    config:
+        activate:
+            on-profile: railway
+
+    datasource:
+        url: ${DATABASE_URL}
+        username: ${DATABASE_USER}
+        password: ${DATABASE_PASSWORD}
+        driver-class-name: org.postgresql.Driver
+        hikari:
+            maximum-pool-size: 5
+
+    flyway:
+        url: ${DATABASE_URL}
+        user: ${DATABASE_USER}
+        password: ${DATABASE_PASSWORD}
