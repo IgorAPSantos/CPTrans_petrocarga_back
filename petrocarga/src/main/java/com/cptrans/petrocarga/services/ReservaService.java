@@ -53,10 +53,11 @@ public class ReservaService {
 
 
     public List<Reserva> findAll(List<StatusReservaEnum> status, UUID vagaId) {
+        if(status == null) status = new ArrayList<>();
         if(vagaId != null) {
             return findByVagaId(vagaId, status);
         }
-        if(status != null) {
+        if(!status.isEmpty()) {
             return findByStatus(status);
         }
         return reservaRepository.findAll();
@@ -77,7 +78,8 @@ public class ReservaService {
 
     public List<Reserva> findByVagaId(UUID vagaId, List<StatusReservaEnum> status) {
         Vaga vaga = vagaService.findById(vagaId);
-        if(status != null) {
+        if(status == null) status = new ArrayList<>();
+        if(!status.isEmpty()) {
             return reservaRepository.findByVagaAndStatusIn(vaga, status);
         }
         return reservaRepository.findByVaga(vaga);
@@ -86,7 +88,8 @@ public class ReservaService {
     public List<Reserva> findByVagaIdAndDataAndStatusIn(UUID vagaId, LocalDate data, List<StatusReservaEnum> status) {
         Vaga vaga = vagaService.findById(vagaId);
         List<Reserva> reservas = reservaRepository.findByVaga(vaga);
-        if(status != null) {
+        if (status == null) status = new ArrayList<>();
+        if(!status.isEmpty()) {
             reservas = reservaRepository.findByVagaAndStatusIn(vaga, status);
         }
         if(data != null) {
@@ -117,7 +120,8 @@ public class ReservaService {
 
     public List<Reserva> findByUsuarioId(UUID usuarioId, List<StatusReservaEnum> status) {
         Usuario usuario = usuarioService.findById(usuarioId);
-        if(status != null) {
+        if(status == null ) status = new ArrayList<>();
+        if(!status.isEmpty()) {
             return reservaRepository.findByCriadoPorAndStatusIn(usuario, status);
         }
         return reservaRepository.findByCriadoPor(usuario);
@@ -138,9 +142,9 @@ public class ReservaService {
 
     public void checarExcecoesReserva(Reserva novaReserva, Usuario usuarioLogado, Motorista motoristaDaReserva, Veiculo veiculoDaReserva) {
         Vaga vagaReserva = novaReserva.getVaga();
-        List<Reserva> reservasAtivasNaVaga = reservaRepository.findByVagaAndStatus(vagaReserva, StatusReservaEnum.ATIVA);
-        List<ReservaRapida> reservasRapidasAtivasNaVaga = reservaRapidaService.findByVagaAndStatusIn(vagaReserva, new ArrayList<>(List.of(StatusReservaEnum.ATIVA)));//reservaRapidaRepository.findByVagaAndStatus(vagaReserva, StatusReservaEnum.ATIVA);
-   
+        List<StatusReservaEnum> listaStatus = new ArrayList<>(List.of(StatusReservaEnum.ATIVA, StatusReservaEnum.RESERVADA));
+        List<Reserva> reservasAtivasNaVaga = reservaRepository.findByVagaAndStatusIn(vagaReserva, listaStatus);
+        List<ReservaRapida> reservasRapidasAtivasNaVaga = reservaRapidaService.findByVagaAndStatusIn(vagaReserva, listaStatus);
         reservaUtils.validarTempoMaximoReserva(novaReserva);
         reservaUtils.validarEspacoDisponivelNaVaga(novaReserva, usuarioLogado, reservasAtivasNaVaga, reservasRapidasAtivasNaVaga);
         reservaUtils.validarPermissoesReserva(usuarioLogado, motoristaDaReserva, veiculoDaReserva);
