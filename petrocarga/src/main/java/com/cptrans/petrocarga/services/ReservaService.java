@@ -302,8 +302,8 @@ public static class Intervalo {
     public Reserva finalizarForcado(UUID reservaId) {
         Reserva reserva = reservaRepository.findById(reservaId).orElseThrow(() -> new EntityNotFoundException("Reserva não encontrada."));
 
-        if (!StatusReservaEnum.ATIVA.equals(reserva.getStatus())) {
-            throw new IllegalStateException("Reserva não está ativa e não pode ser finalizada.");
+        if (!StatusReservaEnum.RESERVADA.equals(reserva.getStatus())) {
+            throw new IllegalStateException("Só é possivel finalizar uma reserva com status 'RESERVADA'.");
         }
 
         OffsetDateTime agora = OffsetDateTime.now();
