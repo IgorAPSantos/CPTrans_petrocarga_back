@@ -21,6 +21,8 @@ import com.cptrans.petrocarga.dto.UsuarioPATCHRequestDTO;
 import com.cptrans.petrocarga.dto.UsuarioResponseDTO;
 import com.cptrans.petrocarga.services.GestorService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/gestores")
 public class GestorController {
@@ -50,13 +52,13 @@ public class GestorController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping()
-    public ResponseEntity<UsuarioResponseDTO> createGestor(@RequestBody GestorRequestDTO gestorRequestDTO) {
+    public ResponseEntity<UsuarioResponseDTO> createGestor(@RequestBody @Valid GestorRequestDTO gestorRequestDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(gestorService.createGestor(gestorRequestDTO.toEntity()).toResponseDTO());
     }
 
     @PreAuthorize("#usuarioId == authentication.principal.id or hasRole('ADMIN')")
     @PatchMapping("/{usuarioId}")
-    public ResponseEntity<UsuarioResponseDTO> updateGestor(@PathVariable UUID usuarioId, @RequestBody UsuarioPATCHRequestDTO gestorRequestDTO) {
+    public ResponseEntity<UsuarioResponseDTO> updateGestor(@PathVariable UUID usuarioId, @RequestBody @Valid UsuarioPATCHRequestDTO gestorRequestDTO) {
         return ResponseEntity.ok(gestorService.updateGestor(usuarioId, gestorRequestDTO).toResponseDTO());
     }
 }

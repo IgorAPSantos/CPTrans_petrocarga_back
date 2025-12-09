@@ -56,7 +56,7 @@ public class MotoristaController {
 
     @PreAuthorize("#usuarioId == authentication.principal.id or hasRole('ADMIN')")
     @PatchMapping("/{usuarioId}")
-    public ResponseEntity<MotoristaResponseDTO> updateMotorista(@PathVariable UUID usuarioId, @RequestBody UsuarioPATCHRequestDTO motoristaRequestDTO) {
+    public ResponseEntity<MotoristaResponseDTO> updateMotorista(@PathVariable UUID usuarioId,  @RequestBody @Valid UsuarioPATCHRequestDTO motoristaRequestDTO) {
         Motorista updatedMotorista = motoristaService.updateMotorista(usuarioId, motoristaRequestDTO);
         return ResponseEntity.ok(new MotoristaResponseDTO(updatedMotorista));
     }

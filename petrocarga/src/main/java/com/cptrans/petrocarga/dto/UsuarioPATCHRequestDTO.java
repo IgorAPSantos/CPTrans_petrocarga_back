@@ -10,7 +10,6 @@ import com.cptrans.petrocarga.enums.TipoCnhEnum;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public class UsuarioPATCHRequestDTO {
@@ -18,7 +17,6 @@ public class UsuarioPATCHRequestDTO {
     @Size(min = 3, max = 100, message = "Nome deve ter entre 3 e 100 caracteres.")
     private String nome;
 
-    @Valid
     @Email(message = "Informe um email válido.")
     private String email;
 
@@ -28,14 +26,12 @@ public class UsuarioPATCHRequestDTO {
     @Size(min = 6, max = 100, message = "Senha deve conter no mínimo 6 caracteres.")
     private String senha;
 
-    @Valid
     @CPF(message = "Informe um CPF válido.")
     private String cpf;
 
-    @NotBlank
+    @Size(min = 6, max = 100, message = "matricula deve conter no mínimo 6 caracteres.")
     private String matricula;
 
-    @Valid
     @CNPJ(message = "Informe um CNPJ válido.")
     private String cnpj;
 
