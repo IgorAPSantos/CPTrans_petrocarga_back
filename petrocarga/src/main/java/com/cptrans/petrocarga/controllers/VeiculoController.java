@@ -63,7 +63,7 @@ public class VeiculoController {
 
     @PreAuthorize("#usuarioId == authentication.principal.id or hasAnyRole('ADMIN', 'GESTOR')")
     @PatchMapping("/{id}/{usuarioId}")
-    public ResponseEntity<VeiculoResponseDTO> updateVeiculo(@PathVariable UUID id, @PathVariable UUID usuarioId, @RequestBody VeiculoRequestDTO veiculoRequestDTO) {
+    public ResponseEntity<VeiculoResponseDTO> updateVeiculo(@PathVariable UUID id, @PathVariable UUID usuarioId, @RequestBody @Valid VeiculoRequestDTO veiculoRequestDTO) {
         Veiculo veiculo = veiculoService.updateVeiculo(id, usuarioId, veiculoRequestDTO);
         return ResponseEntity.ok(veiculo.toResponseDTO());
     }

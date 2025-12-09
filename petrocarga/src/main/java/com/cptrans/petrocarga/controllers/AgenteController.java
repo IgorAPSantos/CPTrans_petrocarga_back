@@ -56,7 +56,7 @@ public class AgenteController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR') or #usuarioId == authentication.principal.id")
     @PatchMapping("/{usuarioId}")
-    public ResponseEntity<AgenteResponseDTO> updateAgente(@PathVariable UUID usuarioId, @RequestBody UsuarioPATCHRequestDTO agenteRequestDTO) {
+    public ResponseEntity<AgenteResponseDTO> updateAgente(@PathVariable UUID usuarioId, @RequestBody @Valid UsuarioPATCHRequestDTO agenteRequestDTO) {
         Agente updatedAgente = agenteService.updateAgente(usuarioId, agenteRequestDTO);
         return ResponseEntity.ok(updatedAgente.toResponseDTO());
     }
