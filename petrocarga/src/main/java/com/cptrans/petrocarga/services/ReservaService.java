@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
@@ -15,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.cptrans.petrocarga.dto.ReservaDTO;
+import com.cptrans.petrocarga.dto.ReservaPATCHRequestDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
@@ -131,7 +133,7 @@ public class ReservaService {
         UserAuthenticated userAuthenticated = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Usuario usuarioLogado = usuarioService.findById(userAuthenticated.id());
         novaReserva.setCriadoPor(usuarioLogado);
-        checarExcecoesReserva(novaReserva, novaReserva.getCriadoPor(), novaReserva.getMotorista(), novaReserva.getVeiculo());
+        checarExcecoesReserva(novaReserva, novaReserva.getCriadoPor(), novaReserva.getMotorista(), novaReserva.getVeiculo(), ReservaUtils.METODO_POST);
   
         return reservaRepository.save(novaReserva);
     }
@@ -140,13 +142,13 @@ public class ReservaService {
         reservaRepository.deleteById(id);
     }
 
-    public void checarExcecoesReserva(Reserva novaReserva, Usuario usuarioLogado, Motorista motoristaDaReserva, Veiculo veiculoDaReserva) {
+    public void checarExcecoesReserva(Reserva novaReserva, Usuario usuarioLogado, Motorista motoristaDaReserva, Veiculo veiculoDaReserva, String metodoChamador) {
         Vaga vagaReserva = novaReserva.getVaga();
         List<StatusReservaEnum> listaStatus = new ArrayList<>(List.of(StatusReservaEnum.ATIVA, StatusReservaEnum.RESERVADA));
         List<Reserva> reservasAtivasNaVaga = reservaRepository.findByVagaAndStatusIn(vagaReserva, listaStatus);
         List<ReservaRapida> reservasRapidasAtivasNaVaga = reservaRapidaService.findByVagaAndStatusIn(vagaReserva, listaStatus);
         reservaUtils.validarTempoMaximoReserva(novaReserva);
-        reservaUtils.validarEspacoDisponivelNaVaga(novaReserva, usuarioLogado, reservasAtivasNaVaga, reservasRapidasAtivasNaVaga);
+        reservaUtils.validarEspacoDisponivelNaVaga(novaReserva, usuarioLogado, reservasAtivasNaVaga, reservasRapidasAtivasNaVaga, metodoChamador);
         reservaUtils.validarPermissoesReserva(usuarioLogado, motoristaDaReserva, veiculoDaReserva);
     }
 
@@ -402,5 +404,57 @@ public static class Intervalo {
         }
 
         return finalizadas;
+    }
+
+    public Reserva atualizarReserva (Reserva reserva, UUID usuarioId, ReservaPATCHRequestDTO reservaRequestDTO) {
+        final Integer TEMPO_LIMITE_ALTERACAO = 60;
+        UserAuthenticated userAuthenticated = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Usuario usuarioLogado = usuarioService.findById(userAuthenticated.id());
+        Usuario usuarioReserva = usuarioService.findById(usuarioId);
+        OffsetDateTime agora = OffsetDateTime.now(DateUtils.FUSO_BRASIL);
+        Integer deltaTempo = (int) agora.toInstant().until(reserva.getInicio().toInstant(), ChronoUnit.MINUTES);
+      
+        if (!reserva.getStatus().equals(StatusReservaEnum.RESERVADA) && !reserva.getStatus().equals(StatusReservaEnum.ATIVA)) throw new IllegalArgumentException("Reserva com status '" + reserva.getStatus() + "' não pode mais ser atualizada.");
+        
+        if (!reserva.getCriadoPor().equals(usuarioReserva) || !reserva.getMotorista().getUsuario().equals(usuarioReserva) ) throw new EntityNotFoundException("Reserva não encontrada, verifique a reservaId e o usuarioId informados.");
+        
+        if (deltaTempo < TEMPO_LIMITE_ALTERACAO || deltaTempo < 0){
+            if(reservaRequestDTO.getStatus() != null && reservaRequestDTO.getStatus().equals(StatusReservaEnum.CONCLUIDA)) reserva.setStatus(StatusReservaEnum.CONCLUIDA);
+            else throw new IllegalArgumentException("Impossível alterar reserva pois só faltam " + deltaTempo + " minutos para o início e o tempo limite de alteração é de " + TEMPO_LIMITE_ALTERACAO + " minutos.");
+        }
+        
+        if (!usuarioLogado.getId().equals(reserva.getCriadoPor().getId())) reserva.setCriadoPor(usuarioLogado);
+        
+        if (reservaRequestDTO.getVeiculoId() != null) reserva.setVeiculo(veiculoService.findById(reservaRequestDTO.getVeiculoId()));
+        
+        if (reservaRequestDTO.getCidadeOrigem() != null) reserva.setCidadeOrigem(reservaRequestDTO.getCidadeOrigem());
+       
+        if (reservaRequestDTO.getInicio() != null) reserva.setInicio(reservaRequestDTO.getInicio());
+
+        if (reservaRequestDTO.getFim() != null) reserva.setFim(reservaRequestDTO.getFim());
+
+
+        checarExcecoesReserva(reserva, usuarioLogado, reserva.getMotorista(), reserva.getVeiculo(), ReservaUtils.METODO_PATCH);
+        return reservaRepository.save(reserva);
+    }
+
+    public void cancelarReserva(UUID reservaId, UUID usuarioId) {
+        Reserva reserva = findById(reservaId);
+        UserAuthenticated userAuthenticated = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<String> authorities = userAuthenticated.userDetails().getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).toList();
+        Usuario usuario = usuarioService.findById(usuarioId);
+
+        if (!StatusReservaEnum.RESERVADA.equals(reserva.getStatus())) {
+            throw new IllegalStateException("Só é possivel cancelar uma reserva com status 'RESERVADA'.");
+        }
+        if(!reserva.getCriadoPor().getId().equals(usuario.getId()) || !reserva.getMotorista().getUsuario().getId().equals(usuario.getId())) {
+            if(!authorities.contains(PermissaoEnum.ADMIN.getRole()) && !authorities.contains(PermissaoEnum.GESTOR.getRole())) {
+                throw new IllegalArgumentException("Usuário não tem permissão para cancelar esta reserva.");
+            }
+        }
+
+        reserva.setStatus(StatusReservaEnum.CANCELADA);
+        reservaRepository.save(reserva);
     }
 }
