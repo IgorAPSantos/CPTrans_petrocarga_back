@@ -11,11 +11,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cptrans.petrocarga.dto.DisponibilidadeVagaRequestDTO;
@@ -74,10 +75,19 @@ public class DisponibilidadeVagaController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
-    @PutMapping("/{id}")
-    public ResponseEntity<DisponibilidadeVagaResponseDTO> updateDisponibilidadeVaga(@PathVariable UUID id, @RequestBody @Valid DisponibilidadeVagaRequestDTO disponibilidadeVagaRequestDTO) {
-        DisponibilidadeVaga disponibilidadeVaga = disponibilidadeVagaService.updateDisponibilidadeVaga(id, disponibilidadeVagaRequestDTO.toEntity(), disponibilidadeVagaRequestDTO.getVagaId());
+    @PatchMapping("/{id}")
+    public ResponseEntity<DisponibilidadeVagaResponseDTO> updateDisponibilidadeVaga(@PathVariable UUID id, @RequestBody  DisponibilidadeVagaRequestDTO disponibilidadeVagaRequestDTO) {
+        DisponibilidadeVaga disponibilidadeVaga = disponibilidadeVagaService.updateDisponibilidadeVaga(id, disponibilidadeVagaRequestDTO);
+        disponibilidadeVagaService.save(disponibilidadeVaga);
         return ResponseEntity.ok(disponibilidadeVaga.toResponseDTO());
+      
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
+    @PatchMapping("/byCodigoPmp")
+    public ResponseEntity<List<DisponibilidadeVagaResponseDTO>> updateDisponibilidadeVagaByCodigoPmp(@RequestBody  DisponibilidadeVagaRequestDTO disponibilidadeVagaRequestDTO, @RequestParam(required = true) String codigoPmp) {
+        List<DisponibilidadeVaga> disponibilidadeVaga = disponibilidadeVagaService.updateDisponibilidadeVagaByCodigoPmp(disponibilidadeVagaRequestDTO, codigoPmp);
+        return ResponseEntity.ok(disponibilidadeVaga.stream().map(DisponibilidadeVaga::toResponseDTO).collect(Collectors.toList()));
       
     }
 
@@ -87,4 +97,19 @@ public class DisponibilidadeVagaController {
         disponibilidadeVagaService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
+    @DeleteMapping("/byList")
+    public ResponseEntity<Void> deleteMultiplasDisponibilidadeVaga(@RequestParam(required = true) List<UUID> listaIds) {
+        disponibilidadeVagaService.deleteByIdList(listaIds);
+        return ResponseEntity.noContent().build();
+    }
+    
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
+    @DeleteMapping("/byCodigoPMP")
+    public ResponseEntity<Void> deleteMultiplasDisponibilidadeVaga(@RequestParam String codigoPMP) {
+        disponibilidadeVagaService.deleteByCodigoPMP(codigoPMP);
+        return ResponseEntity.noContent().build();
+    }
+
 }
