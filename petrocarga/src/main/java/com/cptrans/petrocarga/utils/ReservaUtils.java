@@ -21,6 +21,9 @@ public class ReservaUtils {
     @Autowired
     private EmpresaService empresaService;
 
+    public static final String METODO_POST = "POST";
+    public static final String METODO_PATCH = "PATCH";
+
     public void validarTempoMaximoReserva(Reserva novaReserva) {
         Vaga vagaReserva = novaReserva.getVaga();
         OffsetDateTime agora = OffsetDateTime.now(DateUtils.FUSO_BRASIL);
@@ -39,7 +42,7 @@ public class ReservaUtils {
         }
     }
 
-    public void validarEspacoDisponivelNaVaga(Reserva novaReserva, Usuario usuarioLogado, List<Reserva> reservasAtivasNaVaga, List<ReservaRapida> reservasRapidasAtivasNaVaga) {
+    public void validarEspacoDisponivelNaVaga(Reserva novaReserva, Usuario usuarioLogado, List<Reserva> reservasAtivasNaVaga, List<ReservaRapida> reservasRapidasAtivasNaVaga, String metodoChamador) {
         Vaga vagaReserva = novaReserva.getVaga();
         Veiculo veiculoDaReserva = novaReserva.getVeiculo();
         Motorista motoristaDaReserva = novaReserva.getMotorista();
@@ -61,7 +64,7 @@ public class ReservaUtils {
         if(!reservasAtivasNaVaga.isEmpty()){
             for(Reserva reserva : reservasAtivasNaVaga){
                 Boolean reservaSobrepostas = novaReserva.getInicio().toInstant().isBefore(reserva.getFim().toInstant()) && novaReserva.getFim().toInstant().isAfter(reserva.getInicio().toInstant());
-                validarMotoristaReserva(usuarioLogado, motoristaDaReserva, reserva);
+                if (!metodoChamador.equals(METODO_PATCH))validarMotoristaReserva(usuarioLogado, motoristaDaReserva, reserva);
                 if(reservaSobrepostas){
                     tamanhoDisponivelVaga -= reserva.getVeiculo().getComprimento();
                     if(tamanhoDisponivelVaga < 0) throw new IllegalArgumentException("Não há espaço suficiente na vaga para a reserva no período solicitado. Espaço disponível: " + (tamanhoDisponivelVaga + veiculoDaReserva.getComprimento()) + " metros.");
