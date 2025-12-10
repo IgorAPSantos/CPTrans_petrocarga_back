@@ -10,4 +10,5 @@ import com.cptrans.petrocarga.models.DisponibilidadeVaga;
 
 public interface DisponibilidadeVagaRepository extends JpaRepository<DisponibilidadeVaga, UUID> {
     public List<DisponibilidadeVaga> findByVagaId(UUID vagaId);
+    public List<DisponibilidadeVaga> findByVagaEnderecoCodigoPmp(String codigoPMP);
 }
