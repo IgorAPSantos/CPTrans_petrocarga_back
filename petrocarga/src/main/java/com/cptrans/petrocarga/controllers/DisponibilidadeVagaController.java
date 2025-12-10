@@ -92,6 +92,14 @@ public class DisponibilidadeVagaController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
+    @PatchMapping("/byList")
+    public ResponseEntity<List<DisponibilidadeVagaResponseDTO>> updateDisponibilidadeVagaByList(@RequestBody  DisponibilidadeVagaRequestDTO disponibilidadeVagaRequestDTO, @RequestParam(required = true) List<UUID> listaIds) {
+        List<DisponibilidadeVaga> disponibilidadeVaga = disponibilidadeVagaService.updateDisponibilidadeVagaByList(disponibilidadeVagaRequestDTO, listaIds);
+        return ResponseEntity.ok(disponibilidadeVaga.stream().map(DisponibilidadeVaga::toResponseDTO).collect(Collectors.toList()));
+      
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDisponibilidadeVaga(@PathVariable UUID id) {
         disponibilidadeVagaService.deleteById(id);
