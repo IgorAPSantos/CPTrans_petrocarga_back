@@ -120,6 +120,16 @@ public class DisponibilidadeVagaService {
         return disponibilidadeVagaRepository.saveAll(disponibilidadesAtualizadas);
     }
 
+    public List<DisponibilidadeVaga> updateDisponibilidadeVagaByList(DisponibilidadeVagaRequestDTO novaDisponibilidadeVaga, List<UUID> listaIds) {
+        List<DisponibilidadeVaga> disponibilidadesAtualizadas = new ArrayList<>();
+        for (UUID id : listaIds) {
+            DisponibilidadeVaga disponibilidadeVaga = findById(id);
+            updateDisponibilidadeVaga(disponibilidadeVaga.getId(), novaDisponibilidadeVaga);
+            disponibilidadesAtualizadas.add(disponibilidadeVaga);
+        }
+        return disponibilidadeVagaRepository.saveAll(disponibilidadesAtualizadas);
+    }
+
     public void deleteById(UUID id) {
         DisponibilidadeVaga disponibilidadeVaga = findById(id);
         disponibilidadeVagaRepository.deleteById(disponibilidadeVaga.getId());
