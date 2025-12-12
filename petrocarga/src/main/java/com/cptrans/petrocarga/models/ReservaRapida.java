@@ -3,6 +3,7 @@ package com.cptrans.petrocarga.models;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.cptrans.petrocarga.dto.ReservaDTO;
 import com.cptrans.petrocarga.dto.ReservaRapidaResponseDTO;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
@@ -137,5 +138,9 @@ public class ReservaRapida {
 
     public ReservaRapidaResponseDTO toResponse() {
         return new ReservaRapidaResponseDTO(this);
+    }
+
+    public ReservaDTO toReservaDTO() {
+        return new ReservaDTO(this.id, this.vaga, this.inicio, this.fim, this.tipoVeiculo.getComprimento(), this.placa, this.status, this.agente.getUsuario(), this.criadoEm);
     }
 }
