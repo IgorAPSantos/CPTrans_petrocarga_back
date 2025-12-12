@@ -20,6 +20,7 @@ import com.cptrans.petrocarga.repositories.ReservaRepository;
 import com.cptrans.petrocarga.security.UserAuthenticated;
 import com.cptrans.petrocarga.utils.DateUtils;
 import com.cptrans.petrocarga.utils.ReservaRapidaUtils;
+import com.cptrans.petrocarga.utils.ReservaUtils;
 
 @Service
 public class ReservaRapidaService {
@@ -101,8 +102,8 @@ public class ReservaRapidaService {
             novaReservaRapida.setAgente(agenteLogado);
         }
 
-        reservaRapidaUtils.validarQuantidadeReservasPorPlaca(quantidadeReservasRapidasPorPlaca, novaReservaRapida);
-        reservaRapidaUtils.validarTempoMaximoReservaRapida(novaReservaRapida, novaReservaRapida.getVaga());
+        ReservaRapidaUtils.validarQuantidadeReservasPorPlaca(quantidadeReservasRapidasPorPlaca, novaReservaRapida);
+        ReservaUtils.validarTempoMaximoReserva(novaReservaRapida.toReservaDTO(), novaReservaRapida.getVaga());
         reservaRapidaUtils.validarEspacoDisponivelNaVaga(novaReservaRapida, vagaReserva, reservasAtivasNaVaga, reservasRapidasAtivasNaVaga);
         return reservaRapidaRepository.save(novaReservaRapida);
 
