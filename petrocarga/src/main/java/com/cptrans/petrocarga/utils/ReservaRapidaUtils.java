@@ -1,6 +1,5 @@
 package com.cptrans.petrocarga.utils;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -11,28 +10,11 @@ import com.cptrans.petrocarga.models.Vaga;
 
 @Component
 public class ReservaRapidaUtils {
-    private final Integer  LIMITE_DE_RESERVAS_POR_PLACA = 3;
+    public static final Integer  LIMITE_DE_RESERVAS_POR_PLACA = 3;
 
-    public void validarQuantidadeReservasPorPlaca(Integer quantidadeReservasRapidasPorPlaca, ReservaRapida novaReservaRapida) {
+    public static void validarQuantidadeReservasPorPlaca(Integer quantidadeReservasRapidasPorPlaca, ReservaRapida novaReservaRapida) {
         if(quantidadeReservasRapidasPorPlaca.equals(LIMITE_DE_RESERVAS_POR_PLACA)){
             throw new IllegalArgumentException("Veículo com placa " + novaReservaRapida.getPlaca() + " já atingiu o limite de reservas rápidas (" + LIMITE_DE_RESERVAS_POR_PLACA + ").");
-        }
-    }
-
-    public void validarTempoMaximoReservaRapida(ReservaRapida novaReservaRapida, Vaga vagaReserva) {
-        OffsetDateTime agora = OffsetDateTime.now(DateUtils.FUSO_BRASIL);
-        
-        if(novaReservaRapida.getFim().toInstant().isBefore(novaReservaRapida.getInicio().toInstant())) {
-            throw new IllegalArgumentException("Fim da reserva deve ser posterior ao inicio.");
-        }
-        if (novaReservaRapida.getFim().toInstant().isBefore(agora.toInstant())) {
-            throw new IllegalArgumentException("Fim da reserva deve ser posterior ao horário atual.");
-        }
-
-        Integer tempoReservaEmMinutos = (int) (novaReservaRapida.getInicio().toInstant().until(novaReservaRapida.getFim().toInstant(), java.time.temporal.ChronoUnit.MINUTES));
-        Boolean tempoValido = tempoReservaEmMinutos <= (vagaReserva.getArea().getTempoMaximo() * 60) && tempoReservaEmMinutos > 0;
-        if(!tempoValido){
-            throw new IllegalArgumentException("Tempo total de reserva inválido.");
         }
     }
 

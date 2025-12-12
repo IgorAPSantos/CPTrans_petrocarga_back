@@ -22,6 +22,8 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
     public List<Reserva> findByStatusIn(List<StatusReservaEnum> status);
     public List<Reserva> findByVagaAndStatusAndInicio(Vaga vaga, StatusReservaEnum status, OffsetDateTime data);
     public List<Reserva> findByVeiculoPlacaIgnoringCaseAndStatusIn(String placa, List<StatusReservaEnum> status);
+    public Integer countByVeiculoPlacaIgnoringCase(String placa);
+    public List<Reserva> findByFimGreaterThanAndInicioLessThan(OffsetDateTime novoInicio, OffsetDateTime novoFim);
 
     @Query("SELECT r FROM Reserva r " +
            "JOIN FETCH r.vaga " +

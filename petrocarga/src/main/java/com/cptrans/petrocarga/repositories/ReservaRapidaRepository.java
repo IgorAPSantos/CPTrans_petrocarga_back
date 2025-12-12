@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.repositories;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,5 +18,6 @@ public interface ReservaRapidaRepository extends JpaRepository<ReservaRapida, UU
     public List<ReservaRapida> findByVagaAndStatusIn(Vaga vaga, List<StatusReservaEnum> status);
     public List<ReservaRapida> findByPlacaIgnoringCaseAndStatus(String placa, StatusReservaEnum status);
     public List<ReservaRapida> findByAgente(Agente agente);
+    public List<ReservaRapida> findByFimGreaterThanAndInicioLessThan(OffsetDateTime novoInicio, OffsetDateTime novoFim);
     public Integer countByPlaca(String placa);
 }

@@ -143,11 +143,11 @@ public class ReservaService {
     }
 
     public void checarExcecoesReserva(Reserva novaReserva, Usuario usuarioLogado, Motorista motoristaDaReserva, Veiculo veiculoDaReserva, String metodoChamador) {
-        Vaga vagaReserva = novaReserva.getVaga();
+        Vaga vagaNovaReserva = novaReserva.getVaga();
         List<StatusReservaEnum> listaStatus = new ArrayList<>(List.of(StatusReservaEnum.ATIVA, StatusReservaEnum.RESERVADA));
-        List<Reserva> reservasAtivasNaVaga = reservaRepository.findByVagaAndStatusIn(vagaReserva, listaStatus);
-        List<ReservaRapida> reservasRapidasAtivasNaVaga = reservaRapidaService.findByVagaAndStatusIn(vagaReserva, listaStatus);
-        reservaUtils.validarTempoMaximoReserva(novaReserva);
+        List<Reserva> reservasAtivasNaVaga = reservaRepository.findByVagaAndStatusIn(vagaNovaReserva, listaStatus);
+        List<ReservaRapida> reservasRapidasAtivasNaVaga = reservaRapidaService.findByVagaAndStatusIn(vagaNovaReserva, listaStatus);
+        ReservaUtils.validarTempoMaximoReserva(novaReserva.toReservaDTO(), vagaNovaReserva);
         reservaUtils.validarEspacoDisponivelNaVaga(novaReserva, usuarioLogado, reservasAtivasNaVaga, reservasRapidasAtivasNaVaga, metodoChamador);
         reservaUtils.validarPermissoesReserva(usuarioLogado, motoristaDaReserva, veiculoDaReserva);
     }
@@ -155,32 +155,14 @@ public class ReservaService {
     public List<ReservaDTO> getReservasByVagaAndData(Vaga vaga, LocalDate data, List<StatusReservaEnum> status) {
         List<Reserva> reservas = findByVagaIdAndDataAndStatusIn(vaga.getId(), data, status);
         List<ReservaRapida> reservasRapidas = reservaRapidaService.findByVagaAndDataAndStatusIn(vaga, data, status);
-        List<ReservaDTO> listaFinalReservas = new ArrayList<>();
-        
-        if(reservasRapidas != null && !reservasRapidas.isEmpty()) {
-            reservasRapidas.forEach(rr -> listaFinalReservas.add(new ReservaDTO(rr.getId(), vaga, rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca(), rr.getStatus())));
-        }
-
-        if(reservas != null && !reservas.isEmpty()) {
-            reservas.forEach(r-> listaFinalReservas.add(new ReservaDTO(r.getId(), vaga, r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca(), r.getStatus())));
-        }
-        
+        List<ReservaDTO> listaFinalReservas = ReservaUtils.juntarReservas(reservas, reservasRapidas);
         return listaFinalReservas;
     }
 
     public List<ReservaDTO> getAllReservasByData(LocalDate data, List<StatusReservaEnum> status) {
         List<Reserva> reservas = findAllByData(data, status, null);
-        List<ReservaRapida> reservasRapidas = reservaRapidaService.findAllByData( data, status);
-        List<ReservaDTO> listaFinalReservas = new ArrayList<>();
-        
-        if(reservasRapidas != null && !reservasRapidas.isEmpty()) {
-            reservasRapidas.forEach(rr -> listaFinalReservas.add(new ReservaDTO(rr.getId(), rr.getVaga(), rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca(), rr.getStatus())));
-        }
-
-        if(reservas != null && !reservas.isEmpty()) {
-            reservas.forEach(r-> listaFinalReservas.add(new ReservaDTO(r.getId(), r.getVaga(), r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca(), r.getStatus())));
-        }
-        
+        List<ReservaRapida> reservasRapidas = reservaRapidaService.findAllByData(data, status);
+        List<ReservaDTO> listaFinalReservas = ReservaUtils.juntarReservas(reservas, reservasRapidas);
         return listaFinalReservas;
     }
 
@@ -201,13 +183,7 @@ public class ReservaService {
     public List<ReservaDTO> getReservasAtivasByPlaca(String placa){
         List<Reserva> reservasPorPlaca = reservaRepository.findByVeiculoPlacaIgnoringCaseAndStatusIn(placa, new ArrayList<>(List.of(StatusReservaEnum.ATIVA, StatusReservaEnum.RESERVADA)));
         List<ReservaRapida> reservasRapidasPorPlaca = reservaRapidaService.findByPlaca(placa);
-        List<ReservaDTO> listaReservasAtivasPorPlaca = new ArrayList<>();
-        if(reservasRapidasPorPlaca != null && !reservasRapidasPorPlaca.isEmpty()) {
-            reservasRapidasPorPlaca.forEach(rr -> listaReservasAtivasPorPlaca.add(new ReservaDTO(rr.getId(), rr.getVaga(), rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca(), rr.getStatus())));
-        }
-        if(reservasPorPlaca != null && !reservasPorPlaca.isEmpty()) {
-            reservasPorPlaca.forEach(r-> listaReservasAtivasPorPlaca.add(new ReservaDTO(r.getId(),r.getVaga(), r.getInicio(), r.getFim(), r.getVeiculo().getComprimento(), r.getVeiculo().getPlaca(), r.getStatus())));
-        }
+        List<ReservaDTO> listaReservasAtivasPorPlaca = ReservaUtils.juntarReservas(reservasPorPlaca, reservasRapidasPorPlaca);
         return listaReservasAtivasPorPlaca;
     }
 
@@ -419,9 +395,10 @@ public static class Intervalo {
         if (!reserva.getCriadoPor().equals(usuarioReserva) || !reserva.getMotorista().getUsuario().equals(usuarioReserva) ) throw new EntityNotFoundException("Reserva não encontrada, verifique a reservaId e o usuarioId informados.");
         
         if (deltaTempo < TEMPO_LIMITE_ALTERACAO || deltaTempo < 0){
-            if(reservaRequestDTO.getStatus() != null && reservaRequestDTO.getStatus().equals(StatusReservaEnum.CONCLUIDA)) reserva.setStatus(StatusReservaEnum.CONCLUIDA);
-            else throw new IllegalArgumentException("Impossível alterar reserva pois só faltam " + deltaTempo + " minutos para o início e o tempo limite de alteração é de " + TEMPO_LIMITE_ALTERACAO + " minutos.");
+            throw new IllegalArgumentException("Impossível alterar reserva pois só faltam " + deltaTempo + " minutos para o início e o tempo limite de alteração é de " + TEMPO_LIMITE_ALTERACAO + " minutos.");
         }
+        
+        if(reservaRequestDTO.getStatus() != null && reservaRequestDTO.getStatus().equals(StatusReservaEnum.CONCLUIDA)) reserva.setStatus(StatusReservaEnum.CONCLUIDA);
         
         if (!usuarioLogado.getId().equals(reserva.getCriadoPor().getId())) reserva.setCriadoPor(usuarioLogado);
         
