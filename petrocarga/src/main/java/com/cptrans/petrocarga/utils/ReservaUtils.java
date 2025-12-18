@@ -75,11 +75,11 @@ public class ReservaUtils {
     }
 
     public void validarLimiteReservasPorPlaca (ReservaDTO novaReserva, String metodoChamador){
-        Integer quantidadeReservasPorPlaca = reservaRepository.countByVeiculoPlacaIgnoringCase(novaReserva.getPlacaVeiculo());
+        Integer quantidadeReservasPorPlaca = reservaRepository.countByVeiculoPlacaIgnoringCaseAndStatusIn(novaReserva.getPlacaVeiculo(), List.of(StatusReservaEnum.ATIVA, StatusReservaEnum.RESERVADA));
         List<Reserva> reservasNormaisSobrepostas = reservaRepository.findByFimGreaterThanAndInicioLessThan(novaReserva.getInicio(), novaReserva.getFim());
         List<ReservaRapida> reservasRapidasSobrepostas = reservaRapidaRepository.findByFimGreaterThanAndInicioLessThan(novaReserva.getInicio(), novaReserva.getFim());
         List<ReservaDTO> reservasSobrepostas = juntarReservas(reservasNormaisSobrepostas, reservasRapidasSobrepostas);
-        if (quantidadeReservasPorPlaca.equals(LIMITE_DE_RESERVAS_POR_PLACA)) throw new IllegalArgumentException("Veículo de placa " + novaReserva.getPlacaVeiculo() + " ja atingiu o limite de " + LIMITE_DE_RESERVAS_POR_PLACA + "reservas ativas.");
+        if (quantidadeReservasPorPlaca.equals(LIMITE_DE_RESERVAS_POR_PLACA)) throw new IllegalArgumentException("Veículo de placa " + novaReserva.getPlacaVeiculo() + " ja atingiu o limite de " + LIMITE_DE_RESERVAS_POR_PLACA + " reservas ativas/reservadas.");
         if(reservasSobrepostas != null && !reservasSobrepostas.isEmpty()  ){
             for(ReservaDTO reserva : reservasSobrepostas){
                 if(reserva.getStatus().equals(StatusReservaEnum.ATIVA) || reserva.getStatus().equals(StatusReservaEnum.RESERVADA)) {

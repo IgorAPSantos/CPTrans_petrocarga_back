@@ -46,3 +46,6 @@ app:
             enabled: false
             grace-minutes: 10
             scan-ms: 1800000
+    firebase-push-notification:
+        enabled: true
+        credentials: "${FIREBASE_CREDENTIALS}"
