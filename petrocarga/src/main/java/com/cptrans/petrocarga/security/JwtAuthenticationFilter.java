@@ -44,13 +44,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        final String token = authHeader.substring(7);
-        final String email = jwtService.getEmailDoToken(token);
-
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-            if (jwtService.validarToken(token)) {
+        final String token = resolveToken(request);
+        
+        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            final String email = jwtService.getEmailDoToken(token);
+            if(email != null && email.isEmpty() && jwtService.validarToken(token)){
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
                 UUID id = jwtService.getIdDoToken(token);
                 UserAuthenticated userAuthenticated = new UserAuthenticated(id, userDetails);
                 UsernamePasswordAuthenticationToken authToken =
@@ -60,5 +59,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+    private String resolveToken(HttpServletRequest request) {
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
+        if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if ("auth-token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return null;
     }
 }
