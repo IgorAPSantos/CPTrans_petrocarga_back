@@ -15,3 +15,8 @@ spring:
         url: jdbc:postgresql://localhost:5432/petrocarga
         user: postgres
         password: 123456
+    
+app:
+    firebase-push-notification:
+        enabled: false
+        credentials: "classpath:firebase-service-account.json"

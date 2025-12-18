@@ -113,6 +113,12 @@
             <artifactId>postgres-socket-factory</artifactId>
             <version>1.27.0</version>
         </dependency>
+        <!-- Firebase Admin SDK -->
+        <dependency>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>9.7.0</version>
+        </dependency>
     </dependencies>
 
     <build>

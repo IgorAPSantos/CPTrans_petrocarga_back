@@ -1,4 +1,4 @@
-package com.cptrans.petrocarga.configs;
+package com.cptrans.petrocarga.infrastructure.configs;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

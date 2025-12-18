@@ -24,7 +24,6 @@ public class AuthService {
 
     public AuthResponseDTO login(AuthRequestDTO request) {
         Usuario usuario = usuarioRepository.findByEmail(request.getEmail()).orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas."));
-        System.out.println("Usuario encontrado: " + usuario.getEmail());
         if(usuario.getAtivo() == false) {
             throw new IllegalArgumentException("Usuário desativado.");
         }

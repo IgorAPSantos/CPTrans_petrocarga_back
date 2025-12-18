@@ -1,4 +1,4 @@
-package com.cptrans.petrocarga.configs;
+package com.cptrans.petrocarga.infrastructure.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
