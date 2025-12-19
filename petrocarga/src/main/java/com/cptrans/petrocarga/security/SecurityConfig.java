@@ -41,7 +41,9 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/v3/api-docs.yaml",
                     "/motoristas/cadastro/",
-                    "/motoristas/cadastro"
+                    "/motoristas/cadastro",
+                    "notificacoes/stream/",
+                    "notificacoes/stream"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
