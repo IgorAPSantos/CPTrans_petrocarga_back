@@ -12,7 +12,6 @@ import com.cptrans.petrocarga.models.PushToken;
 import com.cptrans.petrocarga.repositories.PushTokenRepository;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
 
 @Service
 public class FirebasePushService implements PushNotificationService {
@@ -28,15 +27,15 @@ public class FirebasePushService implements PushNotificationService {
             for (PushToken token : tokens) {
                 Message message = Message.builder()
                     .setToken(token.getToken())
-                    .setNotification(
-                        Notification.builder()
-                        .setTitle(notificacao.getTitulo())
-                        .setBody(notificacao.getMensagem())
-                        .build())
                     .putAllData(
                         Map.of(
                             "notificacaoId", notificacao.getId().toString(),
-                            "tipo", notificacao.getTipo().name()
+                            "title", notificacao.getTitulo(),
+                            "body", notificacao.getMensagem(),
+                            "tipo", notificacao.getTipo().name(),
+                            "lida", String.valueOf(notificacao.isLida()),
+                            "metadata", notificacao.getMetadata().toString()
+                                
                         ))
                     .build();
 
