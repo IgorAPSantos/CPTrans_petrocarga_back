@@ -20,3 +20,6 @@ app:
     firebase-push-notification:
         enabled: false
         credentials: "classpath:firebase-service-account.json"
+    cookie-settings:
+        secure: false
+        same-site: Lax
