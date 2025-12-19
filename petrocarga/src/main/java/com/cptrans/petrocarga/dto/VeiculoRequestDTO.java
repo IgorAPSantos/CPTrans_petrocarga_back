@@ -35,7 +35,8 @@ public class VeiculoRequestDTO {
 
     public Veiculo toEntity() {
         Veiculo veiculo = new Veiculo();
-        veiculo.setPlaca(this.placa);
+        if(this.placa == null) throw new IllegalArgumentException("Placa deve ser informada.");
+        veiculo.setPlaca(this.placa.toUpperCase());
         veiculo.setMarca(this.marca);
         veiculo.setModelo(this.modelo);
         veiculo.setTipo(this.tipo);
