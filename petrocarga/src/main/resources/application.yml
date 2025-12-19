@@ -49,3 +49,6 @@ app:
     firebase-push-notification:
         enabled: true
         credentials: "${FIREBASE_CREDENTIALS}"
+    cookie-settings:
+        secure: true
+        same-site: None
