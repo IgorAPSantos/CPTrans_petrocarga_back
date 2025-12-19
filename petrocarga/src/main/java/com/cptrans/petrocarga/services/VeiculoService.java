@@ -95,7 +95,7 @@ public class VeiculoService {
             if(veiculoByPlaca.isPresent() && !veiculoByPlaca.get().getId().equals(veiculoRegistrado.getId())) {
                 throw new IllegalArgumentException("Você já possui um veículo cadastrado com essa placa.");
             }
-            veiculoRegistrado.setPlaca(novoVeiculo.getPlaca());
+            veiculoRegistrado.setPlaca(novoVeiculo.getPlaca().toUpperCase());
         }
         if (novoVeiculo.getTipo() != null){
             veiculoRegistrado.setTipo(novoVeiculo.getTipo());
