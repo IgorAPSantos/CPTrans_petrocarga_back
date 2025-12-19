@@ -32,7 +32,10 @@ public class SecurityConfig {
             .cors(withDefaults -> {})
             .authorizeHttpRequests(auth -> auth
                  .requestMatchers(
-                    "/auth/**",
+                    "/auth/login/",
+                    "/auth/login",
+                    "/auth/admin/",
+                    "/auth/admin",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
                     "/v3/api-docs/**",
