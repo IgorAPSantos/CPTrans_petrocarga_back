@@ -7,25 +7,28 @@ import com.cptrans.petrocarga.enums.TipoCnhEnum;
 import com.cptrans.petrocarga.models.Empresa;
 import com.cptrans.petrocarga.models.Motorista;
 
-import io.micrometer.common.lang.NonNull;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class MotoristaRequestDTO {
 
-    @NonNull
+    @NotNull(message = "O campo 'usuario' é obrigatório.")
     @Valid
     private UsuarioRequestDTO usuario;
 
-    @NonNull
+    @NotNull(message = "O campo 'tipoCnh' é obrigatório.")
     @Valid
     private TipoCnhEnum tipoCnh;
 
+    @NotNull(message = "O campo 'numeroCnh' é obrigatório.")
     @Size(min = 9, max = 9, message = "Número da CNH deve ter exatamente 9 caracteres.")
     private String numeroCnh;
 
-    @NonNull
+    @NotNull(message = "O campo 'dataValidadeCnh' é obrigatório.")
     @Valid
+    @Future(message = "Data de validade da CNH deve ser futura.")
     private LocalDate dataValidadeCnh;
 
     @Valid
