@@ -52,7 +52,7 @@ public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSou
     var corsConfig = new org.springframework.web.cors.CorsConfiguration();
     corsConfig.setAllowedOriginPatterns(List.of(
         "http://localhost:3000",
-        "https://cp-trans-petrocarga-front.vercel.app/"
+        "https://cp-trans-petrocarga-front.vercel.app"
     ));
     corsConfig.setAllowedMethods(java.util.List.of("GET", "PATCH", "POST", "PUT", "DELETE", "OPTIONS"));
     corsConfig.setAllowedHeaders(java.util.List.of( 
