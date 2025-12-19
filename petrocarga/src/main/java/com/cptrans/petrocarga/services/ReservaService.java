@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cptrans.petrocarga.dto.ReservaDTO;
 import com.cptrans.petrocarga.dto.ReservaPATCHRequestDTO;
@@ -30,14 +32,19 @@ import com.cptrans.petrocarga.repositories.ReservaRepository;
 import com.cptrans.petrocarga.security.UserAuthenticated;
 import com.cptrans.petrocarga.utils.DateUtils;
 import com.cptrans.petrocarga.utils.ReservaUtils;
-
+import com.cptrans.petrocarga.repositories.ReservaRapidaRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Propagation;
 
 @Service
 public class ReservaService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ReservaService.class);
+
     @Autowired
     private ReservaRepository reservaRepository;
+    @Autowired
+    private ReservaRapidaRepository reservaRapidaRepository;
     @Autowired
     private MotoristaService motoristaService;
     @Autowired
@@ -356,7 +363,7 @@ public static class Intervalo {
      * @return quantidade de reservas finalizadas
      */
     public int processarNoShow(int graceMinutes) {
-        OffsetDateTime agora = OffsetDateTime.now();
+        OffsetDateTime agora = OffsetDateTime.now(DateUtils.FUSO_BRASIL);
 
         List<Reserva> candidatas = reservaRepository.findNoShowCandidates(
             StatusReservaEnum.RESERVADA,
@@ -367,19 +374,95 @@ public static class Intervalo {
         int finalizadas = 0;
         for (Reserva reserva : candidatas) {
             try {
-                finalizarForcado(reserva.getId());
+                finalizarForcadoIsolated(reserva.getId());
                 finalizadas++;
             } catch (Exception e) {
                 // Log e continua para não bloquear outras reservas
-                System.err.println("Erro ao finalizar reserva " + reserva.getId() + ": " + e.getMessage());
+                logger.error("Erro ao finalizar reserva {}: {}", reserva.getId(), e.getMessage(), e);
+            }
+        }
+
+        // Processa reservas rápidas (mesma lógica de no-show)
+        List<ReservaRapida> candidatasRapidas = reservaRapidaRepository.findNoShowCandidates(
+            StatusReservaEnum.RESERVADA,
+            graceMinutes,
+            agora
+        );
+
+        for (ReservaRapida rr : candidatasRapidas) {
+            try {
+                finalizarReservaRapidaIsolated(rr);
+                finalizadas++;
+            } catch (Exception e) {
+                logger.error("Erro ao finalizar reserva rápida {}: {}", rr.getId(), e.getMessage(), e);
             }
         }
 
         if (finalizadas > 0) {
-            System.out.println("No-show: " + finalizadas + " reserva(s) finalizada(s) automaticamente.");
+            logger.info("No-show: {} reserva(s) finalizada(s) automaticamente.", finalizadas);
         }
 
         return finalizadas;
+    }
+
+    /**
+     * Processa reservas para auto-conclusão: todas as reservas com status ATIVA cujo fim já passou
+     * serão marcadas como CONCLUIDA.
+     * Método independente do no-show (não aplica punições).
+     */
+    public void processarAutoConclusao() {
+        OffsetDateTime agora = OffsetDateTime.now(DateUtils.FUSO_BRASIL);
+
+        List<Reserva> candidatas = reservaRepository.findByStatusAndFimBefore(StatusReservaEnum.ATIVA, agora);
+
+        int concluidas = 0;
+        for (Reserva reserva : candidatas) {
+            try {
+                autoConcluirReservaIsolated(reserva);
+                concluidas++;
+            } catch (Exception e) {
+                // Log e continua para não bloquear outras reservas
+                logger.error("Erro ao auto-concluir reserva {}: {}", reserva.getId(), e.getMessage(), e);
+            }
+        }
+
+        // Processa auto-conclusão para reservas rápidas
+        List<ReservaRapida> candidatasRapidas = reservaRapidaRepository.findByStatusAndFimBefore(StatusReservaEnum.ATIVA, agora);
+        for (ReservaRapida rr : candidatasRapidas) {
+            try {
+                autoConcluirReservaRapidaIsolated(rr);
+                concluidas++;
+            } catch (Exception e) {
+                logger.error("Erro ao auto-concluir reserva rápida {}: {}", rr.getId(), e.getMessage(), e);
+            }
+        }
+
+        if (concluidas > 0) {
+            logger.info("Auto-conclusão: {} reserva(s) concluída(s).", concluidas);
+        }
+    }
+
+    @org.springframework.transaction.annotation.Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void finalizarForcadoIsolated(UUID reservaId) {
+        finalizarForcado(reservaId);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void finalizarReservaRapidaIsolated(ReservaRapida rr) {
+        rr.setStatus(StatusReservaEnum.REMOVIDA);
+        reservaRapidaRepository.save(rr);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void autoConcluirReservaIsolated(Reserva reserva) {
+        reserva.setStatus(StatusReservaEnum.CONCLUIDA);
+        reservaRepository.save(reserva);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void autoConcluirReservaRapidaIsolated(ReservaRapida rr) {
+        rr.setStatus(StatusReservaEnum.CONCLUIDA);
+        reservaRapidaRepository.save(rr);
     }
 
     public Reserva atualizarReserva (Reserva reserva, UUID usuarioId, ReservaPATCHRequestDTO reservaRequestDTO) {

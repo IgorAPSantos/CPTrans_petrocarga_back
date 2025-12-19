@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cptrans.petrocarga.enums.DiaSemanaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
@@ -18,9 +20,11 @@ import com.cptrans.petrocarga.models.EnderecoVaga;
 import com.cptrans.petrocarga.models.OperacaoVaga;
 import com.cptrans.petrocarga.models.Vaga;
 import com.cptrans.petrocarga.repositories.VagaRepository;
+import com.cptrans.petrocarga.utils.DateUtils;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional; 
+import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Propagation; 
 
 @Service
 public class VagaService {
@@ -28,6 +32,12 @@ public class VagaService {
     private VagaRepository vagaRepository;
     @Autowired
     private EnderecoVagaService enderecoVagaService;
+
+    @Autowired
+    private com.cptrans.petrocarga.repositories.ReservaRepository reservaRepository;
+
+    @Autowired
+    private com.cptrans.petrocarga.repositories.ReservaRapidaRepository reservaRapidaRepository;
 
 
     public List<Vaga> findAll() {
@@ -66,6 +76,62 @@ public class VagaService {
             .orElseThrow(() -> new EntityNotFoundException("Vaga com ID " + id + " não encontrada."));
         
         vagaRepository.deleteById(vaga.getId());
+    }
+
+    private static final Logger logger = LoggerFactory.getLogger(VagaService.class);
+
+    /**
+     * Sincroniza o status físico das vagas de acordo com reservas ativas no momento.
+     * Regras:
+     *  - Não altera vagas com status MANUTENCAO
+     *  - Se existir reserva ATIVA|RESERVADA no instante atual, marca INDISPONIVEL
+     *    se estava DISPONIVEL. Caso contrário, se não existir reserva e a vaga
+     *    estiver INDISPONIVEL, marca DISPONIVEL.
+     *  - Erros ao processar uma vaga não impedem o processamento das demais.
+     */
+    public void sincronizarStatusVagas() {
+        List<Vaga> vagas = findAll();
+        int atualizadas = 0;
+        java.time.OffsetDateTime agora = java.time.OffsetDateTime.now(DateUtils.FUSO_BRASIL);
+
+        for (Vaga vaga : vagas) {
+            try {
+                if (vaga.getStatus() == StatusVagaEnum.MANUTENCAO) continue; // não altera vagas em manutenção
+
+                boolean atualizou = sincronizarStatusVaga(vaga, agora);
+                if (atualizou) atualizadas++;
+            } catch (Exception e) {
+                logger.error("Erro ao sincronizar vaga {}: {}", vaga.getId(), e.getMessage(), e);
+            }
+        }
+
+        if (atualizadas > 0) {
+            logger.info("Sincronização de status de vagas: {} vaga(s) atualizada(s).", atualizadas);
+        }
+    }
+
+    @org.springframework.transaction.annotation.Transactional(propagation = Propagation.REQUIRES_NEW)
+    public boolean sincronizarStatusVaga(Vaga vaga, java.time.OffsetDateTime agora) {
+        if (vaga.getStatus() == StatusVagaEnum.MANUTENCAO) return false;
+
+        boolean ocupadoReserva = reservaRepository.existsByVagaIdAndHorarioOcupado(vaga.getId(), agora);
+        boolean ocupadoReservaRapida = reservaRapidaRepository.existsByVagaIdAndHorarioOcupado(vaga.getId(), agora);
+        boolean ocupado = ocupadoReserva || ocupadoReservaRapida;
+
+        if (ocupado) {
+            if (vaga.getStatus() == StatusVagaEnum.DISPONIVEL) {
+                vaga.setStatus(StatusVagaEnum.INDISPONIVEL);
+                vagaRepository.save(vaga);
+                return true;
+            }
+        } else {
+            if (vaga.getStatus() == StatusVagaEnum.INDISPONIVEL) {
+                vaga.setStatus(StatusVagaEnum.DISPONIVEL);
+                vagaRepository.save(vaga);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Transactional

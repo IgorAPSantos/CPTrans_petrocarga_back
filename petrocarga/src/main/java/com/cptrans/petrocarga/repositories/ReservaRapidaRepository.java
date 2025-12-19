@@ -20,4 +20,24 @@ public interface ReservaRapidaRepository extends JpaRepository<ReservaRapida, UU
     public List<ReservaRapida> findByAgente(Agente agente);
     public List<ReservaRapida> findByFimGreaterThanAndInicioLessThan(OffsetDateTime novoInicio, OffsetDateTime novoFim);
     public Integer countByPlaca(String placa);
+
+    @org.springframework.data.jpa.repository.Query("SELECT r FROM ReservaRapida r " +
+           "WHERE r.status = :status " +
+           "AND r.inicio <= :agora " +
+           "AND FUNCTION('TIMESTAMPADD', MINUTE, :graceMinutes, r.inicio) <= :agora " +
+           "AND r.fim > :agora")
+    public List<ReservaRapida> findNoShowCandidates(
+        @org.springframework.data.repository.query.Param("status") StatusReservaEnum status,
+        @org.springframework.data.repository.query.Param("graceMinutes") int graceMinutes,
+        @org.springframework.data.repository.query.Param("agora") OffsetDateTime agora
+    );
+
+    @org.springframework.data.jpa.repository.Query("SELECT CASE WHEN (COUNT(r) > 0) THEN true ELSE false END FROM ReservaRapida r " +
+           "WHERE r.vaga.id = :vagaId " +
+           "AND (r.status = com.cptrans.petrocarga.enums.StatusReservaEnum.ATIVA OR r.status = com.cptrans.petrocarga.enums.StatusReservaEnum.RESERVADA) " +
+           "AND r.inicio <= :dataHora " +
+           "AND r.fim >= :dataHora")
+    public boolean existsByVagaIdAndHorarioOcupado(@org.springframework.data.repository.query.Param("vagaId") UUID vagaId, @org.springframework.data.repository.query.Param("dataHora") java.time.OffsetDateTime dataHora);
+
+    public List<ReservaRapida> findByStatusAndFimBefore(StatusReservaEnum status, OffsetDateTime agora);
 }
