@@ -21,8 +21,11 @@ public class NotificacaoCriadaListener {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onNotificacaoEnviada(NotificacaoCriadaEvent event) {
-        realTimeNotificationService.enviarNotificacao(event.notificacao());
-        pushNotificationService.enviarNotificacao(event.notificacao());
+        if(realTimeNotificationService.isAtivo(event.notificacao().getUsuarioId())){
+            realTimeNotificationService.enviarNotificacao(event.notificacao());
+        }else{
+            pushNotificationService.enviarNotificacao(event.notificacao());
+        }
     }
     
 }
