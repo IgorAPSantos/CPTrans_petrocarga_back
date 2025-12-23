@@ -1,9 +1,13 @@
 package com.cptrans.petrocarga.infrastructure.realtime;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -33,7 +37,32 @@ public class SseNotficationService implements RealTimeNotificationService {
         emitter.onTimeout(cleanup);
         emitter.onError(e -> cleanup.run());
 
+         try {
+            emitter.send(
+                SseEmitter.event()
+                .name("INIT")
+                .data("connected"));
+        } catch (IOException e) {
+            emitter.completeWithError(e);
+        }
+
+        startHeartbeat(emitter, usuarioId);
+       
         return emitter;
+    }
+
+    private void startHeartbeat(SseEmitter emitter, UUID usuarioId) {
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                emitter.send(SseEmitter.event().comment("keep-alive"));
+            } catch (Exception e) {
+                scheduler.shutdown();
+                Set<SseEmitter> set = emitters.get(usuarioId);
+                if (set != null) set.remove(emitter);
+            }
+        }, 15, 15, java.util.concurrent.TimeUnit.SECONDS);
     }
 
 
