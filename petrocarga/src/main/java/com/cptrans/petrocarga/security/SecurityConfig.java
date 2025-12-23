@@ -36,6 +36,8 @@ public class SecurityConfig {
                     "/auth/login",
                     "/auth/admin/",
                     "/auth/admin",
+                    "/auth/me/",
+                    "/auth/me",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
                     "/v3/api-docs/**",
@@ -43,9 +45,7 @@ public class SecurityConfig {
                     "/motoristas/cadastro/",
                     "/motoristas/cadastro",
                     "/notificacoes/stream/",
-                    "/notificacoes/stream",
-                    "/petrocarga/notificacoes/stream/",
-                    "/petrocarga/notificacoes/stream"
+                    "/notificacoes/stream"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

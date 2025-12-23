@@ -1,11 +1,15 @@
 package com.cptrans.petrocarga.controllers;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +21,7 @@ import com.cptrans.petrocarga.dto.UsuarioRequestDTO;
 import com.cptrans.petrocarga.dto.UsuarioResponseDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.models.Usuario;
+import com.cptrans.petrocarga.security.UserAuthenticated;
 import com.cptrans.petrocarga.services.AuthService;
 import com.cptrans.petrocarga.services.UsuarioService;
 
@@ -61,6 +66,13 @@ public class AuthController {
     public ResponseEntity<UsuarioResponseDTO> createAdmin(@RequestBody UsuarioRequestDTO usuario) {
         Usuario novoUsuario = usuarioService.createUsuario(usuario.toEntity(), PermissaoEnum.ADMIN);
         return ResponseEntity.ok(novoUsuario.toResponseDTO());
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UsuarioResponseDTO> getMe(){
+        UUID usuarioIdFromToken = (((UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).id());
+        Usuario usuarioLogado = usuarioService.findByIdAndAtivo(usuarioIdFromToken, true);
+        return ResponseEntity.ok(usuarioLogado.toResponseDTO());
     }
 
     @PreAuthorize("isAuthenticated()")

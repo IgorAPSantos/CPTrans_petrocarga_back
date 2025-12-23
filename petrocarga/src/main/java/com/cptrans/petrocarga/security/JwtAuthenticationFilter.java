@@ -52,8 +52,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         }catch (Exception e) {
-            System.out.println("Erro ao autenticar o usuário: " + e.getMessage());
-            System.out.println("UserAuthenticated: " + (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
             SecurityContextHolder.clearContext();
         }
 
