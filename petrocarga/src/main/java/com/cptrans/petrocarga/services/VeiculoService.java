@@ -82,7 +82,7 @@ public class VeiculoService {
         Usuario usuarioRegistrado = usuarioService.findById(usuarioId);
         UserAuthenticated usuarioLogado = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<String> authorities = usuarioLogado.userDetails().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-        if (!veiculoRegistrado.getUsuario().getId().equals(usuarioRegistrado.getId()) && (!authorities.contains(PermissaoEnum.ADMIN.getRole()) || !authorities.contains(PermissaoEnum.GESTOR.getRole()))) {
+        if (!veiculoRegistrado.getUsuario().getId().equals(usuarioRegistrado.getId()) && (!authorities.contains(PermissaoEnum.ADMIN.getRole()) && !authorities.contains(PermissaoEnum.GESTOR.getRole()))) {
                 throw new IllegalArgumentException("Usuário não pode editar veículo de outro usuário.");
         }
 
@@ -91,7 +91,7 @@ public class VeiculoService {
         }
 
         if (novoVeiculo.getPlaca() != null){
-            Optional<Veiculo> veiculoByPlaca = veiculoRepository.findByPlacaAndUsuario(novoVeiculo.getPlaca(), usuarioRegistrado);
+            Optional<Veiculo> veiculoByPlaca = veiculoRepository.findByPlacaAndUsuario(novoVeiculo.getPlaca().toUpperCase(), usuarioRegistrado);
             if(veiculoByPlaca.isPresent() && !veiculoByPlaca.get().getId().equals(veiculoRegistrado.getId())) {
                 throw new IllegalArgumentException("Você já possui um veículo cadastrado com essa placa.");
             }

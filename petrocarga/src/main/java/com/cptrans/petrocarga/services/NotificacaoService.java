@@ -76,6 +76,7 @@ public class NotificacaoService {
         return notificacaoSalva;
     }
 
+    @Transactional
     public List<Notificacao> sendNotificacaoToUsuariosByPermissao(PermissaoEnum permissao, Notificacao novaNotificacao) {
         List<Usuario> usuarios = usuarioService.findByPermissaoAndAtivo(permissao, true);
         List<Notificacao> notificacoesSalvas = new ArrayList<>();

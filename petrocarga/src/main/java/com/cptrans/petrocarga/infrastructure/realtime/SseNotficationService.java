@@ -1,6 +1,7 @@
 package com.cptrans.petrocarga.infrastructure.realtime;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,15 +14,24 @@ import com.cptrans.petrocarga.models.Notificacao;
 @Service
 public class SseNotficationService implements RealTimeNotificationService {
 
-    private final Map<UUID, SseEmitter> emitters = new ConcurrentHashMap<>();
+    private final Map<UUID, Set<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
     public SseEmitter connect(UUID usuarioId) {
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-        emitters.put(usuarioId, emitter);
+        SseEmitter emitter = new SseEmitter(0L);
 
-        emitter.onCompletion(() -> emitters.remove(usuarioId));
-        emitter.onTimeout(() -> emitters.remove(usuarioId));
-        emitter.onError((e) -> emitters.remove(usuarioId));
+        emitters.computeIfAbsent(usuarioId, id -> ConcurrentHashMap.newKeySet()).add(emitter);
+
+        Runnable cleanup = () -> {
+            Set<SseEmitter> set = emitters.get(usuarioId);
+            if (set != null) {
+                set.remove(emitter);
+                if (set.isEmpty()) emitters.remove(usuarioId);
+            }
+        };
+
+        emitter.onCompletion(cleanup);
+        emitter.onTimeout(cleanup);
+        emitter.onError(e -> cleanup.run());
 
         return emitter;
     }
@@ -29,15 +39,29 @@ public class SseNotficationService implements RealTimeNotificationService {
 
     @Override
     public void enviarNotificacao(Notificacao notificacao) {
-        SseEmitter emitter = emitters.get(notificacao.getUsuarioId());
+        Set<SseEmitter> userEmitters = emitters.get(notificacao.getUsuarioId());
         
-        if (emitter != null) {
+        if (userEmitters == null || userEmitters.isEmpty()) return;
+
+        for(SseEmitter emitter : Set.copyOf(userEmitters)) {
             try {
-                emitter.send(notificacao);
+                emitter.send(
+                    SseEmitter.event()
+                        .id(notificacao.getId().toString())
+                        .name("notificacao")
+                        .data(notificacao)
+                        .reconnectTime(3000)
+                    );
             } catch (Exception e) {
-                emitters.remove(notificacao.getUsuarioId());
+                userEmitters.remove(emitter);
             }
         }
+        if (userEmitters.isEmpty()) emitters.remove(notificacao.getUsuarioId());
+    }
+
+    @Override
+    public boolean isAtivo(UUID usuarioId) {
+        return emitters.containsKey(usuarioId) && !emitters.get(usuarioId).isEmpty();
     }
     
 }
