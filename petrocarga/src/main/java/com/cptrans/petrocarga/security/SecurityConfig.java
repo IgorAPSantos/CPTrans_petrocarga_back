@@ -43,7 +43,9 @@ public class SecurityConfig {
                     "/motoristas/cadastro/",
                     "/motoristas/cadastro",
                     "/notificacoes/stream/",
-                    "/notificacoes/stream"
+                    "/notificacoes/stream",
+                    "/petrocarga/notificacoes/stream/",
+                    "/petrocarga/notificacoes/stream"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
