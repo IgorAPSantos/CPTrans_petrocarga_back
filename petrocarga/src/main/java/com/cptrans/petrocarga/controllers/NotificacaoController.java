@@ -31,6 +31,7 @@ import com.cptrans.petrocarga.services.NotificacaoService;
 import com.cptrans.petrocarga.services.PushTokenService;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 
@@ -47,9 +48,14 @@ public class NotificacaoController {
     private PushTokenService pushTokenService;
     
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter stream(@AuthenticationPrincipal UserAuthenticated user) {
+    public SseEmitter stream(@AuthenticationPrincipal UserAuthenticated user, HttpServletResponse response) {
         if(user == null) throw new AuthorizationDeniedException("Acesso negado");
-        return sseNotficationService.connect(user.id());
+
+        SseEmitter emitter = sseNotficationService.connect(user.id());
+        
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Connection", "keep-alive");
+        return emitter;
     }
 
     @PreAuthorize("#usuarioId == authentication.principal.id or hasAnyRole('ADMIN', 'GESTOR')")
