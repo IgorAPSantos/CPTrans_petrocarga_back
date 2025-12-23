@@ -13,6 +13,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableMethodSecurity
@@ -29,7 +32,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .cors(withDefaults -> {})
+            .cors(withDefaults -> withDefaults.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
                  .requestMatchers(
                     "/auth/login/",
@@ -55,24 +58,24 @@ public class SecurityConfig {
     }
 
     @Bean
-public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
-    var corsConfig = new org.springframework.web.cors.CorsConfiguration();
-    corsConfig.setAllowedOriginPatterns(List.of(
-        "http://localhost:3000",
-        "https://cp-trans-petrocarga-front.vercel.app"
-    ));
-    corsConfig.setAllowedMethods(java.util.List.of("GET", "PATCH", "POST", "PUT", "DELETE", "OPTIONS"));
-    corsConfig.setAllowedHeaders(java.util.List.of( 
-        "Authorization",
-        "Content-Type",
-        "Accept",
-        "Cache-Control",
-        "Last-Event-ID"));
-    corsConfig.setAllowCredentials(true);
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        corsConfig.setAllowedOriginPatterns(List.of(
+            "http://localhost:3000",
+            "https://cp-trans-petrocarga-front.vercel.app"
+        ));
+        corsConfig.setAllowedMethods(java.util.List.of("GET", "PATCH", "POST", "PUT", "DELETE", "OPTIONS"));
+        corsConfig.setAllowedHeaders(java.util.List.of( 
+            "Authorization",
+            "Content-Type",
+            "Accept",
+            "Cache-Control",
+            "Last-Event-ID"));
+        corsConfig.setAllowCredentials(true);
 
-    var source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", corsConfig);
-    return source;
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
+        return source;
 }
 
     @Bean
