@@ -62,6 +62,19 @@ public class Notificacao {
         this.metadata = metadata;
     }
 
+     public Notificacao(UUID usuarioId, String titulo, String mensagem, TipoNotificacaoEnum tipo) {
+        this.usuarioId = usuarioId;
+        this.titulo = titulo;
+        this.mensagem = mensagem;
+        this.tipo = tipo;
+    }
+
+    public Notificacao(String titulo, String mensagem, TipoNotificacaoEnum tipo) {
+        this.titulo = titulo;
+        this.mensagem = mensagem;
+        this.tipo = tipo;
+    }
+
     public Notificacao(String titulo, String mensagem, TipoNotificacaoEnum tipo, Object metadata) {
         this.titulo = titulo;
         this.mensagem = mensagem;
@@ -89,12 +102,24 @@ public class Notificacao {
         return titulo;
     }
 
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
     public String getMensagem() {
         return mensagem;
     }
 
+    public void setMensagem(String mensagem) {
+        this.mensagem = mensagem;
+    }
+
     public TipoNotificacaoEnum getTipo() {
         return tipo;
+    }
+
+    public void setTipo(TipoNotificacaoEnum tipo) {
+        this.tipo = tipo;
     }
 
     public boolean isLida() {
@@ -107,5 +132,9 @@ public class Notificacao {
 
     public Object getMetadata() {
         return metadata;
+    }
+
+    public void setMetadata(Object metadata) {
+        this.metadata = metadata;
     }
 }
