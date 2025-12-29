@@ -18,15 +18,13 @@ public class NotificacaoRequestDTO {
     @NotNull
     public TipoNotificacaoEnum tipo;
 
-    public Object metadata;
     
     public NotificacaoRequestDTO() {
     }
 
-    public NotificacaoRequestDTO(String titulo, String mensagem, Object metadata) {
+    public NotificacaoRequestDTO(String titulo, String mensagem) {
         this.titulo = titulo;
         this.mensagem = mensagem;
-        this.metadata = metadata;
     }
 
     public String getTitulo() {
@@ -37,11 +35,7 @@ public class NotificacaoRequestDTO {
         return mensagem;
     }
 
-    public Object getMetadata() {
-        return metadata;
-    }
-
     public Notificacao toEntity(){
-        return new Notificacao(titulo, mensagem, tipo, metadata);
+        return new Notificacao(titulo, mensagem, tipo);
     }
 }

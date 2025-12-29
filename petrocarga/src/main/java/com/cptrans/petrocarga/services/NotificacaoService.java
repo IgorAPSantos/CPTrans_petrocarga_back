@@ -1,7 +1,9 @@
 package com.cptrans.petrocarga.services;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +34,14 @@ public class NotificacaoService {
     @Autowired
     private SpringDomainEventPublisher eventPublisher;
  
-    private Notificacao createNotificacao(UUID usuarioId, String titulo, String mensagem, TipoNotificacaoEnum tipo, Object dadosAdicionais) {
-        PermissaoEnum permissaoUsuarioLogado = usuarioService.findById(((UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).id()).getPermissao();
+    private Notificacao createNotificacao(UUID usuarioId, String titulo, String mensagem, TipoNotificacaoEnum tipo, Map<String, Object> dadosAdicionais) {
+        Usuario usuarioLogado = usuarioService.findById(((UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).id());
         Usuario usuarioDestinatario = usuarioService.findById(usuarioId);
-        NotificacaoUtils.validateByPermissao(permissaoUsuarioLogado, usuarioDestinatario.getPermissao());
+        NotificacaoUtils.validateByPermissao(usuarioLogado.getPermissao(), usuarioDestinatario.getPermissao());
+        if (dadosAdicionais == null) dadosAdicionais = new HashMap<>();
+        dadosAdicionais.put("remetente", usuarioLogado.toResponseDTO());
         Notificacao novaNotificacao = new Notificacao(usuarioDestinatario.getId(), titulo, mensagem, tipo, dadosAdicionais);
+        
         return notificacaoRepository.save(novaNotificacao);
     }
 
@@ -71,7 +76,7 @@ public class NotificacaoService {
     public Notificacao sendNotificationToUsuario(UUID usuarioId, Notificacao novaNotificacao) {
         Usuario usuario = usuarioService.findByIdAndAtivo(usuarioId, true);
         novaNotificacao.setUsuarioId(usuario.getId());
-        Notificacao notificacaoSalva = createNotificacao(novaNotificacao.getUsuarioId(), novaNotificacao.getTitulo(), novaNotificacao.getMensagem(), novaNotificacao.getTipo(), novaNotificacao.getMetadata());
+        Notificacao notificacaoSalva = createNotificacao(novaNotificacao.getUsuarioId(), novaNotificacao.getTitulo(), novaNotificacao.getMensagem(), novaNotificacao.getTipo(), null);
         eventPublisher.publish(new NotificacaoCriadaEvent(notificacaoSalva));
         return notificacaoSalva;
     }
@@ -79,12 +84,18 @@ public class NotificacaoService {
     @Transactional
     public List<Notificacao> sendNotificacaoToUsuariosByPermissao(PermissaoEnum permissao, Notificacao novaNotificacao) {
         List<Usuario> usuarios = usuarioService.findByPermissaoAndAtivo(permissao, true);
+        Usuario usuarioLogado = usuarioService.findById(((UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).id());
         List<Notificacao> notificacoesSalvas = new ArrayList<>();
+        Map<String, Object> dadosAdicionais = new HashMap<>();
+
+        dadosAdicionais.put("remetente", usuarioLogado.toResponseDTO());
+
         if(usuarios.isEmpty()) {
             throw new EntityNotFoundException("Nenhum usuário encontrado com a permissão: " + permissao);
         }
         for (Usuario usuario : usuarios) {
-            Notificacao novaNotificacaoUsuario = new Notificacao(usuario.getId(), novaNotificacao.getTitulo(), novaNotificacao.getMensagem(), novaNotificacao.getTipo(), novaNotificacao.getMetadata());
+            Notificacao novaNotificacaoUsuario = new Notificacao(usuario.getId(), novaNotificacao.getTitulo(), novaNotificacao.getMensagem(), novaNotificacao.getTipo());
+            novaNotificacaoUsuario.setMetadata(dadosAdicionais);
             notificacoesSalvas.add(novaNotificacaoUsuario);
         }
         if (notificacoesSalvas.isEmpty()) return notificacoesSalvas;
