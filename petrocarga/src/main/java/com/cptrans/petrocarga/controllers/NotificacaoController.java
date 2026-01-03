@@ -12,6 +12,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -89,6 +90,13 @@ public class NotificacaoController {
     public ResponseEntity<List<Notificacao>> sendNotificationToPermissao(@PathVariable PermissaoEnum permissao, @Valid @RequestBody NotificacaoRequestDTO notificacaoRequestDTO) {
         List<Notificacao> notificacoesEnviadas = notificacaoService.sendNotificacaoToUsuariosByPermissao(permissao, notificacaoRequestDTO.toEntity());
         return ResponseEntity.ok().body(notificacoesEnviadas);
+    }
+
+    @PatchMapping("/lida/{notificacaoId}")
+    public ResponseEntity<Notificacao> marcarComoLida(@AuthenticationPrincipal UserAuthenticated userAuthenticated, @PathVariable UUID notificacaoId) {
+        UUID usuarioId = userAuthenticated.id();
+        Notificacao notificacaoLida = notificacaoService.marcarComoLida(usuarioId, notificacaoId);
+        return ResponseEntity.ok().body(notificacaoLida);
     }
 
     @PreAuthorize("#usuarioId == authentication.principal.id or hasAnyRole('ADMIN', 'GESTOR')")

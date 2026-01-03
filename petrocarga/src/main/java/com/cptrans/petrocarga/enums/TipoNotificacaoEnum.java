@@ -6,5 +6,6 @@ public enum TipoNotificacaoEnum {
     VAGA,
     VEICULO,
     MOTORISTA,
-    SISTEMA
+    SISTEMA,
+    DENUNCIA
 }
