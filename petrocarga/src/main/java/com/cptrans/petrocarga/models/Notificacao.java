@@ -1,6 +1,7 @@
 package com.cptrans.petrocarga.models;
 
 import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -49,12 +50,12 @@ public class Notificacao {
     @Convert(converter = MetadataJsonConverter.class)
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private Object metadata;
+    private Map<String, Object> metadata;
 
     public Notificacao() {
     }
 
-    public Notificacao(UUID usuarioId, String titulo, String mensagem, TipoNotificacaoEnum tipo, Object metadata) {
+    public Notificacao(UUID usuarioId, String titulo, String mensagem, TipoNotificacaoEnum tipo, Map<String, Object> metadata) {
         this.usuarioId = usuarioId;
         this.titulo = titulo;
         this.mensagem = mensagem;
@@ -75,7 +76,7 @@ public class Notificacao {
         this.tipo = tipo;
     }
 
-    public Notificacao(String titulo, String mensagem, TipoNotificacaoEnum tipo, Object metadata) {
+    public Notificacao(String titulo, String mensagem, TipoNotificacaoEnum tipo, Map<String, Object> metadata) {
         this.titulo = titulo;
         this.mensagem = mensagem;
         this.tipo = tipo;
@@ -130,11 +131,11 @@ public class Notificacao {
         return CRIADA_EM;
     }
 
-    public Object getMetadata() {
+    public Map<String, Object> getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(Object metadata) {
+    public void setMetadata(Map<String, Object> metadata) {
         this.metadata = metadata;
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.cptrans.petrocarga.domain.event.NotificacaoCriadaEvent;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
+import com.cptrans.petrocarga.enums.StatusDenunciaEnum;
 import com.cptrans.petrocarga.enums.TipoNotificacaoEnum;
 import com.cptrans.petrocarga.infrastructure.event.SpringDomainEventPublisher;
 import com.cptrans.petrocarga.models.Notificacao;
@@ -39,7 +40,8 @@ public class NotificacaoService {
         Usuario usuarioDestinatario = usuarioService.findById(usuarioId);
         NotificacaoUtils.validateByPermissao(usuarioLogado.getPermissao(), usuarioDestinatario.getPermissao());
         if (dadosAdicionais == null) dadosAdicionais = new HashMap<>();
-        dadosAdicionais.put("remetente", usuarioLogado.toResponseDTO());
+        dadosAdicionais.put("remetenteId", usuarioLogado.getId());
+        dadosAdicionais.put("remetente", usuarioLogado.getNome());
         Notificacao novaNotificacao = new Notificacao(usuarioDestinatario.getId(), titulo, mensagem, tipo, dadosAdicionais);
         
         return notificacaoRepository.save(novaNotificacao);
@@ -76,7 +78,7 @@ public class NotificacaoService {
     public Notificacao sendNotificationToUsuario(UUID usuarioId, Notificacao novaNotificacao) {
         Usuario usuario = usuarioService.findByIdAndAtivo(usuarioId, true);
         novaNotificacao.setUsuarioId(usuario.getId());
-        Notificacao notificacaoSalva = createNotificacao(novaNotificacao.getUsuarioId(), novaNotificacao.getTitulo(), novaNotificacao.getMensagem(), novaNotificacao.getTipo(), null);
+        Notificacao notificacaoSalva = createNotificacao(novaNotificacao.getUsuarioId(), novaNotificacao.getTitulo(), novaNotificacao.getMensagem(), novaNotificacao.getTipo(), novaNotificacao.getMetadata());
         eventPublisher.publish(new NotificacaoCriadaEvent(notificacaoSalva));
         return notificacaoSalva;
     }
@@ -88,7 +90,10 @@ public class NotificacaoService {
         List<Notificacao> notificacoesSalvas = new ArrayList<>();
         Map<String, Object> dadosAdicionais = new HashMap<>();
 
-        dadosAdicionais.put("remetente", usuarioLogado.toResponseDTO());
+        if (novaNotificacao.getMetadata() != null) dadosAdicionais.putAll(novaNotificacao.getMetadata());
+        
+        dadosAdicionais.put("remetenteId", usuarioLogado.getId());
+        dadosAdicionais.put("remetente", usuarioLogado.getNome());
 
         if(usuarios.isEmpty()) {
             throw new EntityNotFoundException("Nenhum usuário encontrado com a permissão: " + permissao);
@@ -109,8 +114,26 @@ public class NotificacaoService {
         return notificacoesCriadas;
     }
 
+    public Notificacao marcarComoLida(UUID usuarioId, UUID notificacaoId) {
+        Notificacao notificacao = findByIdAndUsuarioId(notificacaoId, usuarioId);
+        notificacao.marcarComoLida();
+        return notificacaoRepository.save(notificacao);
+    }
+
     public void deleteById(UUID usuarioId, UUID notificacaoId) {
         Notificacao notificacao = findByIdAndUsuarioId(usuarioId, notificacaoId);
         notificacaoRepository.delete(notificacao);
     }
+
+    public void notificarDenunciaCriada(Map<String, Object> dadosAdicionais) {
+        Notificacao notificacaoDenuncia = new Notificacao("Nova Denúncia", "Uma nova denúncia foi criada", TipoNotificacaoEnum.DENUNCIA, dadosAdicionais);
+        sendNotificacaoToUsuariosByPermissao(PermissaoEnum.GESTOR, notificacaoDenuncia);
+        sendNotificacaoToUsuariosByPermissao(PermissaoEnum.AGENTE, notificacaoDenuncia);
+    }
+
+    public void notificarDenunciaAtualizada(Map<String, Object> dadosAdicionais, StatusDenunciaEnum statusDenuncia, UUID usuarioIdDenuncia) {
+        Notificacao notificacaoDenuncia = new Notificacao("Denúncia Atualizada", "Sua denúncia foi atualizada para o status: '" + statusDenuncia + "'", TipoNotificacaoEnum.DENUNCIA, dadosAdicionais);
+        sendNotificationToUsuario(usuarioIdDenuncia, notificacaoDenuncia);
+    }
+
 }
