@@ -10,6 +10,8 @@ public class ReservaDetailedResponseDTO {
 
     private UUID id;
     private UUID vagaId;
+    private String numeroEndereco;
+    private String referenciaEndereco;
     private String logradouro;
     private String bairro;
 
@@ -38,6 +40,8 @@ public class ReservaDetailedResponseDTO {
                 this.logradouro = r.getVaga().getEndereco().getLogradouro();
                 this.bairro = r.getVaga().getEndereco().getBairro();
             }
+            this.numeroEndereco = r.getVaga().getNumeroEndereco();
+            this.referenciaEndereco = r.getVaga().getReferenciaEndereco();
         }
         if (r.getMotorista() != null) {
             if (r.getMotorista().getUsuario() != null) {
@@ -63,6 +67,10 @@ public class ReservaDetailedResponseDTO {
     public void setId(UUID id) { this.id = id; }
     public UUID getVagaId() { return vagaId; }
     public void setVagaId(UUID vagaId) { this.vagaId = vagaId; }
+    public String getNumeroEndereco() { return numeroEndereco; }
+    public void setNumeroEndereco(String numeroEndereco) { this.numeroEndereco = numeroEndereco; }
+    public String getReferenciaEndereco() { return referenciaEndereco; }
+    public void setReferenciaEndereco(String referenciaEndereco) { this.referenciaEndereco = referenciaEndereco; }
     public String getLogradouro() { return logradouro; }
     public void setLogradouro(String logradouro) { this.logradouro = logradouro; }
     public String getBairro() { return bairro; }
