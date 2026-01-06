@@ -1,17 +1,30 @@
 package com.cptrans.petrocarga.controllers;
 
-import com.cptrans.petrocarga.dto.ReservaDetailedResponseDTO;
-import com.cptrans.petrocarga.models.Reserva;
-import com.cptrans.petrocarga.services.DocumentoReservaService;
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
+import com.cptrans.petrocarga.dto.ReservaDetailedResponseDTO;
+import com.cptrans.petrocarga.enums.PermissaoEnum;
+import com.cptrans.petrocarga.enums.StatusReservaEnum;
+import com.cptrans.petrocarga.models.Reserva;
+import com.cptrans.petrocarga.security.UserAuthenticated;
+import com.cptrans.petrocarga.services.DocumentoReservaService;
+import com.cptrans.petrocarga.services.ReservaService;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping("/documentos/reservas")
@@ -20,6 +33,9 @@ public class DocumentoReservaController {
     @Autowired
     private DocumentoReservaService documentoReservaService;
 
+    @Autowired
+    private ReservaService reservaService;
+
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR', 'AGENTE', 'MOTORISTA', 'EMPRESA')")
     @GetMapping("/{id}")
     public ResponseEntity<ReservaDetailedResponseDTO> getDocumentoReservaById(@PathVariable UUID id) {
@@ -27,4 +43,29 @@ public class DocumentoReservaController {
         ReservaDetailedResponseDTO dto = new ReservaDetailedResponseDTO(reserva);
         return ResponseEntity.ok(dto);
     }
+
+    @GetMapping(
+    value = "/{id}/comprovante",
+    produces = MediaType.APPLICATION_PDF_VALUE
+    )
+    public ResponseEntity<byte[]> gerarComprovante(@AuthenticationPrincipal UserAuthenticated user, @PathVariable UUID id) throws IOException {
+        List<String> authorities = user.userDetails().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+        Reserva reserva = reservaService.findById(id);
+        
+        if (reserva != null) {
+            if (!reserva.getStatus().equals(StatusReservaEnum.RESERVADA)) throw new EntityNotFoundException("Reserva não encontrada.");
+            if(authorities.contains(PermissaoEnum.MOTORISTA.getRole())){
+                if(!reserva.getMotorista().getUsuario().getId().equals(user.id()) && !reserva.getCriadoPor().getId().equals(user.id())) throw new EntityNotFoundException("Reserva não encontrada.");
+            } 
+        }
+
+        String html = documentoReservaService.gerarHtmlReserva(reserva);
+        byte[] pdf = documentoReservaService.gerarPdf(html);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=comprovante-reserva.pdf")
+                .body(pdf);
+    }
+
 }

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Comprovante de Reserva</title>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 180px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .section {
+            margin-top: 15px;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        td {
+            padding: 6px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <img class="logo" src="classpath:/static/pdf/Logo.png" alt="CPTrans Logo" />
+        <h1>Comprovante de Reserva</h1>
+    </div>
+
+    <div class=" section">
+        <table>
+            <tr>
+                <td class="label">Código da Reserva</td>
+                <td th:text="${reserva.id}"></td>
+            </tr>
+            <tr>
+                <td class="label">Status</td>
+                <td th:text="${reserva.status}"></td>
+            </tr>
+            <tr>
+                <td class="label">Criado por</td>
+                <td th:text="${reserva.criadoPorNome}"></td>
+            </tr>
+            <tr>
+                <td class="label">Motorista</td>
+                <td th:text="${reserva.motoristaNome}"></td>
+            </tr>
+            <tr>
+                <td class="label">Veículo</td>
+                <td>
+                    <span th:text="${reserva.veiculoModelo}"></span>
+                    -
+                    <span th:text="${reserva.veiculoPlaca}"></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Endereço</td>
+                <td>
+                    <span th:text="${reserva.logradouro}"></span>,
+                    <span th:text="${reserva.numeroEndereco}"></span>,
+                    <span th:text="${reserva.bairro}"></span>,
+                    <span th:text="${reserva.referenciaEndereco}"></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Período</td>
+                <td>
+                    <span th:text="${#temporals.format(reserva.inicio, 'dd/MM/yyyy HH:mm')}"></span>
+                    até
+                    <span th:text="${#temporals.format(reserva.fim, 'dd/MM/yyyy HH:mm')}"></span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+
+</html>
