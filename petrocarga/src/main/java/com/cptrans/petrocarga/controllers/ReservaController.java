@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,6 +31,7 @@ import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.models.Reserva;
 import com.cptrans.petrocarga.models.Vaga;
 import com.cptrans.petrocarga.models.Veiculo;
+import com.cptrans.petrocarga.security.UserAuthenticated;
 import com.cptrans.petrocarga.services.MotoristaService;
 import com.cptrans.petrocarga.services.ReservaService;
 import com.cptrans.petrocarga.services.VagaService;
@@ -147,6 +149,12 @@ public class ReservaController {
     public ResponseEntity<ReservaResponseDTO> updateReserva(@PathVariable UUID id, @PathVariable UUID usuarioId, @RequestBody @Valid ReservaPATCHRequestDTO reservaRequestDTO) {
         Reserva reserva = reservaService.findById(id);
         Reserva reservaAtualizada = reservaService.atualizarReserva(reserva, usuarioId, reservaRequestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservaAtualizada.toResponseDTO());
+    }
+
+    @PatchMapping("checkout/{id}")
+    public ResponseEntity<ReservaResponseDTO> realizarCheckout(@AuthenticationPrincipal UserAuthenticated userAuthenticated, @PathVariable UUID id ) {
+        Reserva reservaAtualizada = reservaService.realizarCheckout(id);
         return ResponseEntity.status(HttpStatus.CREATED).body(reservaAtualizada.toResponseDTO());
     }
 
