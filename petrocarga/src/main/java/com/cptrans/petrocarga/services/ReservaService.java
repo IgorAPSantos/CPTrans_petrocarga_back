@@ -398,8 +398,6 @@ public static class Intervalo {
             throw new IllegalArgumentException("Impossível alterar reserva pois só faltam " + deltaTempo + " minutos para o início e o tempo limite de alteração é de " + TEMPO_LIMITE_ALTERACAO + " minutos.");
         }
         
-        if(reservaRequestDTO.getStatus() != null && reservaRequestDTO.getStatus().equals(StatusReservaEnum.CONCLUIDA)) reserva.setStatus(StatusReservaEnum.CONCLUIDA);
-        
         if (!usuarioLogado.getId().equals(reserva.getCriadoPor().getId())) reserva.setCriadoPor(usuarioLogado);
         
         if (reservaRequestDTO.getVeiculoId() != null) reserva.setVeiculo(veiculoService.findById(reservaRequestDTO.getVeiculoId()));
@@ -410,8 +408,14 @@ public static class Intervalo {
 
         if (reservaRequestDTO.getFim() != null) reserva.setFim(reservaRequestDTO.getFim());
 
-
         checarExcecoesReserva(reserva, usuarioLogado, reserva.getMotorista(), reserva.getVeiculo(), ReservaUtils.METODO_PATCH);
+        return reservaRepository.save(reserva);
+    }
+
+    public Reserva realizarCheckout(UUID reservaId) {
+        Reserva reserva = findById(reservaId);
+        if (reserva.getStatus() != StatusReservaEnum.ATIVA) throw new IllegalArgumentException("Reserva com status '" + reserva.getStatus() + "' não pode ser finalizada.");
+        reserva.setStatus(StatusReservaEnum.CONCLUIDA);
         return reservaRepository.save(reserva);
     }
 
