@@ -58,8 +58,8 @@ public class NotificacaoService {
     public Notificacao findById(UUID notificacaoId) {
         return notificacaoRepository.findById(notificacaoId).orElseThrow(() -> new EntityNotFoundException("Notificação não encontrada"));
     }
-    public Notificacao findByIdAndUsuarioId(UUID usuarioId, UUID notificacaoId) {
-        return notificacaoRepository.findByIdAndUsuarioId(usuarioId, notificacaoId).orElseThrow(() -> new EntityNotFoundException("Notificação não encontrada"));
+    public Notificacao findByIdAndUsuarioId(UUID notificacaoId, UUID usuarioId) {
+        return notificacaoRepository.findByIdAndUsuarioId(notificacaoId, usuarioId).orElseThrow(() -> new EntityNotFoundException("Notificação não encontrada"));
     }
 
     public Notificacao findByIdAndSetLida(UUID notificacaoId) {
@@ -120,8 +120,8 @@ public class NotificacaoService {
         return notificacaoRepository.save(notificacao);
     }
 
-    public void deleteById(UUID usuarioId, UUID notificacaoId) {
-        Notificacao notificacao = findByIdAndUsuarioId(usuarioId, notificacaoId);
+    public void deleteById(UUID notificacaoId, UUID usuarioId) {
+        Notificacao notificacao = findByIdAndUsuarioId(notificacaoId, usuarioId);
         notificacaoRepository.delete(notificacao);
     }
 

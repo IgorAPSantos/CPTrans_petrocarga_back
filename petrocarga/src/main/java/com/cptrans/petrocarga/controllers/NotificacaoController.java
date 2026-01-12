@@ -102,7 +102,7 @@ public class NotificacaoController {
     @PreAuthorize("#usuarioId == authentication.principal.id or hasAnyRole('ADMIN', 'GESTOR')")
     @DeleteMapping("/{usuarioId}/{notificacaoId}")
     public ResponseEntity<Void> deleteNotificacao(@PathVariable UUID usuarioId, @PathVariable UUID notificacaoId) {
-        notificacaoService.deleteById(usuarioId, notificacaoId);
+        notificacaoService.deleteById(notificacaoId, usuarioId);
         return ResponseEntity.noContent().build();
     }
 
