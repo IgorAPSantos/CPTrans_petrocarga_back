@@ -16,7 +16,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 @Configuration
-@Profile("local")
+@Profile("local-noemail")  // Desativado - usar "local-noemail" para voltar ao modo sem email
 public class NoOpMailConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NoOpMailConfig.class);

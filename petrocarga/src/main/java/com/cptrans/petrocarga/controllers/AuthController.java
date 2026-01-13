@@ -21,6 +21,8 @@ import com.cptrans.petrocarga.dto.UsuarioRequestDTO;
 import com.cptrans.petrocarga.dto.UsuarioResponseDTO;
 import com.cptrans.petrocarga.dto.AccountActivationRequest;
 import com.cptrans.petrocarga.dto.ResendCodeRequest;
+import com.cptrans.petrocarga.dto.ForgotPasswordRequest;
+import com.cptrans.petrocarga.dto.ResetPasswordRequest;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.security.UserAuthenticated;
@@ -111,6 +113,29 @@ public class AuthController {
                 return ResponseEntity.ok().build();
             } catch (IllegalArgumentException e) {
                 return ResponseEntity.badRequest().body(null);
+            } catch (jakarta.persistence.EntityNotFoundException e) {
+                return ResponseEntity.notFound().build();
+            }
+        }
+
+        @PostMapping("/forgot-password")
+        public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+            try {
+                usuarioService.forgotPassword(request.email());
+                return ResponseEntity.ok().build();
+            } catch (jakarta.persistence.EntityNotFoundException e) {
+                // Retorna OK mesmo se não encontrar para não expor se o email existe
+                return ResponseEntity.ok().build();
+            }
+        }
+
+        @PostMapping("/reset-password")
+        public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
+            try {
+                usuarioService.resetPassword(request.email(), request.code(), request.novaSenha());
+                return ResponseEntity.ok().build();
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().build();
             } catch (jakarta.persistence.EntityNotFoundException e) {
                 return ResponseEntity.notFound().build();
             }

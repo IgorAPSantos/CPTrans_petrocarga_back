@@ -33,4 +33,20 @@ public class EmailService {
 
         mailSender.send(message);
     }
+
+    public void sendPasswordResetCode(String to, String code) {
+        // Log the code for local/dev testing
+        LOGGER.info("Ambiente de DEV - Código de recuperação de senha para {}: {}", to, code);
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(from);
+        message.setTo(to);
+        message.setSubject("Recuperação de Senha - PetroCarga");
+        message.setText("Você solicitou a recuperação de senha.\n\n" +
+                "Seu código de recuperação é: " + code + "\n\n" +
+                "Este código expira em 10 minutos.\n\n" +
+                "Se você não solicitou esta recuperação, ignore este e-mail.");
+
+        mailSender.send(message);
+    }
 }
