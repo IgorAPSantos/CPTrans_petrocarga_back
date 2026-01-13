@@ -5,11 +5,13 @@ import java.util.Optional;
 import com.cptrans.petrocarga.models.Agente;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
 import com.cptrans.petrocarga.models.Usuario;
 
+@Repository
 public interface AgenteRepository extends JpaRepository<Agente, UUID> {
     public Optional<Agente> findByUsuario(Usuario usuario);
     public Optional<Agente> findByMatricula(String matricula);
