@@ -43,7 +43,11 @@ public class NoOpMailConfig {
 
             @Override
             public void send(MimeMessage mimeMessage) throws MailException {
-                LOGGER.info("[NO-OP MAIL] would send MimeMessage to: {}", (Object) mimeMessage.getAllRecipients());
+                try {
+                    LOGGER.info("[NO-OP MAIL] would send MimeMessage to: {}", (Object) mimeMessage.getAllRecipients());
+                } catch (Exception e) {
+                    LOGGER.info("[NO-OP MAIL] would send MimeMessage (recipients unavailable)");
+                }
             }
 
             @Override
