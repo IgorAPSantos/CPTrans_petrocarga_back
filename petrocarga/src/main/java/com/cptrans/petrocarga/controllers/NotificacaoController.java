@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,6 +31,7 @@ import com.cptrans.petrocarga.models.PushToken;
 import com.cptrans.petrocarga.security.UserAuthenticated;
 import com.cptrans.petrocarga.services.NotificacaoService;
 import com.cptrans.petrocarga.services.PushTokenService;
+import com.cptrans.petrocarga.utils.AuthUtils;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletResponse;
@@ -95,14 +97,28 @@ public class NotificacaoController {
     @PatchMapping("/lida/{notificacaoId}")
     public ResponseEntity<Notificacao> marcarComoLida(@AuthenticationPrincipal UserAuthenticated userAuthenticated, @PathVariable UUID notificacaoId) {
         UUID usuarioId = userAuthenticated.id();
+        AuthUtils.validarPemissoesUsuarioLogado(userAuthenticated, usuarioId, List.of(PermissaoEnum.ADMIN.getRole()));
         Notificacao notificacaoLida = notificacaoService.marcarComoLida(usuarioId, notificacaoId);
         return ResponseEntity.ok().body(notificacaoLida);
+    }
+
+    @PreAuthorize("#usuarioId == authentication.principal.id")
+    @PatchMapping("/marcarSelecionadasComoLida/{usuarioId}")
+    public ResponseEntity<List<Notificacao>> marcarSelecionadasComoLida(@PathVariable UUID usuarioId, @AuthenticationPrincipal UserAuthenticated userAuthenticated, @RequestParam(required = true) List<UUID> listaNotificacaoId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(notificacaoService.marcarSelecionadasComoLida(usuarioId, listaNotificacaoId));
     }
 
     @PreAuthorize("#usuarioId == authentication.principal.id or hasAnyRole('ADMIN', 'GESTOR')")
     @DeleteMapping("/{usuarioId}/{notificacaoId}")
     public ResponseEntity<Void> deleteNotificacao(@PathVariable UUID usuarioId, @PathVariable UUID notificacaoId) {
         notificacaoService.deleteById(notificacaoId, usuarioId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("#usuarioId == authentication.principal.id or hasAnyRole('ADMIN', 'GESTOR')")
+    @DeleteMapping("deletarSelecionadas/{usuarioId}/{notificacaoId}")
+    public ResponseEntity<Void> deleteNotificacoesSelecionadas(@PathVariable UUID usuarioId, @RequestParam(required = true) List<UUID> listaNotificacaoId) {
+        notificacaoService.deletarSelecionadas(usuarioId, listaNotificacaoId);
         return ResponseEntity.noContent().build();
     }
 
