@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import com.cptrans.petrocarga.enums.StatusDenunciaEnum;
 import com.cptrans.petrocarga.enums.TipoDenunciaEnum;
 import com.cptrans.petrocarga.models.Denuncia;
 
+@Repository
 public interface DenunciaRepository extends JpaRepository<Denuncia, UUID> {
     public boolean existsByReservaId(UUID reservaId);
     public List<Denuncia> findByCriadoPorIdAndStatus(UUID usuarioId, StatusDenunciaEnum status);

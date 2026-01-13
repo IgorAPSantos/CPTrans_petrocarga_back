@@ -7,12 +7,14 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.models.Reserva;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.models.Vaga;
 
+@Repository
 public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
     public List<Reserva> findByVaga(Vaga vaga);
     public List<Reserva> findByVagaAndStatus(Vaga vaga, StatusReservaEnum status);

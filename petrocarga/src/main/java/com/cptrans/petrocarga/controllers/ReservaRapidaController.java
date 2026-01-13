@@ -1,7 +1,9 @@
 package com.cptrans.petrocarga.controllers;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,10 +14,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cptrans.petrocarga.dto.ReservaRapidaRequestDTO;
 import com.cptrans.petrocarga.dto.ReservaRapidaResponseDTO;
+import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.models.Agente;
 import com.cptrans.petrocarga.models.ReservaRapida;
 import com.cptrans.petrocarga.models.Vaga;
@@ -46,10 +50,13 @@ public class ReservaRapidaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(novaReservaRapida.toResponse());
     }
     
-    @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR') or #agenteId == authentication.principal.id")
-    @GetMapping("/{agenteId}")
-    public ResponseEntity<List<ReservaRapidaResponseDTO>> getReservasRapidas(@PathVariable UUID agenteId) {
-        Agente agente = agenteService.findById(agenteId);
+    @PreAuthorize("#usuarioId == authentication.principal.id or hasAnyRole('ADMIN', 'GESTOR')")
+    @GetMapping("/{usuarioId}")
+    public ResponseEntity<List<ReservaRapidaResponseDTO>> getReservasRapidasByUsuarioId(@PathVariable UUID usuarioId, @RequestParam(required = false) UUID vagaId, @RequestParam(required = false) String placaVeiculo, @RequestParam(required = false) LocalDate data, @RequestParam(required = false) List<StatusReservaEnum> listaStatus) {
+        Agente agente = agenteService.findByUsuarioId(usuarioId);
+        if(vagaId != null || placaVeiculo != null || data != null || (listaStatus != null && !listaStatus.isEmpty())) {
+            return ResponseEntity.ok().body(reservaRapidaService.findByAgenteWithFilters(agente, vagaId, placaVeiculo, data, listaStatus).stream().map(ReservaRapida::toResponse).collect(Collectors.toList()));
+        }
         List<ReservaRapidaResponseDTO> reservasRapidas = reservaRapidaService.findByAgente(agente).stream()
                 .map(ReservaRapida::toResponse)
                 .toList();

@@ -5,10 +5,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.models.Veiculo;
 
+@Repository
 public interface VeiculoRepository extends JpaRepository<Veiculo, UUID> {
     public List<Veiculo> findByPlaca(String placa);
     public Optional<Veiculo> findByPlacaAndUsuario(String placa, Usuario usuario);

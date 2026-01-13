@@ -3,6 +3,7 @@ package com.cptrans.petrocarga.services;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +19,7 @@ import com.cptrans.petrocarga.models.Vaga;
 import com.cptrans.petrocarga.repositories.ReservaRapidaRepository;
 import com.cptrans.petrocarga.repositories.ReservaRepository;
 import com.cptrans.petrocarga.security.UserAuthenticated;
+import com.cptrans.petrocarga.specification.ReservaRapidaSpecification;
 import com.cptrans.petrocarga.utils.DateUtils;
 import com.cptrans.petrocarga.utils.ReservaRapidaUtils;
 import com.cptrans.petrocarga.utils.ReservaUtils;
@@ -87,6 +89,10 @@ public class ReservaRapidaService {
 
     public List<ReservaRapida> findByAgente(Agente agente) {
         return reservaRapidaRepository.findByAgente(agente);
+    }
+    
+    public List<ReservaRapida> findByAgenteWithFilters(Agente agente, UUID vagaId, String placaVeiculo, LocalDate data, List<StatusReservaEnum> listaStatus) {
+       return reservaRapidaRepository.findAll(ReservaRapidaSpecification.filtrar(agente.getUsuario().getId(), vagaId, placaVeiculo, data, listaStatus));
     }
 
     public ReservaRapida create(ReservaRapida novaReservaRapida) {

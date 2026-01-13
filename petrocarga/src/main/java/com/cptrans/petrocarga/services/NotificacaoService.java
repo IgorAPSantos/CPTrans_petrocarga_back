@@ -120,6 +120,23 @@ public class NotificacaoService {
         return notificacaoRepository.save(notificacao);
     }
 
+    public List<Notificacao> marcarSelecionadasComoLida(UUID usuarioId, List<UUID> listaNotificacaoId) {
+        List<Notificacao> notificacoes = notificacaoRepository.findByIdInAndUsuarioId(listaNotificacaoId, usuarioId);
+        List<Notificacao> notificacoesLidas = new ArrayList<>();
+        if(notificacoes == null || notificacoes.isEmpty()) throw new EntityNotFoundException("Nenhuma notificação encontrada");
+        for(Notificacao notificacao : notificacoes) {
+            notificacao.marcarComoLida();
+            notificacoesLidas.add(notificacao);
+        }
+        return notificacaoRepository.saveAll(notificacoesLidas);
+    }
+
+    public void deletarSelecionadas(UUID usuarioId, List<UUID> listaNotificacaoId) {
+        List<Notificacao> notificacoes = notificacaoRepository.findByIdInAndUsuarioId(listaNotificacaoId, usuarioId);
+        if(notificacoes == null || notificacoes.isEmpty()) throw new EntityNotFoundException("Nenhuma notificação encontrada");
+        notificacaoRepository.deleteAll(notificacoes);
+    }
+
     public void deleteById(UUID notificacaoId, UUID usuarioId) {
         Notificacao notificacao = findByIdAndUsuarioId(notificacaoId, usuarioId);
         notificacaoRepository.delete(notificacao);
