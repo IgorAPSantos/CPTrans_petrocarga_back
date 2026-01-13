@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cptrans.petrocarga.dto.ReservaDetailedResponseDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
-import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.models.Reserva;
 import com.cptrans.petrocarga.security.UserAuthenticated;
 import com.cptrans.petrocarga.services.DocumentoReservaService;
@@ -53,7 +52,6 @@ public class DocumentoReservaController {
         Reserva reserva = reservaService.findById(id);
         
         if (reserva != null) {
-            if (!reserva.getStatus().equals(StatusReservaEnum.RESERVADA)) throw new EntityNotFoundException("Reserva não encontrada.");
             if(authorities.contains(PermissaoEnum.MOTORISTA.getRole())){
                 if(!reserva.getMotorista().getUsuario().getId().equals(user.id()) && !reserva.getCriadoPor().getId().equals(user.id())) throw new EntityNotFoundException("Reserva não encontrada.");
             } 
