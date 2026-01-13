@@ -1,5 +1,7 @@
 package com.cptrans.petrocarga.services;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,6 +16,7 @@ import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.repositories.UsuarioRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UsuarioService {
@@ -23,6 +26,9 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private EmailService emailService;
     
     public List<Usuario> findAll() {
         return usuarioRepository.findAll();
@@ -53,7 +59,67 @@ public class UsuarioService {
         }
         novoUsuario.setPermissao(permissao);
         novoUsuario.setSenha(passwordEncoder.encode(novoUsuario.getSenha()));
-        return usuarioRepository.save(novoUsuario);
+        // Ensure user is created as inactive and generate activation code
+        novoUsuario.setAtivo(false);
+
+        SecureRandom random = new SecureRandom();
+        int code = random.nextInt(1_000_000);
+        String codeStr = String.format("%06d", code);
+        novoUsuario.setVerificationCode(codeStr);
+        novoUsuario.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(10));
+
+        Usuario saved = usuarioRepository.save(novoUsuario);
+
+        // Send activation code via email (best-effort)
+        try {
+            emailService.sendActivationCode(saved.getEmail(), codeStr);
+        } catch (Exception e) {
+            // log or rethrow depending on desired behavior; keep it simple here
+        }
+
+        return saved;
+    }
+
+    @Transactional
+    public Usuario activateAccount(String email, String code) {
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado."));
+
+        if (usuario.getVerificationCode() == null || !usuario.getVerificationCode().equals(code)) {
+            throw new IllegalArgumentException("Código inválido.");
+        }
+
+        if (usuario.getVerificationCodeExpiresAt() == null || usuario.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Código expirado.");
+        }
+
+        usuario.setAtivo(true);
+        usuario.setVerificationCode(null);
+        usuario.setVerificationCodeExpiresAt(null);
+
+        return usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public void resendActivationCode(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado."));
+
+        if (usuario.getAtivo() != null && usuario.getAtivo()) {
+            throw new IllegalArgumentException("Usuário já ativado.");
+        }
+
+        SecureRandom random = new SecureRandom();
+        int code = random.nextInt(1_000_000);
+        String codeStr = String.format("%06d", code);
+        usuario.setVerificationCode(codeStr);
+        usuario.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(10));
+
+        usuarioRepository.save(usuario);
+
+        try {
+            emailService.sendActivationCode(usuario.getEmail(), codeStr);
+        } catch (Exception e) {
+            // best-effort: ignore or log
+        }
     }
 
     public Usuario updateUsuario(UUID id, Usuario novoUsuario, PermissaoEnum permissao) {

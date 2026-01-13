@@ -37,6 +37,10 @@ public class SecurityConfig {
                  .requestMatchers(
                     "/auth/login/",
                     "/auth/login",
+                    "/auth/resend-code",
+                    "/auth/resend-code/",
+                    "/auth/activate",
+                    "/auth/activate/",
                     "/auth/admin/",
                     "/auth/admin",
                     "/auth/me/",

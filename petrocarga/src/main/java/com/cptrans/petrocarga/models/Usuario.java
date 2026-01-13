@@ -1,6 +1,7 @@
 package com.cptrans.petrocarga.models;
 
 import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -58,10 +59,16 @@ public class Usuario implements UserDetails{
     @Column(name = "desativado_em", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime desativadoEm;
 
+    @Column(name = "verification_code", length = 6)
+    private String verificationCode;
+
+    @Column(name = "verification_code_expires_at", columnDefinition = "TIMESTAMP")
+    private LocalDateTime verificationCodeExpiresAt;
+
     // Constructors
     public Usuario() {
         this.criadoEm = OffsetDateTime.now();
-        this.ativo = true;
+        this.ativo = false;
     }
     public Usuario(String nome, String cpf, String telefone, String email, String senha, PermissaoEnum permissao) {
         this.nome = nome;
@@ -71,7 +78,7 @@ public class Usuario implements UserDetails{
         this.senha = senha;
         this.permissao = permissao;
         this.criadoEm = OffsetDateTime.now();
-        this.ativo = true;
+        this.ativo = false;
     }
 
     // Getters and Setters
@@ -153,6 +160,22 @@ public class Usuario implements UserDetails{
 
     public void setDesativadoEm(OffsetDateTime desativadoEm) {
         this.desativadoEm = desativadoEm;
+    }
+
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
+    }
+
+    public LocalDateTime getVerificationCodeExpiresAt() {
+        return verificationCodeExpiresAt;
+    }
+
+    public void setVerificationCodeExpiresAt(LocalDateTime verificationCodeExpiresAt) {
+        this.verificationCodeExpiresAt = verificationCodeExpiresAt;
     }
 
     public UsuarioResponseDTO toResponseDTO() {

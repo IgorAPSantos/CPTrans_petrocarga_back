@@ -19,6 +19,8 @@ import com.cptrans.petrocarga.dto.AuthRequestDTO;
 import com.cptrans.petrocarga.dto.AuthResponseDTO;
 import com.cptrans.petrocarga.dto.UsuarioRequestDTO;
 import com.cptrans.petrocarga.dto.UsuarioResponseDTO;
+import com.cptrans.petrocarga.dto.AccountActivationRequest;
+import com.cptrans.petrocarga.dto.ResendCodeRequest;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.security.UserAuthenticated;
@@ -89,4 +91,28 @@ public class AuthController {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return ResponseEntity.noContent().build();
    }
+
+        @PostMapping("/activate")
+        public ResponseEntity<Void> activateAccount(@RequestBody AccountActivationRequest request) {
+            try {
+                usuarioService.activateAccount(request.email(), request.code());
+                return ResponseEntity.ok().build();
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().build();
+            } catch (jakarta.persistence.EntityNotFoundException e) {
+                return ResponseEntity.notFound().build();
+            }
+        }
+
+        @PostMapping("/resend-code")
+        public ResponseEntity<Void> resendCode(@RequestBody ResendCodeRequest request) {
+            try {
+                usuarioService.resendActivationCode(request.email());
+                return ResponseEntity.ok().build();
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(null);
+            } catch (jakarta.persistence.EntityNotFoundException e) {
+                return ResponseEntity.notFound().build();
+            }
+        }
 }
