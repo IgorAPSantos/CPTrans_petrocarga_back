@@ -1,5 +1,7 @@
 package com.cptrans.petrocarga.services;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,6 +16,7 @@ import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.repositories.UsuarioRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UsuarioService {
@@ -23,6 +26,9 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private EmailService emailService;
     
     public List<Usuario> findAll() {
         return usuarioRepository.findAll();
@@ -53,7 +59,135 @@ public class UsuarioService {
         }
         novoUsuario.setPermissao(permissao);
         novoUsuario.setSenha(passwordEncoder.encode(novoUsuario.getSenha()));
-        return usuarioRepository.save(novoUsuario);
+        // Ensure user is created as inactive and generate activation code
+        novoUsuario.setAtivo(false);
+
+        SecureRandom random = new SecureRandom();
+        int code = random.nextInt(1_000_000);
+        String codeStr = String.format("%06d", code);
+        novoUsuario.setVerificationCode(codeStr);
+        novoUsuario.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(10));
+
+        Usuario saved = usuarioRepository.save(novoUsuario);
+
+        // Send activation code via email (best-effort)
+        try {
+            emailService.sendActivationCode(saved.getEmail(), codeStr);
+        } catch (Exception e) {
+            // log or rethrow depending on desired behavior; keep it simple here
+        }
+
+        return saved;
+    }
+
+    @Transactional
+    public Usuario activateAccount(String email, String code) {
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado."));
+
+        if (usuario.getVerificationCode() == null || !usuario.getVerificationCode().equals(code)) {
+            throw new IllegalArgumentException("Código inválido.");
+        }
+
+        if (usuario.getVerificationCodeExpiresAt() == null || usuario.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Código expirado.");
+        }
+
+        usuario.setAtivo(true);
+        usuario.setVerificationCode(null);
+        usuario.setVerificationCodeExpiresAt(null);
+
+        return usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public void resendActivationCode(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado."));
+
+        if (usuario.getAtivo() != null && usuario.getAtivo()) {
+            throw new IllegalArgumentException("Usuário já ativado.");
+        }
+
+        SecureRandom random = new SecureRandom();
+        int code = random.nextInt(1_000_000);
+        String codeStr = String.format("%06d", code);
+        usuario.setVerificationCode(codeStr);
+        usuario.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(10));
+
+        usuarioRepository.save(usuario);
+
+        try {
+            emailService.sendActivationCode(usuario.getEmail(), codeStr);
+        } catch (Exception e) {
+            // best-effort: ignore or log
+        }
+    }
+
+    // ==================== RECUPERAÇÃO DE SENHA ====================
+
+    @Transactional
+    public void forgotPassword(String email) {
+        // Busca usuário pelo email (silenciosamente ignora se não existir por segurança)
+        Optional<Usuario> optUsuario = usuarioRepository.findByEmail(email);
+        
+        if (optUsuario.isEmpty()) {
+            // Por segurança, não revelamos se o email existe ou não
+            return;
+        }
+
+        Usuario usuario = optUsuario.get();
+
+        // Gera código de 6 dígitos
+        SecureRandom random = new SecureRandom();
+        int code = random.nextInt(1_000_000);
+        String codeStr = String.format("%06d", code);
+
+        // Reutiliza os campos de verification_code para reset de senha
+        usuario.setVerificationCode(codeStr);
+        usuario.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(10));
+
+        usuarioRepository.save(usuario);
+
+        try {
+            emailService.sendPasswordResetCode(usuario.getEmail(), codeStr);
+        } catch (Exception e) {
+            // best-effort: log error but don't fail
+        }
+    }
+
+    @Transactional
+    public void resetPassword(String email, String code, String novaSenha) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
+
+        System.out.println("=== DEBUG RESET PASSWORD ===");
+        System.out.println("Email: " + email);
+        System.out.println("Código recebido: " + code);
+        System.out.println("Código no banco: " + usuario.getVerificationCode());
+        System.out.println("Expiração: " + usuario.getVerificationCodeExpiresAt());
+        System.out.println("Agora: " + LocalDateTime.now());
+
+        // Valida código
+        if (usuario.getVerificationCode() == null || !usuario.getVerificationCode().equals(code)) {
+            System.out.println("ERRO: Código não confere!");
+            throw new IllegalArgumentException("Código inválido ou expirado.");
+        }
+
+        // Valida expiração
+        if (usuario.getVerificationCodeExpiresAt() == null || 
+            usuario.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            System.out.println("ERRO: Código expirado!");
+            throw new IllegalArgumentException("Código inválido ou expirado.");
+        }
+
+        // Atualiza senha
+        usuario.setSenha(passwordEncoder.encode(novaSenha));
+
+        // Limpa código após uso
+        usuario.setVerificationCode(null);
+        usuario.setVerificationCodeExpiresAt(null);
+
+        usuarioRepository.save(usuario);
+        System.out.println("Senha alterada com sucesso!");
     }
 
     public Usuario updateUsuario(UUID id, Usuario novoUsuario, PermissaoEnum permissao) {
