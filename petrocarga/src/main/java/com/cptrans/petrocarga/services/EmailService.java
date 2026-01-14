@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,6 +22,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
+    @Async
     public void sendActivationCode(String to, String code) {
         // Log the code for local/dev testing
         LOGGER.info("Ambiente de DEV - Código para {}: {}", to, code);
@@ -34,6 +36,7 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    @Async
     public void sendPasswordResetCode(String to, String code) {
         // Log the code for local/dev testing
         LOGGER.info("Ambiente de DEV - Código de recuperação de senha para {}: {}", to, code);

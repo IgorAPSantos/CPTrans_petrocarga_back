@@ -116,7 +116,7 @@ public class NotificacaoController {
     }
 
     @PreAuthorize("#usuarioId == authentication.principal.id or hasAnyRole('ADMIN', 'GESTOR')")
-    @DeleteMapping("deletarSelecionadas/{usuarioId}/{notificacaoId}")
+    @DeleteMapping("deletarSelecionadas/{usuarioId}")
     public ResponseEntity<Void> deleteNotificacoesSelecionadas(@PathVariable UUID usuarioId, @RequestParam(required = true) List<UUID> listaNotificacaoId) {
         notificacaoService.deletarSelecionadas(usuarioId, listaNotificacaoId);
         return ResponseEntity.noContent().build();
