@@ -428,7 +428,11 @@ public static class Intervalo {
         Reserva reservaSalva = reservaRepository.save(reserva);
         try {
             reservaSchedulerService.cancelarScheduler(reservaSalva.getId());
+            notificacaoSchedulerService.cancelarSchedulerCheckIn(usuarioId, reservaSalva.getId());
+            notificacaoSchedulerService.cancelarSchedulerFimProximo(usuarioId, reservaSalva.getId());
             reservaSchedulerService.agendarFinalizacaoReserva(reservaSalva.toReservaDTO());
+            notificacaoSchedulerService.agendarNotificacaoCheckInDisponivel(reservaSalva.getMotorista().getUsuario().getId(), reservaSalva.getId(),reservaSalva.getInicio());
+            notificacaoSchedulerService.agendarNotificacaoFimProximo(reservaSalva.getMotorista().getUsuario().getId(), reservaSalva.getId(), reservaSalva.getFim());
         } catch (SchedulerException e) {
             throw new RuntimeException("Erro ao agendar finalização da reserva: " + e.getMessage());
         }
