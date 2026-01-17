@@ -114,7 +114,7 @@ public class ReservaUtils {
 
     private static void validarMotoristaReserva(Usuario usuarioLogado, Motorista motoristaNovaReserva, ReservaDTO reservaExistente, String metodoChamador) {
         if(usuarioLogado.getPermissao().equals(PermissaoEnum.MOTORISTA)){
-            if(reservaExistente.getCriadoPor().getId().equals(usuarioLogado.getId()) || reservaExistente.getMotoristaId().equals(usuarioLogado.getId())){
+            if((reservaExistente.getMotoristaId()!= null && reservaExistente.getCriadoPor() != null) && (reservaExistente.getCriadoPor().getId().equals(usuarioLogado.getId()) || reservaExistente.getMotoristaId().equals(usuarioLogado.getId()))){
                 if ((reservaExistente.getStatus().equals(StatusReservaEnum.ATIVA) || reservaExistente.getStatus().equals(StatusReservaEnum.RESERVADA)) && !metodoChamador.equals(METODO_PATCH) ){
                     throw new IllegalArgumentException("Motorista já possui uma reserva ativa nesta vaga.");
                 }
