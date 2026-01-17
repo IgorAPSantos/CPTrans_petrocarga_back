@@ -3,14 +3,17 @@ package com.cptrans.petrocarga.services;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
+import com.cptrans.petrocarga.infrastructure.scheduler.service.ReservaSchedulerService;
 import com.cptrans.petrocarga.models.Agente;
 import com.cptrans.petrocarga.models.Reserva;
 import com.cptrans.petrocarga.models.ReservaRapida;
@@ -39,6 +42,8 @@ public class ReservaRapidaService {
     private UsuarioService usuarioService;
     @Autowired
     private AgenteService agenteService;
+    @Autowired
+    private ReservaSchedulerService reservaSchedulerService;
     
     public List<ReservaRapida> findAll(List<StatusReservaEnum> status) {
         if(status == null ) status = new ArrayList<>();
@@ -46,6 +51,14 @@ public class ReservaRapidaService {
             return reservaRapidaRepository.findByStatusIn(status);
         }
         return reservaRapidaRepository.findAll();
+    }
+
+    public Optional<ReservaRapida> findById(UUID id) {
+        return reservaRapidaRepository.findById(id);
+    }
+
+    public ReservaRapida save (ReservaRapida reservaRapida) {
+        return reservaRapidaRepository.save(reservaRapida);
     }
 
     public List<ReservaRapida> findAllByData(LocalDate data, List<StatusReservaEnum> status) {
@@ -111,7 +124,12 @@ public class ReservaRapidaService {
         ReservaRapidaUtils.validarQuantidadeReservasPorPlaca(quantidadeReservasRapidasPorPlaca, novaReservaRapida);
         ReservaUtils.validarTempoMaximoReserva(novaReservaRapida.toReservaDTO(), novaReservaRapida.getVaga());
         reservaRapidaUtils.validarEspacoDisponivelNaVaga(novaReservaRapida, vagaReserva, reservasAtivasNaVaga, reservasRapidasAtivasNaVaga);
-        return reservaRapidaRepository.save(novaReservaRapida);
-
+        ReservaRapida reservaRapidaCriada = reservaRapidaRepository.save(novaReservaRapida);
+        try {
+            reservaSchedulerService.agendarFinalizacaoReserva(reservaRapidaCriada.toReservaDTO());
+        } catch (SchedulerException e) {
+            throw new RuntimeException("Erro ao agendar finalização da reserva: " + e.getMessage());
+        }
+        return reservaRapidaCriada;
     }
 }

@@ -38,7 +38,10 @@ spring:
                     timeout: 5000
                     writetimeout: 5000
         from: joaocasadinho324@gmail.com
-
+    quartz:
+        job-store-type: jdbc
+        jdbc:
+            initialize-schema: never
 server:
     port: ${PORT:8080}
     servlet:
