@@ -3,8 +3,6 @@ package com.cptrans.petrocarga.dto;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import com.cptrans.petrocarga.enums.StatusReservaEnum;
-
 import jakarta.validation.constraints.Size;
 
 public class ReservaPATCHRequestDTO {
@@ -13,7 +11,6 @@ public class ReservaPATCHRequestDTO {
     private String cidadeOrigem;
     private OffsetDateTime inicio;
     private OffsetDateTime fim;
-    private StatusReservaEnum status;
     
     public UUID getVeiculoId () {
         return veiculoId;
@@ -29,9 +26,5 @@ public class ReservaPATCHRequestDTO {
 
     public OffsetDateTime getFim () {
         return fim;
-    }
-
-    public StatusReservaEnum getStatus () {
-        return status;
     }
 }
