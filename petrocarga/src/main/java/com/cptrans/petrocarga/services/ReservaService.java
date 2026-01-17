@@ -22,6 +22,7 @@ import com.cptrans.petrocarga.dto.ReservaPATCHRequestDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
+import com.cptrans.petrocarga.infrastructure.scheduler.service.NotificacaoSchedulerService;
 import com.cptrans.petrocarga.infrastructure.scheduler.service.ReservaSchedulerService;
 import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.models.Reserva;
@@ -55,6 +56,8 @@ public class ReservaService {
     private ReservaUtils reservaUtils;
     @Autowired
     private ReservaSchedulerService reservaSchedulerService;
+    @Autowired
+    private NotificacaoSchedulerService notificacaoSchedulerService;
     // @Autowired
     // private DisponibilidadeVagaService disponibilidadeVagaService;
 
@@ -142,6 +145,9 @@ public class ReservaService {
         Reserva reservaSalva = reservaRepository.save(novaReserva);
         try {
             reservaSchedulerService.agendarFinalizacaoReserva(reservaSalva.toReservaDTO());
+            notificacaoSchedulerService.agendarNotificacaoCheckInDisponivel(reservaSalva.getMotorista().getUsuario().getId(), reservaSalva.getId(),reservaSalva.getInicio());
+            notificacaoSchedulerService.agendarNotificacaoFimProximo(reservaSalva.getMotorista().getUsuario().getId(), reservaSalva.getId(), reservaSalva.getFim());
+
         } catch (SchedulerException e) {
             throw new RuntimeException("Erro ao agendar finalização da reserva: " + e.getMessage());
         }

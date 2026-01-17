@@ -1,0 +1,35 @@
+package com.cptrans.petrocarga.infrastructure.scheduler.job.notificacao;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.cptrans.petrocarga.services.NotificacaoService;
+
+@DisallowConcurrentExecution
+@Component
+public class NotificarFimProximoJob implements Job {
+
+    @Autowired
+    private NotificacaoService notificacaoService;
+
+    @Override
+    public void execute(JobExecutionContext context) throws JobExecutionException {
+        UUID usuarioId = UUID.fromString(
+            context.getMergedJobDataMap().getString("usuarioId")
+        );
+
+        OffsetDateTime fimReserva = OffsetDateTime.parse(
+            context.getMergedJobDataMap().getString("fimReserva")
+        );
+
+        notificacaoService.notificarFimProximo(usuarioId, fimReserva);
+    }
+    
+}
