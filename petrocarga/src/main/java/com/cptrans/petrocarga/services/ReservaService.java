@@ -7,9 +7,11 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +22,7 @@ import com.cptrans.petrocarga.dto.ReservaPATCHRequestDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
+import com.cptrans.petrocarga.infrastructure.scheduler.service.ReservaSchedulerService;
 import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.models.Reserva;
 import com.cptrans.petrocarga.models.ReservaRapida;
@@ -50,6 +53,8 @@ public class ReservaService {
     private ReservaRapidaService reservaRapidaService;
     @Autowired
     private ReservaUtils reservaUtils;
+    @Autowired
+    private ReservaSchedulerService reservaSchedulerService;
     // @Autowired
     // private DisponibilidadeVagaService disponibilidadeVagaService;
 
@@ -134,8 +139,13 @@ public class ReservaService {
         Usuario usuarioLogado = usuarioService.findById(userAuthenticated.id());
         novaReserva.setCriadoPor(usuarioLogado);
         checarExcecoesReserva(novaReserva, novaReserva.getCriadoPor(), novaReserva.getMotorista(), novaReserva.getVeiculo(), ReservaUtils.METODO_POST);
-  
-        return reservaRepository.save(novaReserva);
+        Reserva reservaSalva = reservaRepository.save(novaReserva);
+        try {
+            reservaSchedulerService.agendarFinalizacaoReserva(reservaSalva.toReservaDTO());
+        } catch (SchedulerException e) {
+            throw new RuntimeException("Erro ao agendar finalização da reserva: " + e.getMessage());
+        }
+        return reservaSalva;
     }
 
     public void deleteById(UUID id) {
@@ -274,7 +284,7 @@ public static class Intervalo {
      *  - A finalização só é bloqueada se ainda não começou
      *  - Usuário autenticado deve possuir ROLE_AGENTE ou ROLE_ADMIN (garantido por @PreAuthorize no controller)
      * Efeitos:
-     *  - Atualiza status para CONCLUIDA
+     *  - Atualiza status para REMOVIDA
      *  - Não altera o campo "fim" para evitar impacto em relatórios existentes
      */
     public Reserva finalizarForcado(UUID reservaId) {
@@ -409,7 +419,14 @@ public static class Intervalo {
         if (reservaRequestDTO.getFim() != null) reserva.setFim(reservaRequestDTO.getFim());
 
         checarExcecoesReserva(reserva, usuarioLogado, reserva.getMotorista(), reserva.getVeiculo(), ReservaUtils.METODO_PATCH);
-        return reservaRepository.save(reserva);
+        Reserva reservaSalva = reservaRepository.save(reserva);
+        try {
+            reservaSchedulerService.cancelarScheduler(reservaSalva.getId());
+            reservaSchedulerService.agendarFinalizacaoReserva(reservaSalva.toReservaDTO());
+        } catch (SchedulerException e) {
+            throw new RuntimeException("Erro ao agendar finalização da reserva: " + e.getMessage());
+        }
+        return reservaSalva;
     }
 
     public Reserva realizarCheckout(UUID reservaId) {
@@ -437,5 +454,24 @@ public static class Intervalo {
 
         reserva.setStatus(StatusReservaEnum.CANCELADA);
         reservaRepository.save(reserva);
+    }
+
+    public void finalizarReserva (UUID reservaId) {
+        Optional<Reserva> reserva = reservaRepository.findById(reservaId);
+        Optional<ReservaRapida> reservaRapida = reservaRapidaService.findById(reservaId);
+        if(reserva.isPresent()) {
+            if(reserva.get().getStatus() != StatusReservaEnum.CONCLUIDA) {
+                reserva.get().setStatus(StatusReservaEnum.CONCLUIDA);
+                reservaRepository.save(reserva.get());
+            }
+        }
+        else if (reservaRapida.isPresent()) {
+            if(reservaRapida.get().getStatus() != StatusReservaEnum.CONCLUIDA) {
+                reservaRapida.get().setStatus(StatusReservaEnum.CONCLUIDA);
+                reservaRapidaService.save(reservaRapida.get());
+            }
+        } else {
+            throw new EntityNotFoundException("Reserva não encontrada.");
+        }
     }
 }

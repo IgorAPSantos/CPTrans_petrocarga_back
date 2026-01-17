@@ -37,11 +37,11 @@ public class ReservaUtils {
     public static void validarTempoMaximoReserva(ReservaDTO novaReserva, Vaga vagaNovaReserva) {
         OffsetDateTime agora = OffsetDateTime.now(DateUtils.FUSO_BRASIL);
         if(novaReserva.getFim().toInstant().isBefore(novaReserva.getInicio().toInstant())) {
-            throw new IllegalArgumentException("Fim da reserva deve ser posterior ao inicio.");
+            throw new IllegalArgumentException("Horário de Fim da reserva deve ser posterior ao horário de início.");
         }
 
-        if(novaReserva.getFim().toInstant().isBefore(agora.toInstant())) {
-            throw new IllegalArgumentException("Fim da reserva deve ser posterior ao horário atual.");
+        if(novaReserva.getInicio().toInstant().isBefore(agora.toInstant()) || novaReserva.getFim().toInstant().isBefore(agora.toInstant())) {
+            throw new IllegalArgumentException("Horário da reserva deve ser posterior ao horário atual.");
         }
 
         Integer tempoReservaEmMinutos = (int) (novaReserva.getInicio().toInstant().until(novaReserva.getFim().toInstant(), java.time.temporal.ChronoUnit.MINUTES));
