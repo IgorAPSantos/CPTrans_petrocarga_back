@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.services;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,18 @@ public class NotificacaoService {
     private NotificacaoRepository notificacaoRepository;
     @Autowired
     private SpringDomainEventPublisher eventPublisher;
+
+    private final Notificacao CHECKIN_DISPONIVEL_NOTIFICACAO = new Notificacao(
+        "Check-In Disponível",
+        "Você tem um check-in disponível. Por favor, realize o check-in para continuar com sua reserva.",
+        TipoNotificacaoEnum.RESERVA
+    );
+
+    private final Notificacao FIM_PROXIMO_NOTIFICACAO = new Notificacao(
+        "Fim de Reserva Próximo",
+        "Sua reserva está prestes a terminar. Assegure-se de concluir suas atividades a tempo.",
+        TipoNotificacaoEnum.RESERVA
+    );
  
     private Notificacao createNotificacao(UUID usuarioId, String titulo, String mensagem, TipoNotificacaoEnum tipo, Map<String, Object> dadosAdicionais) {
         Usuario usuarioLogado = usuarioService.findById(((UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).id());
@@ -44,6 +57,11 @@ public class NotificacaoService {
         dadosAdicionais.put("remetente", usuarioLogado.getNome());
         Notificacao novaNotificacao = new Notificacao(usuarioDestinatario.getId(), titulo, mensagem, tipo, dadosAdicionais);
         
+        return notificacaoRepository.save(novaNotificacao);
+    }
+
+    @Transactional
+    private Notificacao saveNotificacao(Notificacao novaNotificacao) {
         return notificacaoRepository.save(novaNotificacao);
     }
 
@@ -114,6 +132,33 @@ public class NotificacaoService {
         return notificacoesCriadas;
     }
 
+    @Transactional
+    public List<Notificacao> sendNotificacaoToUsuariosByPermissaoBySystem(PermissaoEnum permissao, Notificacao novaNotificacao) {
+        List<Usuario> usuarios = usuarioService.findByPermissaoAndAtivo(permissao, true);
+        List<Notificacao> notificacoesSalvas = new ArrayList<>();
+        Map<String, Object> dadosAdicionais = new HashMap<>();
+
+        if (novaNotificacao.getMetadata() != null) dadosAdicionais.putAll(novaNotificacao.getMetadata());
+
+        if(usuarios.isEmpty()) {
+            throw new EntityNotFoundException("Nenhum usuário encontrado com a permissão: " + permissao);
+        }
+        for (Usuario usuario : usuarios) {
+            Notificacao novaNotificacaoUsuario = new Notificacao(usuario.getId(), novaNotificacao.getTitulo(), novaNotificacao.getMensagem(), novaNotificacao.getTipo());
+            novaNotificacaoUsuario.setMetadata(dadosAdicionais);
+            notificacoesSalvas.add(novaNotificacaoUsuario);
+        }
+        if (notificacoesSalvas.isEmpty()) return notificacoesSalvas;
+
+        List<Notificacao> notificacoesCriadas = notificacaoRepository.saveAll(notificacoesSalvas);
+        if(!notificacoesCriadas.isEmpty()) {
+            for (Notificacao notificacao : notificacoesCriadas) {
+                eventPublisher.publish(new NotificacaoCriadaEvent(notificacao));
+            }
+        }
+        return notificacoesCriadas;
+    }
+
     public Notificacao marcarComoLida(UUID usuarioId, UUID notificacaoId) {
         Notificacao notificacao = findByIdAndUsuarioId(notificacaoId, usuarioId);
         notificacao.marcarComoLida();
@@ -153,4 +198,26 @@ public class NotificacaoService {
         sendNotificationToUsuario(usuarioIdDenuncia, notificacaoDenuncia);
     }
 
+    @Transactional
+    public Notificacao notificarCheckInDisponivel(UUID usuarioId, OffsetDateTime dataCheckin) {
+        Map<String, Object> dadosAdicionais = new HashMap<>();
+        dadosAdicionais.put("inicioReserva", dataCheckin.toString());
+        CHECKIN_DISPONIVEL_NOTIFICACAO.setMetadata(dadosAdicionais);
+        CHECKIN_DISPONIVEL_NOTIFICACAO.setUsuarioId(usuarioId);
+        CHECKIN_DISPONIVEL_NOTIFICACAO.setTitulo("Check-In Disponível");
+        Notificacao notificacaoSalva = saveNotificacao(CHECKIN_DISPONIVEL_NOTIFICACAO);
+        eventPublisher.publish(new NotificacaoCriadaEvent(notificacaoSalva));
+        return notificacaoSalva;
+    }
+
+    @Transactional
+    public Notificacao notificarFimProximo(UUID usuarioId, OffsetDateTime dataFim) {
+        Map<String, Object> dadosAdicionais = new HashMap<>();
+        dadosAdicionais.put("fimReserva", dataFim.toString());
+        FIM_PROXIMO_NOTIFICACAO.setMetadata(dadosAdicionais);
+        FIM_PROXIMO_NOTIFICACAO.setUsuarioId(usuarioId);
+        Notificacao notificacaoSalva = saveNotificacao(FIM_PROXIMO_NOTIFICACAO);
+        eventPublisher.publish(new NotificacaoCriadaEvent(notificacaoSalva));
+        return notificacaoSalva;
+    }
 }
