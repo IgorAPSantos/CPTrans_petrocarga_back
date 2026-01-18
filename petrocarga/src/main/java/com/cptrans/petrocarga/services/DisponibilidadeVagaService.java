@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.cptrans.petrocarga.dto.DisponibilidadeVagaRequestDTO;
+import com.cptrans.petrocarga.enums.StatusVagaEnum;
+import com.cptrans.petrocarga.infrastructure.scheduler.service.DisponibilidadeVagaScheduler;
 import com.cptrans.petrocarga.models.DisponibilidadeVaga;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.models.Vaga;
@@ -18,18 +21,19 @@ import com.cptrans.petrocarga.security.UserAuthenticated;
 import com.cptrans.petrocarga.utils.DateUtils;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
 public class DisponibilidadeVagaService {
 
     @Autowired
     private DisponibilidadeVagaRepository disponibilidadeVagaRepository;
-
     @Autowired
     private VagaService vagaService;
-
     @Autowired
     private UsuarioService usuarioService;
+    @Autowired
+    private DisponibilidadeVagaScheduler disponibilidadeVagaScheduler;
 
     public DisponibilidadeVaga save (DisponibilidadeVaga disponibilidadeVaga) {
         return disponibilidadeVagaRepository.save(disponibilidadeVaga); 
@@ -59,7 +63,11 @@ public class DisponibilidadeVagaService {
         novaDisponibilidadeVaga.setVaga(vaga);
         novaDisponibilidadeVaga.setCriadoPor(usuario);
 
-        return disponibilidadeVagaRepository.save(novaDisponibilidadeVaga);
+        DisponibilidadeVaga disponibilidadeCriada = disponibilidadeVagaRepository.save(novaDisponibilidadeVaga);
+        
+        agendarInicioEfim(disponibilidadeCriada);
+
+        return disponibilidadeCriada;
     }
 
     public List<DisponibilidadeVaga> createMultipleDisponibilidadeVagas(DisponibilidadeVaga novaDisponibilidadeVaga, List<UUID> listaVagaId) {
@@ -83,10 +91,17 @@ public class DisponibilidadeVagaService {
                 disponibilidadeVaga.setVaga(vaga);
                 disponibilidadeVaga.setCriadoPor(usuarioLogado);
                 disponibilidadesCriadas.add(disponibilidadeVaga);
+
             } 
         }
         if(disponibilidadesCriadas.isEmpty()) throw new IllegalArgumentException("Nenhuma disponibilidade foi criada. Verifique os dados informados.");
-        return disponibilidadeVagaRepository.saveAll(disponibilidadesCriadas);
+        List<DisponibilidadeVaga> disponibilidadesSalvas = disponibilidadeVagaRepository.saveAll(disponibilidadesCriadas);
+        if(!disponibilidadesSalvas.isEmpty()) {
+            disponibilidadesSalvas.forEach(disponibilidade -> {
+                agendarInicioEfim(disponibilidade);
+            });
+        }
+        return disponibilidadesSalvas;
     }
 
     public DisponibilidadeVaga updateDisponibilidadeVaga(UUID disponibilidadeId, DisponibilidadeVagaRequestDTO novaDisponibilidadeVaga) {
@@ -107,7 +122,11 @@ public class DisponibilidadeVagaService {
         
         if(!disponibilidadeValida(disponibilidadeCadastrada, disponibilidadeCadastrada.getVaga())) throw new IllegalArgumentException("Informações inválidas.");
         
-        return disponibilidadeCadastrada;
+        DisponibilidadeVaga disponibilidadeAtualizada = disponibilidadeVagaRepository.save(disponibilidadeCadastrada);
+
+        agendarInicioEfim(disponibilidadeAtualizada);
+
+        return disponibilidadeAtualizada;
     }
 
     public List<DisponibilidadeVaga> updateDisponibilidadeVagaByCodigoPmp(DisponibilidadeVagaRequestDTO novaDisponibilidadeVaga, String codigoPmp) {
@@ -117,7 +136,13 @@ public class DisponibilidadeVagaService {
             updateDisponibilidadeVaga(disponibilidadeVaga.getId(), novaDisponibilidadeVaga);
             disponibilidadesAtualizadas.add(disponibilidadeVaga);
         }
-        return disponibilidadeVagaRepository.saveAll(disponibilidadesAtualizadas);
+        List<DisponibilidadeVaga> disponibilidadesSalvas = disponibilidadeVagaRepository.saveAll(disponibilidadesAtualizadas);
+        if(!disponibilidadesSalvas.isEmpty()) {
+            disponibilidadesSalvas.forEach(disponibilidade -> {
+                agendarInicioEfim(disponibilidade);
+            });
+        }
+        return disponibilidadesSalvas;
     }
 
     public List<DisponibilidadeVaga> updateDisponibilidadeVagaByList(DisponibilidadeVagaRequestDTO novaDisponibilidadeVaga, List<UUID> listaIds) {
@@ -127,20 +152,49 @@ public class DisponibilidadeVagaService {
             updateDisponibilidadeVaga(disponibilidadeVaga.getId(), novaDisponibilidadeVaga);
             disponibilidadesAtualizadas.add(disponibilidadeVaga);
         }
-        return disponibilidadeVagaRepository.saveAll(disponibilidadesAtualizadas);
+        List<DisponibilidadeVaga> disponibilidadesSalvas = disponibilidadeVagaRepository.saveAll(disponibilidadesAtualizadas);
+        if(!disponibilidadesSalvas.isEmpty()) {
+            disponibilidadesSalvas.forEach(disponibilidade -> {
+                agendarInicioEfim(disponibilidade);
+            });
+        }
+        return disponibilidadesSalvas;
     }
 
     public void deleteById(UUID id) {
         DisponibilidadeVaga disponibilidadeVaga = findById(id);
         disponibilidadeVagaRepository.deleteById(disponibilidadeVaga.getId());
+        try {
+            disponibilidadeVagaScheduler.cancelarScheduler(disponibilidadeVaga.getId(), StatusVagaEnum.DISPONIVEL);
+            disponibilidadeVagaScheduler.cancelarScheduler(disponibilidadeVaga.getId(), StatusVagaEnum.INDISPONIVEL);
+        } catch (SchedulerException e) {
+                throw new RuntimeException("Erro ao cancelar scheduler de disponibilidade de vaga.", e);
+        }
     }
+
     public void deleteByIdList(List<UUID> listaIds) {
         disponibilidadeVagaRepository.deleteAllById(listaIds);
+        listaIds.forEach(id -> {
+            try {
+                disponibilidadeVagaScheduler.cancelarScheduler(id, StatusVagaEnum.DISPONIVEL);
+                disponibilidadeVagaScheduler.cancelarScheduler(id, StatusVagaEnum.INDISPONIVEL);
+            } catch (SchedulerException e) {
+                    throw new RuntimeException("Erro ao cancelar scheduler de disponibilidade de vaga.", e);
+            }
+        });
     }
 
     public void deleteByCodigoPMP(String codigoPMP) {
         List<DisponibilidadeVaga> disponibilidadeVagas = disponibilidadeVagaRepository.findByVagaEnderecoCodigoPmp(codigoPMP);
         disponibilidadeVagaRepository.deleteAll(disponibilidadeVagas);
+        disponibilidadeVagas.forEach(disponibilidade -> {
+            try {
+                disponibilidadeVagaScheduler.cancelarScheduler(disponibilidade.getId(), StatusVagaEnum.DISPONIVEL);
+                disponibilidadeVagaScheduler.cancelarScheduler(disponibilidade.getId(), StatusVagaEnum.INDISPONIVEL);
+            } catch (SchedulerException e) {
+                    throw new RuntimeException("Erro ao cancelar scheduler de disponibilidade de vaga.", e);
+            }
+        });
     }
 
     public Boolean disponibilidadeValida(DisponibilidadeVaga novaDisponibilidadeVaga, Vaga vaga) {
@@ -165,5 +219,37 @@ public class DisponibilidadeVagaService {
             }
         }
         return true;
+    }
+
+
+    public void agendarInicioEfim(DisponibilidadeVaga disponibilidadeVaga) {
+        try {
+            disponibilidadeVagaScheduler.cancelarScheduler(disponibilidadeVaga.getId(), StatusVagaEnum.DISPONIVEL);
+            disponibilidadeVagaScheduler.cancelarScheduler(disponibilidadeVaga.getId(), StatusVagaEnum.INDISPONIVEL);
+
+            disponibilidadeVagaScheduler.AgendarAlteracaoDisponibilidadeVaga(
+                disponibilidadeVaga,
+                StatusVagaEnum.DISPONIVEL,
+                disponibilidadeVaga.getInicio()
+            );
+
+            disponibilidadeVagaScheduler.AgendarAlteracaoDisponibilidadeVaga(
+                disponibilidadeVaga,
+                StatusVagaEnum.INDISPONIVEL,
+                disponibilidadeVaga.getFim()
+            );
+        } catch (SchedulerException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Transactional
+    public DisponibilidadeVaga alterarDisponibilidade(UUID disponibilidadeId, StatusVagaEnum novoStatus) {
+        DisponibilidadeVaga disponibilidadeVaga = findById(disponibilidadeId);
+        disponibilidadeVaga.getVaga().setStatus(novoStatus);
+        Vaga vagaAtualizada = vagaService.save(disponibilidadeVaga.getVaga());
+        disponibilidadeVaga.setVaga(vagaAtualizada);
+        return disponibilidadeVagaRepository.save(disponibilidadeVaga);
     }
 }
