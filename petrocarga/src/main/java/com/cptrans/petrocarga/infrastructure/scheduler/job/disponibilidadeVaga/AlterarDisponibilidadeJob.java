@@ -1,0 +1,35 @@
+package com.cptrans.petrocarga.infrastructure.scheduler.job.disponibilidadeVaga;
+
+import java.util.UUID;
+
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.cptrans.petrocarga.enums.StatusVagaEnum;
+import com.cptrans.petrocarga.services.DisponibilidadeVagaService;
+
+@DisallowConcurrentExecution
+@Component
+public class AlterarDisponibilidadeJob implements Job {
+
+    @Autowired
+    private DisponibilidadeVagaService disponibilidadeVagaService;
+
+    @Override
+    public void execute(JobExecutionContext context) throws JobExecutionException {
+        UUID disponibilidadeId = UUID.fromString(
+            context.getMergedJobDataMap().getString("disponibilidadeId")
+        );
+
+        StatusVagaEnum novoStatus = StatusVagaEnum.valueOf(
+            context.getMergedJobDataMap().getString("status")
+        );
+
+        disponibilidadeVagaService.alterarDisponibilidade(disponibilidadeId, novoStatus);
+    }
+    
+}

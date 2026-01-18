@@ -29,6 +29,9 @@ public class VagaService {
     @Autowired
     private EnderecoVagaService enderecoVagaService;
 
+    public Vaga save(Vaga vaga) {
+        return vagaRepository.save(vaga);
+    }
 
     public List<Vaga> findAll() {
         return vagaRepository.findAll();
