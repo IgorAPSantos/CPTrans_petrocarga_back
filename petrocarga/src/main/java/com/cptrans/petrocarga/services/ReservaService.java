@@ -36,6 +36,7 @@ import com.cptrans.petrocarga.utils.DateUtils;
 import com.cptrans.petrocarga.utils.ReservaUtils;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
 public class ReservaService {
@@ -52,6 +53,8 @@ public class ReservaService {
     private VagaService vagaService;
     @Autowired
     private ReservaRapidaService reservaRapidaService;
+    @Autowired
+    private NotificacaoService notificacaoService;
     @Autowired
     private ReservaUtils reservaUtils;
     @Autowired
@@ -145,6 +148,7 @@ public class ReservaService {
         Reserva reservaSalva = reservaRepository.save(novaReserva);
         try {
             reservaSchedulerService.agendarFinalizacaoReserva(reservaSalva.toReservaDTO());
+            reservaSchedulerService.agendarFinalizacaoNoShow(reservaSalva.toReservaDTO());
             notificacaoSchedulerService.agendarNotificacaoCheckInDisponivel(reservaSalva.getMotorista().getUsuario().getId(), reservaSalva.getId(),reservaSalva.getInicio());
             notificacaoSchedulerService.agendarNotificacaoFimProximo(reservaSalva.getMotorista().getUsuario().getId(), reservaSalva.getId(), reservaSalva.getFim());
 
@@ -427,10 +431,12 @@ public static class Intervalo {
         checarExcecoesReserva(reserva, usuarioLogado, reserva.getMotorista(), reserva.getVeiculo(), ReservaUtils.METODO_PATCH);
         Reserva reservaSalva = reservaRepository.save(reserva);
         try {
-            reservaSchedulerService.cancelarScheduler(reservaSalva.getId());
+            reservaSchedulerService.cancelarSchedulerFinalizaReserva(reservaSalva.getId());
+            reservaSchedulerService.cancelarSchedulerNoShowReserva(reservaSalva.getId());
             notificacaoSchedulerService.cancelarSchedulerCheckIn(usuarioId, reservaSalva.getId());
             notificacaoSchedulerService.cancelarSchedulerFimProximo(usuarioId, reservaSalva.getId());
             reservaSchedulerService.agendarFinalizacaoReserva(reservaSalva.toReservaDTO());
+            reservaSchedulerService.agendarFinalizacaoNoShow(reservaSalva.toReservaDTO());
             notificacaoSchedulerService.agendarNotificacaoCheckInDisponivel(reservaSalva.getMotorista().getUsuario().getId(), reservaSalva.getId(),reservaSalva.getInicio());
             notificacaoSchedulerService.agendarNotificacaoFimProximo(reservaSalva.getMotorista().getUsuario().getId(), reservaSalva.getId(), reservaSalva.getFim());
         } catch (SchedulerException e) {
@@ -443,7 +449,13 @@ public static class Intervalo {
         Reserva reserva = findById(reservaId);
         if (reserva.getStatus() != StatusReservaEnum.ATIVA) throw new IllegalArgumentException("Reserva com status '" + reserva.getStatus() + "' não pode ser finalizada.");
         reserva.setStatus(StatusReservaEnum.CONCLUIDA);
-        return reservaRepository.save(reserva);
+        Reserva reservaSalva = reservaRepository.save(reserva);
+        try {
+            reservaSchedulerService.cancelarSchedulerFinalizaReserva(reservaSalva.getId());
+        } catch (SchedulerException e) {
+            throw new RuntimeException("Erro ao agendar finalização da reserva: " + e.getMessage());
+        }
+        return reservaSalva;
     }
 
     public void cancelarReserva(UUID reservaId, UUID usuarioId) {
@@ -463,8 +475,36 @@ public static class Intervalo {
         }
 
         reserva.setStatus(StatusReservaEnum.CANCELADA);
-        reservaRepository.save(reserva);
+        Reserva reservaSalva = reservaRepository.save(reserva);
+
+        try {
+            reservaSchedulerService.cancelarSchedulerFinalizaReserva(reservaSalva.getId());
+            reservaSchedulerService.cancelarSchedulerNoShowReserva(reservaSalva.getId());
+            notificacaoSchedulerService.cancelarSchedulerCheckIn(usuarioId, reservaSalva.getId());
+            notificacaoSchedulerService.cancelarSchedulerFimProximo(usuarioId, reservaSalva.getId());
+        } catch (SchedulerException e) {
+            throw new RuntimeException("Erro ao agendar finalização da reserva: " + e.getMessage());
+        }
+
     }
+
+    @Transactional
+    public void processarNoShow(UUID reservaId){
+        Optional<Reserva> reserva = reservaRepository.findById(reservaId);
+        if(!reserva.isPresent() || !reserva.get().getStatus().equals(StatusReservaEnum.RESERVADA)) return;
+        reserva.get().setStatus(StatusReservaEnum.REMOVIDA);
+        Reserva reservaSalva = reservaRepository.save(reserva.get());
+        notificacaoService.notificarNoShow(reserva.get().getMotorista().getUsuario().getId(), reserva.get().getInicio());
+        try {
+            reservaSchedulerService.cancelarSchedulerFinalizaReserva(reservaSalva.getId());
+            reservaSchedulerService.cancelarSchedulerNoShowReserva(reservaSalva.getId());
+            notificacaoSchedulerService.cancelarSchedulerCheckIn(reservaSalva.getMotorista().getUsuario().getId(), reservaSalva.getId());
+            notificacaoSchedulerService.cancelarSchedulerFimProximo(reservaSalva.getMotorista().getUsuario().getId(), reservaSalva.getId());
+        } catch (SchedulerException e) {
+            throw new RuntimeException("Erro ao agendar finalização da reserva: " + e.getMessage());
+        }
+    }
+
 
     public void finalizarReserva (UUID reservaId) {
         Optional<Reserva> reserva = reservaRepository.findById(reservaId);

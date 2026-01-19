@@ -47,6 +47,12 @@ public class NotificacaoService {
         "Sua reserva está prestes a terminar. Assegure-se de concluir suas atividades a tempo.",
         TipoNotificacaoEnum.RESERVA
     );
+
+     private final Notificacao NO_SHOW_NOTIFICACAO = new Notificacao(
+        "Não Comparecimento à Reserva",
+        "Sua reserva foi removida pois você não realizou o checkIn à tempo.",
+        TipoNotificacaoEnum.RESERVA
+    );
  
     private Notificacao createNotificacao(UUID usuarioId, String titulo, String mensagem, TipoNotificacaoEnum tipo, Map<String, Object> dadosAdicionais) {
         Usuario usuarioLogado = usuarioService.findById(((UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).id());
@@ -217,6 +223,14 @@ public class NotificacaoService {
         FIM_PROXIMO_NOTIFICACAO.setMetadata(dadosAdicionais);
         FIM_PROXIMO_NOTIFICACAO.setUsuarioId(usuarioId);
         Notificacao notificacaoSalva = saveNotificacao(FIM_PROXIMO_NOTIFICACAO);
+        eventPublisher.publish(new NotificacaoCriadaEvent(notificacaoSalva));
+        return notificacaoSalva;
+    }
+
+    @Transactional
+    public Notificacao notificarNoShow(UUID usuarioId, OffsetDateTime dataReserva){
+        NO_SHOW_NOTIFICACAO.setUsuarioId(usuarioId);
+        Notificacao notificacaoSalva = saveNotificacao(NO_SHOW_NOTIFICACAO);
         eventPublisher.publish(new NotificacaoCriadaEvent(notificacaoSalva));
         return notificacaoSalva;
     }

@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS motorista
+    ALTER COLUMN numero_cnh TYPE VARCHAR(11);

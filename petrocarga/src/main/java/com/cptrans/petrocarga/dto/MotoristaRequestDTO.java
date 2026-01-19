@@ -23,7 +23,7 @@ public class MotoristaRequestDTO {
     private TipoCnhEnum tipoCnh;
 
     @NotNull(message = "O campo 'numeroCnh' é obrigatório.")
-    @Size(min = 9, max = 9, message = "Número da CNH deve ter exatamente 9 caracteres.")
+    @Size(min = 9, max = 11, message = "Número da CNH deve ter entre 9 e 11 caracteres.")
     private String numeroCnh;
 
     @NotNull(message = "O campo 'dataValidadeCnh' é obrigatório.")

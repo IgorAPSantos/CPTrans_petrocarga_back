@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cptrans.petrocarga.dto.MotoristaFiltrosDTO;
 import com.cptrans.petrocarga.dto.MotoristaRequestDTO;
 import com.cptrans.petrocarga.dto.MotoristaResponseDTO;
 import com.cptrans.petrocarga.dto.UsuarioPATCHRequestDTO;
@@ -34,7 +36,19 @@ public class MotoristaController {
 
     @PreAuthorize("hasAnyRole('ADMIN','GESTOR')")
     @GetMapping
-    public ResponseEntity<List<MotoristaResponseDTO>> getAllMotoristas() {
+    public ResponseEntity<List<MotoristaResponseDTO>> getAllMotoristas(
+        @RequestParam(required = false) String nome,
+        @RequestParam(required = false) String cpf,
+        @RequestParam(required = false) String cnh,
+        @RequestParam(required = false) Boolean ativo
+    ) {
+        MotoristaFiltrosDTO filtros = new MotoristaFiltrosDTO(nome, cpf, cnh, ativo);
+        if(filtros.nome() != null || filtros.cpf() != null || filtros.cnh() != null || filtros.ativo() != null) {
+            List<MotoristaResponseDTO> motoristasFiltrados = motoristaService.findAllWithFiltros(filtros).stream()
+                    .map(MotoristaResponseDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(motoristasFiltrados);
+        }
         List<MotoristaResponseDTO> motoristas = motoristaService.findAll().stream()
                 .map(MotoristaResponseDTO::new)
                 .collect(Collectors.toList());
