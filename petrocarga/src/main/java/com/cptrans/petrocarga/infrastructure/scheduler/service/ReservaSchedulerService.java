@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.cptrans.petrocarga.dto.ReservaDTO;
 import com.cptrans.petrocarga.infrastructure.configs.quartz.QuartzGroups;
 import com.cptrans.petrocarga.infrastructure.scheduler.job.reserva.FinalizarReservaJob;
+import com.cptrans.petrocarga.infrastructure.scheduler.job.reserva.NoShowJob;
 
 @Service
 public class ReservaSchedulerService {
@@ -50,13 +51,51 @@ public class ReservaSchedulerService {
 
         scheduler.scheduleJob(job, trigger);
     }
-    public void cancelarScheduler(UUID reservaId) throws SchedulerException {
+   
+    public void agendarFinalizacaoNoShow(ReservaDTO reservaDTO) throws SchedulerException{
+        JobKey jobKey = JobKey.jobKey(
+            "finaliza-noshow-reserva" + reservaDTO.getId(),
+            QuartzGroups.RESERVAS
+        );
+
+        if (scheduler.checkExists(jobKey)) {
+            return;
+        }
+
+        JobDetail job = JobBuilder.newJob(NoShowJob.class)
+        .withIdentity(
+            "finaliza-noshow-reserva" + reservaDTO.getId(),
+            QuartzGroups.RESERVAS)
+        .usingJobData("reservaId", reservaDTO.getId().toString())
+        .build();
+
+        Trigger trigger = TriggerBuilder.newTrigger()
+        .withIdentity(
+            "trigger-finaliza-noshow-reserva" + reservaDTO.getId(),
+            QuartzGroups.RESERVAS)
+        .startAt(Date.from(reservaDTO.getInicio().plusMinutes(10).toInstant()))
+        .build();
+
+        scheduler.scheduleJob(job, trigger);
+    }
+
+    public void cancelarSchedulerFinalizaReserva(UUID reservaId) throws SchedulerException {
         JobKey jobKey = JobKey.jobKey("finaliza-reserva-" + reservaId, QuartzGroups.RESERVAS);
         if (!scheduler.checkExists(jobKey)) {
             return;
         }
         scheduler.deleteJob(
             JobKey.jobKey("finaliza-reserva-" + reservaId, QuartzGroups.RESERVAS)
+        );
+    }
+
+    public void cancelarSchedulerNoShowReserva(UUID reservaId) throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey("finaliza-noshow-reserva" + reservaId, QuartzGroups.RESERVAS);
+        if (!scheduler.checkExists(jobKey)) {
+            return;
+        }
+        scheduler.deleteJob(
+            JobKey.jobKey("finaliza-noshow-reserva" + reservaId, QuartzGroups.RESERVAS)
         );
     }
 }

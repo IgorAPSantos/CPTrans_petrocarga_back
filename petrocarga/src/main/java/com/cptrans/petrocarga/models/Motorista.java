@@ -37,7 +37,7 @@ public class Motorista {
     @Column(name = "tipo_cnh", length=2, nullable = false)
     private TipoCnhEnum tipoCnh;
 
-    @Column(name = "numero_cnh", unique = true, length = 9, nullable = false)
+    @Column(name = "numero_cnh", unique = true, length = 11, nullable = false)
     private String numeroCnh;
 
     @Column(name = "data_validade_cnh")

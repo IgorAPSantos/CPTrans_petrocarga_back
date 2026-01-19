@@ -41,7 +41,7 @@ public class UsuarioPATCHRequestDTO {
     @Valid
     private TipoCnhEnum tipoCnh;
 
-    @Size(min = 9, max = 9, message = "CNH deve ter exatamente 9 caracteres.")
+    @Size(min = 9, max = 11, message = "CNH deve ter entre 9 e 11 caracteres.")
     private String numeroCnh;
 
     private LocalDate dataValidadeCnh;

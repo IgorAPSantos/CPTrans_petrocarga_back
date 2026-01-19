@@ -8,11 +8,13 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.cptrans.petrocarga.dto.MotoristaFiltrosDTO;
 import com.cptrans.petrocarga.dto.UsuarioPATCHRequestDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.repositories.MotoristaRepository;
+import com.cptrans.petrocarga.specification.MotoristaSpecification;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -31,6 +33,10 @@ public class MotoristaService {
 
     public List<Motorista> findAll() {
         return motoristaRepository.findAll();
+    }
+
+    public List<Motorista> findAllWithFiltros(MotoristaFiltrosDTO filtros) {
+        return motoristaRepository.findAll(MotoristaSpecification.filtrar(filtros));
     }
 
     public Motorista findByUsuarioId(UUID usuarioId) {
