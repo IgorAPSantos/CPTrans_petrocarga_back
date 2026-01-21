@@ -36,24 +36,6 @@ public class NotificacaoService {
     @Autowired
     private SpringDomainEventPublisher eventPublisher;
 
-    private final Notificacao CHECKIN_DISPONIVEL_NOTIFICACAO = new Notificacao(
-        "Check-In Disponível",
-        "Você tem um check-in disponível. Por favor, realize o check-in para continuar com sua reserva.",
-        TipoNotificacaoEnum.RESERVA
-    );
-
-    private final Notificacao FIM_PROXIMO_NOTIFICACAO = new Notificacao(
-        "Fim de Reserva Próximo",
-        "Sua reserva está prestes a terminar. Assegure-se de concluir suas atividades a tempo.",
-        TipoNotificacaoEnum.RESERVA
-    );
-
-     private final Notificacao NO_SHOW_NOTIFICACAO = new Notificacao(
-        "Não Comparecimento à Reserva",
-        "Sua reserva foi removida pois você não realizou o checkIn à tempo.",
-        TipoNotificacaoEnum.RESERVA
-    );
- 
     private Notificacao createNotificacao(UUID usuarioId, String titulo, String mensagem, TipoNotificacaoEnum tipo, Map<String, Object> dadosAdicionais) {
         Usuario usuarioLogado = usuarioService.findById(((UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).id());
         Usuario usuarioDestinatario = usuarioService.findById(usuarioId);
@@ -206,31 +188,65 @@ public class NotificacaoService {
 
     @Transactional
     public Notificacao notificarCheckInDisponivel(UUID usuarioId, OffsetDateTime dataCheckin) {
+        final String TITULO = "Check-In Disponível";
+        final String MENSAGEM = "O horário de início da reserva está próximo. Abra o app para confirmar o check-in e não perder sua vaga.";
+        
         Map<String, Object> dadosAdicionais = new HashMap<>();
         dadosAdicionais.put("inicioReserva", dataCheckin.toString());
-        CHECKIN_DISPONIVEL_NOTIFICACAO.setMetadata(dadosAdicionais);
-        CHECKIN_DISPONIVEL_NOTIFICACAO.setUsuarioId(usuarioId);
-        CHECKIN_DISPONIVEL_NOTIFICACAO.setTitulo("Check-In Disponível");
-        Notificacao notificacaoSalva = saveNotificacao(CHECKIN_DISPONIVEL_NOTIFICACAO);
+
+        Notificacao notificacaoCheckIn = new Notificacao();
+        notificacaoCheckIn.setTitulo(TITULO);
+        notificacaoCheckIn.setMensagem(MENSAGEM);
+        notificacaoCheckIn.setTipo(TipoNotificacaoEnum.RESERVA);
+        notificacaoCheckIn.setUsuarioId(usuarioId);
+        notificacaoCheckIn.setMetadata(dadosAdicionais);
+
+        Notificacao notificacaoSalva = saveNotificacao(notificacaoCheckIn);
+
         eventPublisher.publish(new NotificacaoCriadaEvent(notificacaoSalva));
+
         return notificacaoSalva;
     }
 
     @Transactional
     public Notificacao notificarFimProximo(UUID usuarioId, OffsetDateTime dataFim) {
+        final String TITULO = "Fim da Reserva Próximo";
+        final String MENSAGEM = "Sua reserva está próxima do fim, realize suas atividades à tempo para evitar problemas.";
+
         Map<String, Object> dadosAdicionais = new HashMap<>();
         dadosAdicionais.put("fimReserva", dataFim.toString());
-        FIM_PROXIMO_NOTIFICACAO.setMetadata(dadosAdicionais);
-        FIM_PROXIMO_NOTIFICACAO.setUsuarioId(usuarioId);
-        Notificacao notificacaoSalva = saveNotificacao(FIM_PROXIMO_NOTIFICACAO);
+
+        Notificacao notificacaoFimProximo = new Notificacao();
+        notificacaoFimProximo.setTitulo(TITULO);
+        notificacaoFimProximo.setMensagem(MENSAGEM);
+        notificacaoFimProximo.setTipo(TipoNotificacaoEnum.RESERVA);
+        notificacaoFimProximo.setUsuarioId(usuarioId);
+        notificacaoFimProximo.setMetadata(dadosAdicionais);
+
+        Notificacao notificacaoSalva = saveNotificacao(notificacaoFimProximo);
+
         eventPublisher.publish(new NotificacaoCriadaEvent(notificacaoSalva));
+
         return notificacaoSalva;
     }
 
     @Transactional
     public Notificacao notificarNoShow(UUID usuarioId, OffsetDateTime dataReserva){
+        final String TITULO = "Não Comparecimento à Reserva";
+        final String MENSAGEM = "Você não realizou check-in para a sua reserva à tempo. Sua reserva foi removida.";
+
+        Map<String, Object> dadosAdicionais = new HashMap<>();
+        dadosAdicionais.put("dataReserva", dataReserva.toString());
+
+        Notificacao NO_SHOW_NOTIFICACAO = new Notificacao();
+        NO_SHOW_NOTIFICACAO.setTitulo(TITULO);
+        NO_SHOW_NOTIFICACAO.setMensagem(MENSAGEM);
+        NO_SHOW_NOTIFICACAO.setTipo(TipoNotificacaoEnum.RESERVA);
         NO_SHOW_NOTIFICACAO.setUsuarioId(usuarioId);
+        NO_SHOW_NOTIFICACAO.setMetadata(dadosAdicionais);
+
         Notificacao notificacaoSalva = saveNotificacao(NO_SHOW_NOTIFICACAO);
+
         eventPublisher.publish(new NotificacaoCriadaEvent(notificacaoSalva));
         return notificacaoSalva;
     }

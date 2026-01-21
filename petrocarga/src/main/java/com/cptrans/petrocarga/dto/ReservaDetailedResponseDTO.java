@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.models.Reserva;
+import com.cptrans.petrocarga.utils.DateUtils;
 
 public class ReservaDetailedResponseDTO {
 
@@ -20,7 +21,8 @@ public class ReservaDetailedResponseDTO {
 
     private UUID veiculoId;
     private String veiculoPlaca;
-    private String veiculoModelo; // Adicionado campo modelo
+    private String veiculoModelo;
+    private String veiculoMarca;
 
     private UUID criadoPorId;
     private String criadoPorNome;
@@ -50,7 +52,8 @@ public class ReservaDetailedResponseDTO {
         }
         if (r.getVeiculo() != null) {
             this.veiculoPlaca = r.getVeiculo().getPlaca();
-            this.veiculoModelo = r.getVeiculo().getModelo(); // Adicionado campo modelo
+            this.veiculoModelo = r.getVeiculo().getModelo();
+            this.veiculoMarca = r.getVeiculo().getMarca();
         }
         if (r.getCriadoPor() != null) {
             this.criadoPorNome = r.getCriadoPor().getNome();
@@ -75,21 +78,19 @@ public class ReservaDetailedResponseDTO {
     public void setLogradouro(String logradouro) { this.logradouro = logradouro; }
     public String getBairro() { return bairro; }
     public void setBairro(String bairro) { this.bairro = bairro; }
-    public UUID getMotoristaId() {
-        return motoristaId;
-    }
+    public UUID getMotoristaId() { return motoristaId; }
     public void setMotoristaId(UUID motoristaId) { this.motoristaId = motoristaId; }
     public String getMotoristaNome() { return motoristaNome; }
     public void setMotoristaNome(String motoristaNome) { this.motoristaNome = motoristaNome; }
-    public UUID getVeiculoId() {
-        return veiculoId;
-    }
+    public UUID getVeiculoId() { return veiculoId; }
     public void setVeiculoId(UUID veiculoId) { this.veiculoId = veiculoId; }
     public String getVeiculoPlaca() { return veiculoPlaca; }
+    public String getVeiculoModelo() { return veiculoModelo; }
+    public void setVeiculoModelo(String veiculoModelo) { this.veiculoModelo = veiculoModelo; }
+    public String getVeiculoMarca() { return veiculoMarca; }
+    public void setVeiculoMarca(String veiculoMarca) { this.veiculoMarca = veiculoMarca;}
     public void setVeiculoPlaca(String veiculoPlaca) { this.veiculoPlaca = veiculoPlaca; }
-    public UUID getCriadoPorId() {
-        return criadoPorId;
-    }
+    public UUID getCriadoPorId() { return criadoPorId; }
     public void setCriadoPorId(UUID criadoPorId) { this.criadoPorId = criadoPorId; }
     public String getCriadoPorNome() { return criadoPorNome; }
     public void setCriadoPorNome(String criadoPorNome) { this.criadoPorNome = criadoPorNome; }
@@ -97,17 +98,10 @@ public class ReservaDetailedResponseDTO {
     public void setCidadeOrigem(String cidadeOrigem) { this.cidadeOrigem = cidadeOrigem; }
     public OffsetDateTime getCriadoEm() { return criadoEm; }
     public void setCriadoEm(OffsetDateTime criadoEm) { this.criadoEm = criadoEm; }
-    public OffsetDateTime getInicio() { return inicio; }
+    public OffsetDateTime getInicio() { return inicio.atZoneSameInstant(DateUtils.FUSO_BRASIL).toOffsetDateTime(); }
     public void setInicio(OffsetDateTime inicio) { this.inicio = inicio; }
-    public OffsetDateTime getFim() { return fim; }
+    public OffsetDateTime getFim() { return fim.atZoneSameInstant(DateUtils.FUSO_BRASIL).toOffsetDateTime(); }
     public void setFim(OffsetDateTime fim) { this.fim = fim; }
     public StatusReservaEnum getStatus() { return status; }
     public void setStatus(StatusReservaEnum status) { this.status = status; }
-    public String getVeiculoModelo() {
-        return veiculoModelo;
-    }
-
-    public void setVeiculoModelo(String veiculoModelo) {
-        this.veiculoModelo = veiculoModelo;
-    }
 }

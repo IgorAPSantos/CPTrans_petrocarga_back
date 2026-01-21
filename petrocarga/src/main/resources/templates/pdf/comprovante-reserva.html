@@ -76,6 +76,7 @@
             <tr>
                 <td class="label">Veículo</td>
                 <td>
+                    <span th:text="${reserva.veiculoMarca}"></span>
                     <span th:text="${reserva.veiculoModelo}"></span>
                     -
                     <span th:text="${reserva.veiculoPlaca}"></span>
@@ -96,6 +97,12 @@
                     <span th:text="${#temporals.format(reserva.inicio, 'dd/MM/yyyy HH:mm')}"></span>
                     até
                     <span th:text="${#temporals.format(reserva.fim, 'dd/MM/yyyy HH:mm')}"></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Data de Emissão do Comprovante</td>
+                <td>
+                    <span th:text="${#temporals.format(agora, 'dd/MM/yyyy HH:mm')}"></span>
                 </td>
             </tr>
         </table>
