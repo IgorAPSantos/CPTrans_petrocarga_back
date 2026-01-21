@@ -20,8 +20,8 @@ spring:
     mail:
         host: smtp.gmail.com
         port: 587
-        username: joaocasadinho324@gmail.com
-        password: xvesupzmtfupdgdu
+        username: cpt.petrocarga@gmail.com
+        password: slmkeltaclleqvm
         properties:
             mail:
                 smtp:
@@ -32,7 +32,7 @@ spring:
                     connectiontimeout: 5000
                     timeout: 5000
                     writetimeout: 5000
-        from: joaocasadinho324@gmail.com
+        from: cpt.petrocarga@gmail.com
     
 app:
     firebase-push-notification:
