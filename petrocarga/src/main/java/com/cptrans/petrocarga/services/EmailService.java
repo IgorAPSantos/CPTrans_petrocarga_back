@@ -24,32 +24,44 @@ public class EmailService {
 
     @Async
     public void sendActivationCode(String to, String code) {
-        // Log the code for local/dev testing
-        LOGGER.info("Ambiente de DEV - Código para {}: {}", to, code);
+        try {
+            // Log the code for local/dev testing
+            LOGGER.info("Ambiente de DEV - Código para {}: {}", to, code);
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(from);
-        message.setTo(to);
-        message.setSubject("Código de Ativação - PetroCarga");
-        message.setText("Seu código de ativação é: " + code + "\n\nSe você não solicitou, ignore este e-mail.");
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(from);
+            message.setTo(to);
+            message.setSubject("Código de Ativação - PetroCarga");
+            message.setText("Seu código de ativação é: " + code + "\n\nSe você não solicitou, ignore este e-mail.");
 
-        mailSender.send(message);
+            LOGGER.info("Enviando email de ativação para: {}", to);
+            mailSender.send(message);
+            LOGGER.info("Email de ativação enviado com sucesso para: {}", to);
+        } catch (Exception e) {
+            LOGGER.error("Erro ao enviar email de ativação para {}: {}", to, e.getMessage(), e);
+        }
     }
 
     @Async
     public void sendPasswordResetCode(String to, String code) {
-        // Log the code for local/dev testing
-        LOGGER.info("Ambiente de DEV - Código de recuperação de senha para {}: {}", to, code);
+        try {
+            // Log the code for local/dev testing
+            LOGGER.info("Ambiente de DEV - Código de recuperação de senha para {}: {}", to, code);
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(from);
-        message.setTo(to);
-        message.setSubject("Recuperação de Senha - PetroCarga");
-        message.setText("Você solicitou a recuperação de senha.\n\n" +
-                "Seu código de recuperação é: " + code + "\n\n" +
-                "Este código expira em 10 minutos.\n\n" +
-                "Se você não solicitou esta recuperação, ignore este e-mail.");
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(from);
+            message.setTo(to);
+            message.setSubject("Recuperação de Senha - PetroCarga");
+            message.setText("Você solicitou a recuperação de senha.\n\n" +
+                    "Seu código de recuperação é: " + code + "\n\n" +
+                    "Este código expira em 10 minutos.\n\n" +
+                    "Se você não solicitou esta recuperação, ignore este e-mail.");
 
-        mailSender.send(message);
+            LOGGER.info("Enviando email de reset de senha para: {}", to);
+            mailSender.send(message);
+            LOGGER.info("Email de reset de senha enviado com sucesso para: {}", to);
+        } catch (Exception e) {
+            LOGGER.error("Erro ao enviar email de reset de senha para {}: {}", to, e.getMessage(), e);
+        }
     }
 }
