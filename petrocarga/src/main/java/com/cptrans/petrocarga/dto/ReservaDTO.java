@@ -97,9 +97,6 @@ public class ReservaDTO {
     public EnderecoVagaResponseDTO getEnderecoVaga() {
         return enderecoVaga;
     }
-    public void setEnderecoVaga(Vaga vaga) {
-        this.enderecoVaga = vaga.getEndereco().toResponseDTO();
-    }
     public OffsetDateTime getInicio() {
         return inicio;
     }    
