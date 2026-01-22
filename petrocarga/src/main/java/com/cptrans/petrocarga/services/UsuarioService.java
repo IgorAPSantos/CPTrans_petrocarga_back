@@ -159,23 +159,14 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
 
-        System.out.println("=== DEBUG RESET PASSWORD ===");
-        System.out.println("Email: " + email);
-        System.out.println("Código recebido: " + code);
-        System.out.println("Código no banco: " + usuario.getVerificationCode());
-        System.out.println("Expiração: " + usuario.getVerificationCodeExpiresAt());
-        System.out.println("Agora: " + LocalDateTime.now());
-
         // Valida código
         if (usuario.getVerificationCode() == null || !usuario.getVerificationCode().equals(code)) {
-            System.out.println("ERRO: Código não confere!");
             throw new IllegalArgumentException("Código inválido ou expirado.");
         }
 
         // Valida expiração
         if (usuario.getVerificationCodeExpiresAt() == null || 
             usuario.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-            System.out.println("ERRO: Código expirado!");
             throw new IllegalArgumentException("Código inválido ou expirado.");
         }
 
@@ -187,7 +178,6 @@ public class UsuarioService {
         usuario.setVerificationCodeExpiresAt(null);
 
         usuarioRepository.save(usuario);
-        System.out.println("Senha alterada com sucesso!");
     }
 
     public Usuario updateUsuario(UUID id, Usuario novoUsuario, PermissaoEnum permissao) {

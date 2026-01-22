@@ -21,7 +21,7 @@ spring:
         host: smtp.gmail.com
         port: 587
         username: cpt.petrocarga@gmail.com
-        password: slmkeltaclleqvm
+        password: bqmx mjec zeny bnkd
         properties:
             mail:
                 smtp:
