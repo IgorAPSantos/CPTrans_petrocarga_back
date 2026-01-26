@@ -5,40 +5,45 @@ import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.cptrans.petrocarga.dto.MotoristaFiltrosDTO;
-import com.cptrans.petrocarga.models.Motorista;
+import com.cptrans.petrocarga.dto.GestorFiltrosDTO;
+import com.cptrans.petrocarga.enums.PermissaoEnum;
+import com.cptrans.petrocarga.models.Usuario;
 
 import jakarta.persistence.criteria.Predicate;
 
-public class MotoristaSpecification {
-     public static Specification<Motorista> filtrar(
-        MotoristaFiltrosDTO filtros
+public class GestorSpecification {
+     public static Specification<Usuario> filtrar(
+        GestorFiltrosDTO filtros
     ) {
         return (root, query, cb) -> {
 
             List<Predicate> predicates = new ArrayList<>();
 
+             predicates.add(
+                    cb.equal(root.get("permissao"), PermissaoEnum.GESTOR)
+                );
+
             if (filtros.nome() != null) {
                 predicates.add(
-                    cb.like(cb.lower(root.get("usuario").get("nome")), "%" + filtros.nome().trim().toLowerCase() + "%")
+                    cb.like(cb.lower(root.get("nome")), "%" + filtros.nome().trim().toLowerCase() + "%")
                 );
             }
 
             if (filtros.cpf() != null) {
                 predicates.add(
-                    cb.equal(root.get("usuario").get("cpf"), filtros.cpf())
+                    cb.equal(root.get("cpf"), filtros.cpf())
                 );
             }
 
-            if (filtros.cnh() != null) {
+            if (filtros.email() != null) {
                 predicates.add(
-                    cb.equal(root.get("numero_cnh"), filtros.cnh())
+                    cb.equal(root.get("email"), filtros.email())
                 );
             }
 
             if (filtros.ativo() != null) {
                 predicates.add(
-                    cb.equal(root.get("usuario").get("ativo") , filtros.ativo())
+                    cb.equal(root.get("ativo"), filtros.ativo())
                 );
             }
 

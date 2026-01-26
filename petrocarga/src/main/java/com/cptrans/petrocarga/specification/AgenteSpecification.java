@@ -5,18 +5,19 @@ import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.cptrans.petrocarga.dto.MotoristaFiltrosDTO;
-import com.cptrans.petrocarga.models.Motorista;
+import com.cptrans.petrocarga.dto.AgenteFiltrosDTO;
+import com.cptrans.petrocarga.models.Agente;
 
 import jakarta.persistence.criteria.Predicate;
 
-public class MotoristaSpecification {
-     public static Specification<Motorista> filtrar(
-        MotoristaFiltrosDTO filtros
+public class AgenteSpecification {
+     public static Specification<Agente> filtrar(
+        AgenteFiltrosDTO filtros
     ) {
         return (root, query, cb) -> {
 
             List<Predicate> predicates = new ArrayList<>();
+
 
             if (filtros.nome() != null) {
                 predicates.add(
@@ -30,15 +31,21 @@ public class MotoristaSpecification {
                 );
             }
 
-            if (filtros.cnh() != null) {
+            if (filtros.email() != null) {
                 predicates.add(
-                    cb.equal(root.get("numero_cnh"), filtros.cnh())
+                    cb.equal(root.get("usuario").get("email"), filtros.email())
                 );
             }
 
             if (filtros.ativo() != null) {
                 predicates.add(
                     cb.equal(root.get("usuario").get("ativo") , filtros.ativo())
+                );
+            }
+
+            if (filtros.matricula() != null) {
+                predicates.add(
+                    cb.equal(root.get("matricula"), filtros.matricula())
                 );
             }
 
