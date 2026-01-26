@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -102,7 +101,7 @@ public class AuthController {
         @PostMapping("/activate")
         public ResponseEntity<Void> activateAccount(@RequestBody AccountActivationRequest request) {
             try {
-                usuarioService.activateAccount(request.email(), request.code());
+                usuarioService.activateAccount(request.email(), request.codigo());
                 return ResponseEntity.ok().build();
             } catch (IllegalArgumentException e) {
                 return ResponseEntity.badRequest().build();
@@ -137,7 +136,7 @@ public class AuthController {
         @PostMapping("/reset-password")
         public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
             try {
-                usuarioService.resetPassword(request.email(), request.code(), request.novaSenha());
+                usuarioService.resetPassword(request.email(), request.codigo(), request.novaSenha());
                 return ResponseEntity.ok().build();
             } catch (IllegalArgumentException e) {
                 return ResponseEntity.badRequest().build();
