@@ -168,8 +168,8 @@ public class ReservaDTO {
     public UsuarioResponseDTO getCriadoPor() {
         return criadoPor;
     }
-    public void setCriadoPor(Usuario criadoPor) {
-        this.criadoPor = criadoPor.toResponseDTO();
+    public void setCriadoPor(UsuarioResponseDTO criadoPor) {
+        this.criadoPor = criadoPor;
     }
     public OffsetDateTime getCriadoEm() {
         return criadoEm;
@@ -228,8 +228,4 @@ public class ReservaDTO {
     public void setEnderecoVaga(EnderecoVagaResponseDTO enderecoVaga) {
         this.enderecoVaga = enderecoVaga;
     }
-    public void setCriadoPor(UsuarioResponseDTO criadoPor) {
-        this.criadoPor = criadoPor;
-    }
-    
 }

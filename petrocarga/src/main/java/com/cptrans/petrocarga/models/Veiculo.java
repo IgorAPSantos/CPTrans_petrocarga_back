@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.models;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import com.cptrans.petrocarga.dto.VeiculoResponseDTO;
@@ -54,8 +55,16 @@ public class Veiculo {
     @Column(name = "cnpj_proprietario", length = 14)
     private String cnpjProprietario;
 
+    @Column(name = "ativo", nullable = false, columnDefinition = "BOOLEAN DEFAULT true")
+    private Boolean ativo;
+
+    @Column(name = "deletado_em", nullable = true)
+    private OffsetDateTime deletadoEm;
+
     // Constructors
-    public Veiculo() {}
+    public Veiculo() {
+        this.ativo = true;
+    }
 
     // Getters and Setters
     public UUID getId() {
@@ -128,6 +137,22 @@ public class Veiculo {
 
     public void setCnpjProprietario(String cnpjProprietario) {
         this.cnpjProprietario = cnpjProprietario;
+    }
+
+    public Boolean isAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
+    }
+
+    public OffsetDateTime getDeletadoEm() {
+        return deletadoEm;
+    }
+
+    public void setDeletadoEm(OffsetDateTime deletadoEm) {
+        this.deletadoEm = deletadoEm;
     }
 
     public VeiculoResponseDTO toResponseDTO() {

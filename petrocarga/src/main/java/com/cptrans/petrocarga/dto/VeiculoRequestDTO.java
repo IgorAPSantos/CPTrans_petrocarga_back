@@ -6,13 +6,14 @@ import org.hibernate.validator.constraints.br.CPF;
 import com.cptrans.petrocarga.enums.TipoVeiculoEnum;
 import com.cptrans.petrocarga.models.Veiculo;
 
-import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 
 public class VeiculoRequestDTO {
 
+    @NotNull(message = "Placa deve ser informada.")
     @Size(min=7, max=7, message="Placa deve ter exatamente 7 caracteres.")
     private String placa;
     
@@ -22,7 +23,7 @@ public class VeiculoRequestDTO {
     @Size(min=3, max=20, message="Modelo deve ter entre 3 e 20 caracteres.")
     private String modelo;
 
-    @Nonnull
+    @NotNull(message = "Tipo do veículo deve ser informado.")
     private TipoVeiculoEnum tipo;
 
     @Valid
@@ -35,7 +36,7 @@ public class VeiculoRequestDTO {
 
     public Veiculo toEntity() {
         Veiculo veiculo = new Veiculo();
-        if(this.placa == null) throw new IllegalArgumentException("Placa deve ser informada.");
+        // if(this.placa == null) throw new IllegalArgumentException("Placa deve ser informada.");
         veiculo.setPlaca(this.placa.toUpperCase());
         veiculo.setMarca(this.marca);
         veiculo.setModelo(this.modelo);

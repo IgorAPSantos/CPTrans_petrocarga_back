@@ -1,4 +1,4 @@
 package com.cptrans.petrocarga.dto;
 
-public record AccountActivationRequest(String email, String code) {
+public record AccountActivationRequest(String email, String codigo) {
 }

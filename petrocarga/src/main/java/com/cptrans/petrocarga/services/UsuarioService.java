@@ -2,6 +2,7 @@ package com.cptrans.petrocarga.services;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.repositories.UsuarioRepository;
 import com.cptrans.petrocarga.specification.GestorSpecification;
+import com.cptrans.petrocarga.utils.DateUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -92,6 +94,10 @@ public class UsuarioService {
 
         if (usuario.getVerificationCodeExpiresAt() == null || usuario.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Código expirado.");
+        }
+
+        if(usuario.getDesativadoEm() != null) {
+            usuario.setDesativadoEm(null);
         }
 
         usuario.setAtivo(true);
@@ -252,7 +258,10 @@ public class UsuarioService {
         return usuarioRepository.save(usuarioExistente);
     }
     public void deleteById(UUID id) {
-        usuarioRepository.deleteById(id);
+        Usuario usuario = findByIdAndAtivo(id, true);
+        usuario.setAtivo(false);
+        usuario.setDesativadoEm(OffsetDateTime.now(DateUtils.FUSO_BRASIL));
+        usuarioRepository.save(usuario);
     }
 
     public List<Usuario> findAllGestoresWithFiltros(GestorFiltrosDTO filtros) {

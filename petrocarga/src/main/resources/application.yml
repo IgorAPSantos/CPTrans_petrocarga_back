@@ -73,3 +73,5 @@ app:
     cookie-settings:
         secure: true
         same-site: None
+    frontend:
+        base-url: ${FRONTEND_URL:http://localhost:3000}

@@ -39,9 +39,15 @@ public class MotoristaService {
         return motoristaRepository.findAll(MotoristaSpecification.filtrar(filtros));
     }
 
+    public Motorista findByUsuarioIdAndAtivo(UUID usuarioId, Boolean ativo) {
+        if(ativo == null) ativo = true;
+        Motorista motorista = motoristaRepository.findByUsuarioIdAndUsuarioAtivo(usuarioId, ativo)
+                .orElseThrow(() -> new IllegalArgumentException("Motorista não encontrado"));
+        return motorista;
+    }
+
     public Motorista findByUsuarioId(UUID usuarioId) {
-        Usuario usuario = usuarioService.findById(usuarioId);
-        Motorista motorista = motoristaRepository.findByUsuario(usuario)
+        Motorista motorista = motoristaRepository.findByUsuarioId(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Motorista não encontrado"));
         return motorista;
     }
@@ -65,7 +71,7 @@ public class MotoristaService {
 
     @Transactional
     public Motorista updateMotorista(UUID usuarioId, UsuarioPATCHRequestDTO motoristaRequest) {
-        Motorista motoristaCadastrado = findByUsuarioId(usuarioId);
+        Motorista motoristaCadastrado = findByUsuarioIdAndAtivo(usuarioId, true);
         
         if(motoristaRequest.getDataValidadeCnh() != null) {
             if(motoristaRequest.getDataValidadeCnh().isBefore(LocalDate.now())) throw new IllegalArgumentException("Cnh vencida");
@@ -99,7 +105,7 @@ public class MotoristaService {
     }
 
     public void deleteByUsuarioId(UUID usuarioId) {
-        Motorista motorista = findByUsuarioId(usuarioId);
-        motoristaRepository.deleteById(motorista.getId());
+        Motorista motorista = findByUsuarioIdAndAtivo(usuarioId, true);
+        usuarioService.deleteById(motorista.getUsuario().getId());
     }
 }
