@@ -14,6 +14,8 @@ public class DenunciaResponseDTO {
     private UUID criadoPorId;
     private UUID vagaId;
     private UUID reservaId;
+    private String nomeMotorista;
+    private String telefoneMotorista;
     private EnderecoVagaResponseDTO enderecoVaga;
     private String numeroEndereco;
     private String referenciaEndereco;
@@ -32,6 +34,8 @@ public class DenunciaResponseDTO {
         this.id = denuncia.getId();
         this.descricao = denuncia.getDescricao();
         this.criadoPorId = denuncia.getCriadoPor().getId();
+        this.nomeMotorista = denuncia.getReserva().getMotorista().getUsuario().getNome();
+        this.telefoneMotorista = denuncia.getReserva().getMotorista().getUsuario().getTelefone();
         this.vagaId = denuncia.getVaga().getId();
         this.reservaId = denuncia.getReserva().getId();
         this.enderecoVaga = denuncia.getVaga().getEndereco().toResponseDTO();
@@ -103,6 +107,14 @@ public class DenunciaResponseDTO {
 
     public OffsetDateTime getEncerradoEm() {
         return encerradoEm;
+    }
+
+    public String getNomeMotorista() {
+        return nomeMotorista;
+    }
+
+    public String getTelefoneMotorista() {
+        return telefoneMotorista;
     }
 
 }
