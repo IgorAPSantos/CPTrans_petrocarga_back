@@ -9,14 +9,16 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.cptrans.petrocarga.dto.GestorFiltrosDTO;
 import com.cptrans.petrocarga.dto.UsuarioPATCHRequestDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.repositories.UsuarioRepository;
+import com.cptrans.petrocarga.specification.GestorSpecification;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UsuarioService {
@@ -251,5 +253,9 @@ public class UsuarioService {
     }
     public void deleteById(UUID id) {
         usuarioRepository.deleteById(id);
+    }
+
+    public List<Usuario> findAllGestoresWithFiltros(GestorFiltrosDTO filtros) {
+        return usuarioRepository.findAll(GestorSpecification.filtrar(filtros));
     }
 }

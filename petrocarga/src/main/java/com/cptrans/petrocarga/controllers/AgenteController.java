@@ -3,6 +3,7 @@ package com.cptrans.petrocarga.controllers;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.validator.constraints.br.CPF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +15,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cptrans.petrocarga.dto.AgenteFiltrosDTO;
 import com.cptrans.petrocarga.dto.AgenteRequestDTO;
 import com.cptrans.petrocarga.dto.AgenteResponseDTO;
 import com.cptrans.petrocarga.dto.UsuarioPATCHRequestDTO;
@@ -23,6 +26,7 @@ import com.cptrans.petrocarga.models.Agente;
 import com.cptrans.petrocarga.services.AgenteService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 
 
 @RestController
@@ -34,7 +38,13 @@ public class AgenteController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
     @GetMapping
-    public ResponseEntity<List<AgenteResponseDTO>> getAllAgentes() {
+    public ResponseEntity<List<AgenteResponseDTO>> getAllAgentes(@RequestParam(required = false) String nome, @Valid @CPF @RequestParam(required = false) String cpf, @RequestParam(required = false) String matricula, @RequestParam(required = false) Boolean ativo, @Valid @Email @RequestParam(required = false) String email) {
+        if(nome != null || cpf != null || matricula != null || ativo != null || email != null) {
+            AgenteFiltrosDTO filtros = new AgenteFiltrosDTO(nome, cpf, matricula, ativo, email);
+            List<Agente> agentesFiltrados = agenteService.findByFiltros(filtros);
+            List<AgenteResponseDTO> responseFiltrado = agentesFiltrados.stream().map(Agente::toResponseDTO).toList();
+            return ResponseEntity.ok(responseFiltrado);
+        }
         List<Agente> agentes = agenteService.findAll();
         List<AgenteResponseDTO> response = agentes.stream().map(Agente::toResponseDTO).toList();
         return ResponseEntity.ok(response);

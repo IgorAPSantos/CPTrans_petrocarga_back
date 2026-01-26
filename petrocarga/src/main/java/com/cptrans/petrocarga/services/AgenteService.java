@@ -7,11 +7,13 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.cptrans.petrocarga.dto.AgenteFiltrosDTO;
 import com.cptrans.petrocarga.dto.UsuarioPATCHRequestDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.models.Agente;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.repositories.AgenteRepository;
+import com.cptrans.petrocarga.specification.AgenteSpecification;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -73,5 +75,9 @@ public class AgenteService {
         Usuario usuario = usuarioService.findById(usuarioId);
         Agente agente = agenteRepository.findByUsuario(usuario).orElseThrow(() -> new EntityNotFoundException("Agente não encontrado"));
         agenteRepository.deleteById(agente.getId());
+    }
+
+    public List<Agente> findByFiltros(AgenteFiltrosDTO filtros) {
+        return agenteRepository.findAll(AgenteSpecification.filtrar(filtros));
     }
 }

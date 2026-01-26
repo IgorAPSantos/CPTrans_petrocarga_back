@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cptrans.petrocarga.dto.GestorFiltrosDTO;
 import com.cptrans.petrocarga.dto.GestorRequestDTO;
 import com.cptrans.petrocarga.dto.UsuarioPATCHRequestDTO;
 import com.cptrans.petrocarga.dto.UsuarioResponseDTO;
@@ -31,9 +32,10 @@ public class GestorController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping()
-    public ResponseEntity<List<UsuarioResponseDTO>> getAllGestores(@RequestParam(required = false) Boolean ativo) {
-        if(ativo != null) {
-            return ResponseEntity.ok(gestorService.findAllByAtivo(ativo).stream()
+    public ResponseEntity<List<UsuarioResponseDTO>> getAllGestores(@RequestParam(required = false) String nome, @RequestParam(required = false) String cpf, @RequestParam(required = false) String email, @RequestParam(required = false) Boolean ativo) {
+        if(nome != null || cpf != null || email != null || ativo != null) {
+            GestorFiltrosDTO filtros = new GestorFiltrosDTO(nome, cpf, email, ativo);
+            return ResponseEntity.ok(gestorService.findAllWithFiltros(filtros).stream()
                     .map(gestor -> gestor.toResponseDTO())
                     .toList());
         }
