@@ -72,9 +72,7 @@ public class AgenteService {
     }
 
     public void deleteByUsuarioId(UUID usuarioId) {
-        Usuario usuario = usuarioService.findById(usuarioId);
-        Agente agente = agenteRepository.findByUsuario(usuario).orElseThrow(() -> new EntityNotFoundException("Agente não encontrado"));
-        agenteRepository.deleteById(agente.getId());
+        usuarioService.deleteById(usuarioId);
     }
 
     public List<Agente> findByFiltros(AgenteFiltrosDTO filtros) {

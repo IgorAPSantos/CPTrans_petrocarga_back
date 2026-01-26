@@ -36,6 +36,10 @@ public class GestorService {
         return usuarioService.patchUpdate(id, PermissaoEnum.GESTOR, novoGestor);
     }
 
+    public void deleteByUsuarioId(UUID usuarioId) {
+        usuarioService.deleteById(usuarioId);
+    }
+
     public List<Usuario> findAllWithFiltros(GestorFiltrosDTO filtros) {
         return usuarioService.findAllGestoresWithFiltros(filtros);
     }
