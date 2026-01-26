@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.services;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,6 +16,7 @@ import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.models.Veiculo;
 import com.cptrans.petrocarga.repositories.VeiculoRepository;
 import com.cptrans.petrocarga.security.UserAuthenticated;
+import com.cptrans.petrocarga.utils.DateUtils;
 
 @Service
 public class VeiculoService {
@@ -44,7 +46,7 @@ public class VeiculoService {
     public List<Veiculo> findByUsuarioId(UUID usuarioId) {
         UserAuthenticated usuarioLogado = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Usuario usuario = usuarioService.findById(usuarioId);
-        List<Veiculo> veiculos = veiculoRepository.findByUsuario(usuario);
+        List<Veiculo> veiculos = veiculoRepository.findByUsuarioAndAtivo(usuario, true);
         
         List<String> authorities = usuarioLogado.userDetails().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
         if(authorities.contains(PermissaoEnum.MOTORISTA.getRole()) || authorities.contains(PermissaoEnum.EMPRESA.getRole())) {
@@ -57,23 +59,27 @@ public class VeiculoService {
     }
 
     public Veiculo createVeiculo(Veiculo novoVeiculo, UUID usuarioId) {
-        Usuario usuario = usuarioService.findById(usuarioId);
-        Optional<Veiculo> veiculoByPlaca = veiculoRepository.findByPlacaAndUsuario(novoVeiculo.getPlaca(), usuario);
-        
+        Usuario usuarioVeiculo = usuarioService.findById(usuarioId);
+        Optional<Veiculo> veiculoByPlaca = veiculoRepository.findByPlacaAndUsuario(novoVeiculo.getPlaca(), usuarioVeiculo);
+
         UserAuthenticated usuarioLogado = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<String> authorities = usuarioLogado.userDetails().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-        if(authorities.contains(PermissaoEnum.MOTORISTA.getRole()) || authorities.contains(PermissaoEnum.EMPRESA.getRole())) {
-            if(!usuario.getId().equals(usuarioLogado.id())) {
-                throw new IllegalArgumentException("Usuário não pode cadastrar veículos de outro usuário.");
-            }
+        
+        if (!usuarioId.equals(usuarioLogado.id()) && !authorities.contains(PermissaoEnum.ADMIN.getRole())) {
+            throw new IllegalArgumentException("Usuário não pode cadastrar veículos de outro usuário.");
         }
 
         if(veiculoByPlaca.isPresent()){
-            if(veiculoByPlaca.get().getUsuario().getId().equals(usuario.getId())) {
-                throw new IllegalArgumentException("Voce já possui um veículo cadastrado com essa placa.");
+            if(!veiculoByPlaca.get().isAtivo()){
+                veiculoByPlaca.get().setAtivo(true);
+                veiculoByPlaca.get().setDeletadoEm(null);
+                veiculoByPlaca.get().setUsuario(usuarioVeiculo);
+                return veiculoRepository.save(veiculoByPlaca.get());
             }
+            throw new IllegalArgumentException("Voce já possui um veículo cadastrado com essa placa.");
         }
-        novoVeiculo.setUsuario(usuario);
+
+        novoVeiculo.setUsuario(usuarioVeiculo);
         return veiculoRepository.save(novoVeiculo);
     }
 
@@ -82,6 +88,7 @@ public class VeiculoService {
         Usuario usuarioRegistrado = usuarioService.findById(usuarioId);
         UserAuthenticated usuarioLogado = (UserAuthenticated) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<String> authorities = usuarioLogado.userDetails().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+        
         if (!veiculoRegistrado.getUsuario().getId().equals(usuarioRegistrado.getId()) && (!authorities.contains(PermissaoEnum.ADMIN.getRole()) && !authorities.contains(PermissaoEnum.GESTOR.getRole()))) {
                 throw new IllegalArgumentException("Usuário não pode editar veículo de outro usuário.");
         }
@@ -93,9 +100,15 @@ public class VeiculoService {
         if (novoVeiculo.getPlaca() != null){
             Optional<Veiculo> veiculoByPlaca = veiculoRepository.findByPlacaAndUsuario(novoVeiculo.getPlaca().toUpperCase(), usuarioRegistrado);
             if(veiculoByPlaca.isPresent() && !veiculoByPlaca.get().getId().equals(veiculoRegistrado.getId())) {
+                if(!veiculoByPlaca.get().isAtivo()){
+                    veiculoByPlaca.get().setAtivo(true);
+                    veiculoByPlaca.get().setDeletadoEm(null);    
+                    veiculoRepository.save(veiculoByPlaca.get());
+                }
                 throw new IllegalArgumentException("Você já possui um veículo cadastrado com essa placa.");
+            }else{
+                veiculoRegistrado.setPlaca(novoVeiculo.getPlaca().toUpperCase());
             }
-            veiculoRegistrado.setPlaca(novoVeiculo.getPlaca().toUpperCase());
         }
         if (novoVeiculo.getTipo() != null){
             veiculoRegistrado.setTipo(novoVeiculo.getTipo());
@@ -118,6 +131,8 @@ public class VeiculoService {
                 throw new IllegalArgumentException("Usuário nao pode deletar veiculo de outro usuário.");
             }
         }
-        veiculoRepository.deleteById(id);
+        veiculo.setAtivo(false);
+        veiculo.setDeletadoEm(OffsetDateTime.now(DateUtils.FUSO_BRASIL));
+        veiculoRepository.save(veiculo);
     }
 }
