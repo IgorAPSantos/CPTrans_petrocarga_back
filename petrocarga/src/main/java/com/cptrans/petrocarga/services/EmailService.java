@@ -41,13 +41,13 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.from:${spring.mail.username:no-reply@petrocarga.test}}")
+    @Value("${SMTP_FROM:${SMTP_USERNAME:no-reply@petrocarga.test}}")
     private String from;
 
-    @Value("${spring.mail.username:}")
+    @Value("${SMTP_USERNAME:}")
     private String mailUsername;
 
-    @Value("${app.frontend.base-url:http://localhost:3000}")
+    @Value("${FRONTEND_URL:http://localhost:3000}")
     private String frontendBaseUrl;
 
     public EmailService(JavaMailSender mailSender) {
