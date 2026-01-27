@@ -23,28 +23,31 @@ spring:
         
     # SMTP configuration centralized and sourced exclusively from environment variables.
     # Set these env vars in Railway project settings (recommended):
-    # - SMTP_HOST
-    # - SMTP_PORT
-    # - SMTP_USERNAME
-    # - SMTP_PASSWORD
-    # - SMTP_FROM (optional)
-    # - SMTP_STARTTLS (optional, true/false)
-    # - SMTP_SSL (optional, true/false)
-    # - SMTP_TIMEOUT (optional, milliseconds)
+    # - SMTP_HOST (e.g., smtp.gmail.com)
+    # - SMTP_PORT (use 465 for SSL - recommended for cloud providers)
+    # - SMTP_USERNAME (your email address)
+    # - SMTP_PASSWORD (App Password from Google Account)
+    # - SMTP_FROM (optional, defaults to SMTP_USERNAME)
+    # - SMTP_STARTTLS (optional, false when using SSL on port 465)
+    # - SMTP_SSL (optional, true when using port 465)
+    # - SMTP_TIMEOUT (optional, milliseconds - default 10000)
+    #
+    # IMPORTANTE: Porta 465 (SSL) é preferível em cloud providers (Railway, Heroku, etc.)
+    # porque a porta 587 (STARTTLS) é frequentemente bloqueada para evitar spam.
     mail:
         host: ${SMTP_HOST:}
-        port: ${SMTP_PORT:25}
+        port: ${SMTP_PORT:465}
         username: ${SMTP_USERNAME:}
         password: ${SMTP_PASSWORD:}
         from: ${SMTP_FROM:${SMTP_USERNAME:no-reply@petrocarga.test}}
         properties:
             mail:
                 smtp:
-                    auth: ${SMTP_USERNAME:} # evaluated by MailConfig; presence of username enables auth
+                    auth: true
                     starttls:
                         enable: ${SMTP_STARTTLS:false}
                     ssl:
-                        enable: ${SMTP_SSL:false}
+                        enable: ${SMTP_SSL:true}
                     connectiontimeout: ${SMTP_TIMEOUT:10000}
                     timeout: ${SMTP_TIMEOUT:10000}
                     writetimeout: ${SMTP_TIMEOUT:10000}

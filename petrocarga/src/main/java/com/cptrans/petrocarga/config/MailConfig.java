@@ -26,7 +26,7 @@ public class MailConfig {
     @Value("${SMTP_HOST:}")
     private String host;
 
-    @Value("${SMTP_PORT:25}")
+    @Value("${SMTP_PORT:465}")
     private int port;
 
     @Value("${SMTP_USERNAME:}")
@@ -41,7 +41,7 @@ public class MailConfig {
     @Value("${SMTP_STARTTLS:false}")
     private boolean starttls;
 
-    @Value("${SMTP_SSL:false}")
+    @Value("${SMTP_SSL:true}")
     private boolean ssl;
 
     @Value("${SMTP_TIMEOUT:10000}")
