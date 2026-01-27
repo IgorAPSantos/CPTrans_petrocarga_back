@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.Map;
  * - RESEND_FROM: email remetente (onboarding@resend.dev no tier gratuito)
  */
 @Service
+@Primary
 @ConditionalOnProperty(name = "RESEND_API_KEY", matchIfMissing = false)
 public class ResendEmailService implements EmailSender {
 
