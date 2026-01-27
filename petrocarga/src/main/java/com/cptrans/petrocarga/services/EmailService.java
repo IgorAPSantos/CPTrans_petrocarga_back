@@ -43,6 +43,11 @@ public class EmailService implements EmailSender {
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
+        LOGGER.warn("========================================================");
+        LOGGER.warn("  EmailService (SMTP) initialized");
+        LOGGER.warn("  ATENCAO: Railway BLOQUEIA todas as portas SMTP!");
+        LOGGER.warn("  Para emails funcionarem, configure RESEND_API_KEY");
+        LOGGER.warn("========================================================");
     }
 
     private void logMailEndpointInfo() {
