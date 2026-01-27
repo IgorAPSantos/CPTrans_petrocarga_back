@@ -1,8 +1,12 @@
 package com.cptrans.petrocarga.exceptions;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.catalina.connector.ClientAbortException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +15,52 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class GlobalHandlerException {
+    
+    private static final Logger log = LoggerFactory.getLogger(GlobalHandlerException.class);
+
+    /**
+     * Handle client abort/disconnect errors (SSE, long-polling, etc.)
+     * These are normal when clients close connections - no need to log as errors.
+     */
+    @ExceptionHandler(ClientAbortException.class)
+    public void handleClientAbort(ClientAbortException ex, HttpServletRequest request) {
+        // Client disconnected - this is normal for SSE, just ignore
+        log.debug("Client disconnected from {}: {}", request.getRequestURI(), ex.getMessage());
+    }
+    
+    /**
+     * Handle async request not usable (connection closed during async processing)
+     */
+    @ExceptionHandler(AsyncRequestNotUsableException.class)
+    public void handleAsyncNotUsable(AsyncRequestNotUsableException ex, HttpServletRequest request) {
+        log.debug("Async request no longer usable for {}: {}", request.getRequestURI(), ex.getMessage());
+    }
+    
+    /**
+     * Handle generic IOExceptions that are typically client disconnects
+     */
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<?> handleIOException(IOException ex, HttpServletRequest request) {
+        String message = ex.getMessage();
+        if (message != null && (message.contains("Broken pipe") || message.contains("Connection reset"))) {
+            // Client disconnected - no response needed
+            log.debug("Client disconnected (IO) from {}: {}", request.getRequestURI(), message);
+            return null;
+        }
+        // Other IO errors - return 500
+        Map<String, String> error = new HashMap<>();
+        error.put("erro", "Erro de I/O");
+        error.put("cause", message != null ? message : "unknown");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(EntityNotFoundException ex) {
