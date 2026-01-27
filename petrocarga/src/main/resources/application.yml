@@ -21,23 +21,33 @@ spring:
         connect-retries: 3
         clean-disabled: true
         
-    # Configuração SMTP Gmail para envio real de emails
+    # SMTP configuration centralized and sourced exclusively from environment variables.
+    # Set these env vars in Railway project settings (recommended):
+    # - SMTP_HOST
+    # - SMTP_PORT
+    # - SMTP_USERNAME
+    # - SMTP_PASSWORD
+    # - SMTP_FROM (optional)
+    # - SMTP_STARTTLS (optional, true/false)
+    # - SMTP_SSL (optional, true/false)
+    # - SMTP_TIMEOUT (optional, milliseconds)
     mail:
-        host: smtp.gmail.com
-        port: 587
-        username: joaocasadinho324@gmail.com
-        password: xvesupzmtfupdgdu
+        host: ${SMTP_HOST:}
+        port: ${SMTP_PORT:25}
+        username: ${SMTP_USERNAME:}
+        password: ${SMTP_PASSWORD:}
+        from: ${SMTP_FROM:${SMTP_USERNAME:no-reply@petrocarga.test}}
         properties:
             mail:
                 smtp:
-                    auth: true
+                    auth: ${SMTP_USERNAME:} # evaluated by MailConfig; presence of username enables auth
                     starttls:
-                        enable: true
-                        required: true
-                    connectiontimeout: 5000
-                    timeout: 5000
-                    writetimeout: 5000
-        from: joaocasadinho324@gmail.com
+                        enable: ${SMTP_STARTTLS:false}
+                    ssl:
+                        enable: ${SMTP_SSL:false}
+                    connectiontimeout: ${SMTP_TIMEOUT:10000}
+                    timeout: ${SMTP_TIMEOUT:10000}
+                    writetimeout: ${SMTP_TIMEOUT:10000}
     quartz:
         job-store-type: jdbc
         jdbc:
