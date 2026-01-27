@@ -2,9 +2,9 @@ package com.cptrans.petrocarga.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -15,14 +15,23 @@ import jakarta.mail.internet.MimeMessage;
 import java.io.InputStream;
 import java.util.Properties;
 
+/**
+ * Fallback No-Op JavaMailSender.
+ * Ativado automaticamente quando nenhum outro JavaMailSender bean existe
+ * (ex: SMTP_HOST não definido). Não envia emails de verdade, apenas loga.
+ */
 @Configuration
-@Profile("local-noemail")  // Desativado - usar "local-noemail" para voltar ao modo sem email
 public class NoOpMailConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NoOpMailConfig.class);
 
     @Bean
-    public JavaMailSender javaMailSender() {
+    @ConditionalOnMissingBean(JavaMailSender.class)
+    public JavaMailSender noOpJavaMailSender() {
+        LOGGER.warn("========================================================");
+        LOGGER.warn("  SMTP_HOST not configured. Using NO-OP Mail Sender.");
+        LOGGER.warn("  Emails will NOT be sent. Configure SMTP_HOST to enable.");
+        LOGGER.warn("========================================================");
         return new JavaMailSender() {
             private Session session = Session.getDefaultInstance(new Properties());
 
