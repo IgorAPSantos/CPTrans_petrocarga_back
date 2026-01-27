@@ -74,12 +74,9 @@ public class UsuarioService {
 
         Usuario saved = usuarioRepository.save(novoUsuario);
 
-        // Send activation code via email (best-effort)
-        try {
-            emailService.sendActivationCode(saved.getEmail(), codeStr);
-        } catch (Exception e) {
-            // log or rethrow depending on desired behavior; keep it simple here
-        }
+        // Envia código de ativação via email (assíncrono)
+        // O EmailService é @Async, exceções são tratadas pelo AsyncUncaughtExceptionHandler
+        emailService.sendActivationCode(saved.getEmail(), codeStr);
 
         return saved;
     }
@@ -123,11 +120,8 @@ public class UsuarioService {
 
         usuarioRepository.save(usuario);
 
-        try {
-            emailService.sendActivationCode(usuario.getEmail(), codeStr);
-        } catch (Exception e) {
-            // best-effort: ignore or log
-        }
+        // Reenvia código de ativação via email (assíncrono)
+        emailService.sendActivationCode(usuario.getEmail(), codeStr);
     }
 
     // ==================== RECUPERAÇÃO DE SENHA ====================
@@ -155,11 +149,8 @@ public class UsuarioService {
 
         usuarioRepository.save(usuario);
 
-        try {
-            emailService.sendPasswordResetCode(usuario.getEmail(), codeStr);
-        } catch (Exception e) {
-            // best-effort: log error but don't fail
-        }
+        // Envia email de recuperação de forma assíncrona
+        emailService.sendPasswordResetCode(usuario.getEmail(), codeStr);
     }
 
     @Transactional

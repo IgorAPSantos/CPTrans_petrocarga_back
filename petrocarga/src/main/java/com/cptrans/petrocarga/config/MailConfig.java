@@ -14,37 +14,38 @@ import java.util.Properties;
 
 /**
  * Configuração do JavaMailSender real.
- * Só é ativada quando SMTP_HOST está definido nas variáveis de ambiente.
+ * Ativada quando spring.mail.host OU SMTP_HOST está definido.
  * Caso contrário, o fallback NoOpMailConfig será usado.
  */
 @Configuration
-@ConditionalOnProperty(name = "SMTP_HOST", matchIfMissing = false)
+@ConditionalOnProperty(name = {"spring.mail.host", "SMTP_HOST"}, matchIfMissing = false)
 public class MailConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailConfig.class);
 
-    @Value("${SMTP_HOST:}")
+    // Tenta spring.mail.host primeiro, depois SMTP_HOST como fallback
+    @Value("${spring.mail.host:${SMTP_HOST:}}")
     private String host;
 
-    @Value("${SMTP_PORT:465}")
+    @Value("${spring.mail.port:${SMTP_PORT:465}}")
     private int port;
 
-    @Value("${SMTP_USERNAME:}")
+    @Value("${spring.mail.username:${SMTP_USERNAME:}}")
     private String username;
 
-    @Value("${SMTP_PASSWORD:}")
+    @Value("${spring.mail.password:${SMTP_PASSWORD:}}")
     private String password;
 
-    @Value("${SMTP_FROM:}")
+    @Value("${spring.mail.from:${SMTP_FROM:}}")
     private String smtpFrom;
 
-    @Value("${SMTP_STARTTLS:false}")
+    @Value("${spring.mail.properties.mail.smtp.starttls.enable:${SMTP_STARTTLS:false}}")
     private boolean starttls;
 
-    @Value("${SMTP_SSL:true}")
+    @Value("${spring.mail.properties.mail.smtp.ssl.enable:${SMTP_SSL:true}}")
     private boolean ssl;
 
-    @Value("${SMTP_TIMEOUT:10000}")
+    @Value("${spring.mail.properties.mail.smtp.timeout:${SMTP_TIMEOUT:10000}}")
     private int timeoutMillis;
 
     @Bean
@@ -74,8 +75,13 @@ public class MailConfig {
         props.put("mail.smtp.timeout", Integer.toString(timeoutMillis));
         props.put("mail.smtp.writetimeout", Integer.toString(timeoutMillis));
 
-        LOGGER.info("Configured JavaMailSender - host={}, port={}, userPresent={}, starttls={}, ssl={}, timeoutMs={}",
-                host, port, (username != null && !username.isBlank()), starttls, ssl, timeoutMillis);
+        LOGGER.info("========================================================");
+        LOGGER.info("  REAL JavaMailSender CONFIGURED SUCCESSFULLY");
+        LOGGER.info("  Host: {}, Port: {}", host, port);
+        LOGGER.info("  Username present: {}", (username != null && !username.isBlank()));
+        LOGGER.info("  STARTTLS: {}, SSL: {}", starttls, ssl);
+        LOGGER.info("  Timeout: {}ms", timeoutMillis);
+        LOGGER.info("========================================================");
 
         // Note: 'from' concept is handled by application properties / EmailService
         return impl;
