@@ -1,22 +1,11 @@
 package com.cptrans.petrocarga.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-
-import java.util.concurrent.Executor;
-
-@Configuration
+/**
+ * Esta classe foi mantida apenas por compatibilidade de código.
+ * Não está anotada com @Configuration para evitar que o Spring a registre
+ * e cause ConflictingBeanDefinitionException quando houver outra
+ * configuração válida em `infrastructure.configs.AsyncConfig`.
+ */
 public class AsyncConfig {
 
-    @Bean(name = "taskExecutor")
-    public Executor taskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(5);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("EmailAsync-");
-        executor.initialize();
-        return executor;
-    }
 }
