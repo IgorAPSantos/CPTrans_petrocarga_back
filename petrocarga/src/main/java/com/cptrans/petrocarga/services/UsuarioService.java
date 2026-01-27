@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cptrans.petrocarga.dto.GestorFiltrosDTO;
 import com.cptrans.petrocarga.dto.UsuarioPATCHRequestDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
+import com.cptrans.petrocarga.infrastructure.email.EmailSender;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.repositories.UsuarioRepository;
 import com.cptrans.petrocarga.specification.GestorSpecification;
@@ -32,7 +33,7 @@ public class UsuarioService {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private EmailService emailService;
+    private EmailSender emailService;
     
     public List<Usuario> findAll() {
         return usuarioRepository.findAll();
