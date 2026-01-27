@@ -97,9 +97,11 @@ public class EmailService {
             LOGGER.info("[{}] Email de ativação enviado com sucesso para: {}", Thread.currentThread().getName(), to);
         } catch (MailException e) {
             LOGGER.error("[{}] MailException ao enviar ativação para {}: {}", Thread.currentThread().getName(), to, e.getMessage(), e);
-            // Não relançar: método assíncrono deve tratar falhas internamente
+            // Não silenciar: rethrow para que o AsyncUncaughtExceptionHandler trate o erro e registre stacktrace
+            throw e;
         } catch (Exception e) {
             LOGGER.error("[{}] Erro inesperado ao enviar ativação para {}: {}", Thread.currentThread().getName(), to, e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -130,8 +132,10 @@ public class EmailService {
             LOGGER.info("[{}] Email de reset de senha enviado com sucesso para: {}", Thread.currentThread().getName(), to);
         } catch (MailException e) {
             LOGGER.error("[{}] MailException ao enviar reset para {}: {}", Thread.currentThread().getName(), to, e.getMessage(), e);
+            throw e;
         } catch (Exception e) {
             LOGGER.error("[{}] Erro inesperado ao enviar reset para {}: {}", Thread.currentThread().getName(), to, e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 }

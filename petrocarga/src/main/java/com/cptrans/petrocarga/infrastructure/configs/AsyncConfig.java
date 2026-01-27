@@ -22,9 +22,9 @@ public class AsyncConfig implements AsyncConfigurer {
 	public Executor taskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		// Valores conservadores para ambientes com pouca memória (ex: Railway 350MB)
-		executor.setCorePoolSize(2);
-		executor.setMaxPoolSize(5);
-		executor.setQueueCapacity(100);
+		executor.setCorePoolSize(1);
+		executor.setMaxPoolSize(2);
+		executor.setQueueCapacity(50);
 		executor.setThreadNamePrefix("EmailAsync-");
 		executor.initialize();
 		return executor;

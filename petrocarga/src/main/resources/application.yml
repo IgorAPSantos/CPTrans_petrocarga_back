@@ -21,33 +21,33 @@ spring:
         connect-retries: 3
         clean-disabled: true
         
-    # SMTP config: prefer environment variables in Railway.
-    # Required environment variables (set these in Railway project variables):
-    # - SMTP_HOST (e.g. smtp.gmail.com)
-    # - SMTP_PORT (e.g. 465 for SSL)
+    # SMTP configuration centralized and sourced exclusively from environment variables.
+    # Set these env vars in Railway project settings (recommended):
+    # - SMTP_HOST
+    # - SMTP_PORT
     # - SMTP_USERNAME
     # - SMTP_PASSWORD
-    # - SMTP_FROM (optional, defaults to SMTP_USERNAME)
-    # The application below prioritizes SSL (port 465). To use STARTTLS, set
-    # SMTP_STARTTLS=true and SMTP_SMTP_SSL=false in the env (not recommended for Gmail).
+    # - SMTP_FROM (optional)
+    # - SMTP_STARTTLS (optional, true/false)
+    # - SMTP_SSL (optional, true/false)
+    # - SMTP_TIMEOUT (optional, milliseconds)
     mail:
-        host: ${SMTP_HOST:smtp.gmail.com}
-        port: ${SMTP_PORT:465}
+        host: ${SMTP_HOST:}
+        port: ${SMTP_PORT:25}
         username: ${SMTP_USERNAME:}
         password: ${SMTP_PASSWORD:}
-        # The 'from' will default to username when not provided
         from: ${SMTP_FROM:${SMTP_USERNAME:no-reply@petrocarga.test}}
         properties:
             mail:
                 smtp:
-                    auth: true
-                    ssl:
-                        enable: true
+                    auth: ${SMTP_USERNAME:} # evaluated by MailConfig; presence of username enables auth
                     starttls:
                         enable: ${SMTP_STARTTLS:false}
-                    connectiontimeout: ${SMTP_CONNECTION_TIMEOUT:5000}
-                    timeout: ${SMTP_TIMEOUT:5000}
-                    writetimeout: ${SMTP_WRITETIMEOUT:5000}
+                    ssl:
+                        enable: ${SMTP_SSL:false}
+                    connectiontimeout: ${SMTP_TIMEOUT:10000}
+                    timeout: ${SMTP_TIMEOUT:10000}
+                    writetimeout: ${SMTP_TIMEOUT:10000}
     quartz:
         job-store-type: jdbc
         jdbc:

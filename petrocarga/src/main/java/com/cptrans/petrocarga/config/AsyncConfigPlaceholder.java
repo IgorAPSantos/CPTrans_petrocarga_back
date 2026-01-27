@@ -6,6 +6,7 @@ package com.cptrans.petrocarga.config;
  * e cause ConflictingBeanDefinitionException quando houver outra
  * configuração válida em `infrastructure.configs.AsyncConfig`.
  */
-public class AsyncConfig {
+@Deprecated
+public class AsyncConfigPlaceholder {
 
 }
