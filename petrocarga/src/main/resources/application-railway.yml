@@ -18,9 +18,10 @@ spring:
 
     # Configuração SMTP para envio de emails em produção
     # Usa as variáveis SMTP_* configuradas no Railway
+    # IMPORTANTE: Porta 465 (SSL) é preferível em cloud providers pois 587 é frequentemente bloqueada
     mail:
         host: ${SMTP_HOST:smtp.gmail.com}
-        port: ${SMTP_PORT:587}
+        port: ${SMTP_PORT:465}
         username: ${SMTP_USERNAME:}
         password: ${SMTP_PASSWORD:}
         properties:
@@ -28,9 +29,9 @@ spring:
                 smtp:
                     auth: true
                     starttls:
-                        enable: ${SMTP_STARTTLS:true}
+                        enable: ${SMTP_STARTTLS:false}
                     ssl:
-                        enable: ${SMTP_SSL:false}
+                        enable: ${SMTP_SSL:true}
                     connectiontimeout: ${SMTP_TIMEOUT:10000}
                     timeout: ${SMTP_TIMEOUT:10000}
                     writetimeout: ${SMTP_TIMEOUT:10000}
