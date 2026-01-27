@@ -1,30 +1,24 @@
 package com.cptrans.petrocarga.services;
 
 /*
- * EmailService
+ * EmailService (SMTP-based)
  *
- * Notes for deployment (Railway):
- * - Required environment variables (set in Railway project settings):
- *   SMTP_HOST (e.g. smtp.gmail.com)
- *   SMTP_PORT (e.g. 465 for SSL)
- *   SMTP_USERNAME
- *   SMTP_PASSWORD
- *   SMTP_FROM (optional, defaults to SMTP_USERNAME)
+ * IMPORTANTE: O Railway bloqueia TODAS as portas SMTP (25, 465, 587, 2525).
+ * Em produção no Railway, use ResendEmailService (API HTTP) ao invés deste.
+ * 
+ * Este serviço só é ativado quando:
+ * 1. RESEND_API_KEY NÃO está configurado (ResendEmailService não está ativo)
+ * 2. OU em ambiente local onde SMTP funciona normalmente
  *
- * How to validate email delivery in logs:
- * - Look for lines like "Mail sender config - host: ..., port: ..., from: ..." before send.
- * - Successful send will log: "Email ... enviado com sucesso para: <email>" with thread name.
- * - Failures will be logged with MailException and stacktrace.
- *
- * How to test the endpoint (/auth/forgot-password) when send is asynchronous:
- * 1) Call POST /auth/forgot-password with the email body.
- * 2) Controller returns 200 OK immediately.
- * 3) Check application logs for the background task entries described above.
- * 4) For end-to-end validation, verify the recipient inbox (or use SMTP testing service).
+ * Para Railway, configure:
+ * - RESEND_API_KEY: sua API key do Resend
+ * - RESEND_FROM: onboarding@resend.dev (tier gratuito)
  */
+import com.cptrans.petrocarga.infrastructure.email.EmailSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -33,7 +27,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EmailService {
+@ConditionalOnMissingBean(EmailSender.class)
+public class EmailService implements EmailSender {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
 
@@ -68,6 +63,7 @@ public class EmailService {
         }
     }
 
+    @Override
     @Async("taskExecutor")
     public void sendActivationCode(String to, String code) {
         // Ensure 'from' uses configured username when available
@@ -103,6 +99,7 @@ public class EmailService {
         }
     }
 
+    @Override
     @Async("taskExecutor")
     public void sendPasswordResetCode(String to, String code) {
         if ((from == null || from.isBlank()) && mailUsername != null && !mailUsername.isBlank()) {
