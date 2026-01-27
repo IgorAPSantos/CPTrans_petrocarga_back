@@ -3,16 +3,22 @@ package com.cptrans.petrocarga.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Primary;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Properties;
 
+/**
+ * Configuração do JavaMailSender real.
+ * Só é ativada quando SMTP_HOST está definido nas variáveis de ambiente.
+ * Caso contrário, o fallback NoOpMailConfig será usado.
+ */
 @Configuration
-@Profile("!local-noemail")
+@ConditionalOnProperty(name = "SMTP_HOST", matchIfMissing = false)
 public class MailConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailConfig.class);
@@ -42,15 +48,12 @@ public class MailConfig {
     private int timeoutMillis;
 
     @Bean
+    @Primary
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl impl = new JavaMailSenderImpl();
 
-        if (host == null || host.isBlank()) {
-            LOGGER.warn("SMTP_HOST is not set. JavaMailSender will be created but sending will likely fail.");
-        } else {
-            impl.setHost(host);
-        }
-
+        // SMTP_HOST is guaranteed to be present due to @ConditionalOnProperty
+        impl.setHost(host);
         impl.setPort(port);
 
         if (username != null && !username.isBlank()) {
