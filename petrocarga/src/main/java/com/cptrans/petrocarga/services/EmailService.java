@@ -22,7 +22,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    @Async
+    @Async("taskExecutor")
     public void sendActivationCode(String to, String code) {
         try {
             // Log the code for local/dev testing
@@ -42,7 +42,7 @@ public class EmailService {
         }
     }
 
-    @Async
+    @Async("taskExecutor")
     public void sendPasswordResetCode(String to, String code) {
         try {
             // Log the code for local/dev testing
