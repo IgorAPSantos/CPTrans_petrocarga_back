@@ -2,6 +2,7 @@ package com.cptrans.petrocarga.services;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -9,14 +10,17 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.cptrans.petrocarga.dto.GestorFiltrosDTO;
 import com.cptrans.petrocarga.dto.UsuarioPATCHRequestDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.repositories.UsuarioRepository;
+import com.cptrans.petrocarga.specification.GestorSpecification;
+import com.cptrans.petrocarga.utils.DateUtils;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UsuarioService {
@@ -90,6 +94,10 @@ public class UsuarioService {
 
         if (usuario.getVerificationCodeExpiresAt() == null || usuario.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Código expirado.");
+        }
+
+        if(usuario.getDesativadoEm() != null) {
+            usuario.setDesativadoEm(null);
         }
 
         usuario.setAtivo(true);
@@ -250,6 +258,13 @@ public class UsuarioService {
         return usuarioRepository.save(usuarioExistente);
     }
     public void deleteById(UUID id) {
-        usuarioRepository.deleteById(id);
+        Usuario usuario = findByIdAndAtivo(id, true);
+        usuario.setAtivo(false);
+        usuario.setDesativadoEm(OffsetDateTime.now(DateUtils.FUSO_BRASIL));
+        usuarioRepository.save(usuario);
+    }
+
+    public List<Usuario> findAllGestoresWithFiltros(GestorFiltrosDTO filtros) {
+        return usuarioRepository.findAll(GestorSpecification.filtrar(filtros));
     }
 }

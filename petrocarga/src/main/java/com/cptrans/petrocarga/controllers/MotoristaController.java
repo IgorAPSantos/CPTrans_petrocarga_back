@@ -57,8 +57,8 @@ public class MotoristaController {
 
     @PreAuthorize("#usuarioId == authentication.principal.id or hasRole('ADMIN')")
     @GetMapping("/{usuarioId}")
-    public ResponseEntity<MotoristaResponseDTO> getMotoristaById(@PathVariable UUID usuarioId) {
-        Motorista motorista = motoristaService.findByUsuarioId(usuarioId);
+    public ResponseEntity<MotoristaResponseDTO> getMotoristaById(@PathVariable UUID usuarioId, @RequestParam(required = false) Boolean ativo) {
+        Motorista motorista = motoristaService.findByUsuarioIdAndAtivo(usuarioId, ativo);
         return ResponseEntity.ok(motorista.toResponseDTO());
     }
 

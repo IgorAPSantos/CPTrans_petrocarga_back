@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.cptrans.petrocarga.dto.GestorFiltrosDTO;
 import com.cptrans.petrocarga.dto.UsuarioPATCHRequestDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.models.Usuario;
@@ -33,5 +34,13 @@ public class GestorService {
 
     public Usuario updateGestor(UUID id, UsuarioPATCHRequestDTO novoGestor) {
         return usuarioService.patchUpdate(id, PermissaoEnum.GESTOR, novoGestor);
+    }
+
+    public void deleteByUsuarioId(UUID usuarioId) {
+        usuarioService.deleteById(usuarioId);
+    }
+
+    public List<Usuario> findAllWithFiltros(GestorFiltrosDTO filtros) {
+        return usuarioService.findAllGestoresWithFiltros(filtros);
     }
 }

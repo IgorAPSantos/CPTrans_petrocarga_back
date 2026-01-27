@@ -1,5 +1,6 @@
 package com.cptrans.petrocarga.controllers;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -9,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,7 +52,16 @@ public class NotificacaoController {
     
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@AuthenticationPrincipal UserAuthenticated user, HttpServletResponse response) {
-        if(user == null) throw new AuthorizationDeniedException("Acesso negado");
+        if (user == null) {
+            SseEmitter emitter = new SseEmitter(0L);
+            try {
+                emitter.send(SseEmitter.event()
+                    .name("error")
+                    .data("Acesso negado"));
+            } catch (IOException ignored) { }
+            emitter.complete();
+            return emitter;
+        }
 
         SseEmitter emitter = sseNotficationService.connect(user.id());
         

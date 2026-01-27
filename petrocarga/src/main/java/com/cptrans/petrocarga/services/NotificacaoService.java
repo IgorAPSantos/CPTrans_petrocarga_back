@@ -22,6 +22,7 @@ import com.cptrans.petrocarga.models.Notificacao;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.repositories.NotificacaoRepository;
 import com.cptrans.petrocarga.security.UserAuthenticated;
+import com.cptrans.petrocarga.utils.DateUtils;
 import com.cptrans.petrocarga.utils.NotificacaoUtils;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -192,7 +193,7 @@ public class NotificacaoService {
         final String MENSAGEM = "O horário de início da reserva está próximo. Abra o app para confirmar o check-in e não perder sua vaga.";
         
         Map<String, Object> dadosAdicionais = new HashMap<>();
-        dadosAdicionais.put("inicioReserva", dataCheckin.toString());
+        dadosAdicionais.put("inicioReserva", dataCheckin.atZoneSameInstant(DateUtils.FUSO_BRASIL).toString());
 
         Notificacao notificacaoCheckIn = new Notificacao();
         notificacaoCheckIn.setTitulo(TITULO);
@@ -214,7 +215,7 @@ public class NotificacaoService {
         final String MENSAGEM = "Sua reserva está próxima do fim, realize suas atividades à tempo para evitar problemas.";
 
         Map<String, Object> dadosAdicionais = new HashMap<>();
-        dadosAdicionais.put("fimReserva", dataFim.toString());
+        dadosAdicionais.put("fimReserva", dataFim.atZoneSameInstant(DateUtils.FUSO_BRASIL).toString());
 
         Notificacao notificacaoFimProximo = new Notificacao();
         notificacaoFimProximo.setTitulo(TITULO);
@@ -236,7 +237,7 @@ public class NotificacaoService {
         final String MENSAGEM = "Você não realizou check-in para a sua reserva à tempo. Sua reserva foi removida.";
 
         Map<String, Object> dadosAdicionais = new HashMap<>();
-        dadosAdicionais.put("dataReserva", dataReserva.toString());
+        dadosAdicionais.put("dataReserva", dataReserva.atZoneSameInstant(DateUtils.FUSO_BRASIL).toString());
 
         Notificacao NO_SHOW_NOTIFICACAO = new Notificacao();
         NO_SHOW_NOTIFICACAO.setTitulo(TITULO);

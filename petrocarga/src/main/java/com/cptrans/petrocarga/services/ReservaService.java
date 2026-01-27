@@ -297,21 +297,40 @@ public static class Intervalo {
      *  - Atualiza status para REMOVIDA
      *  - Não altera o campo "fim" para evitar impacto em relatórios existentes
      */
-    public Reserva finalizarForcado(UUID reservaId) {
-        Reserva reserva = reservaRepository.findById(reservaId).orElseThrow(() -> new EntityNotFoundException("Reserva não encontrada."));
+    public ReservaDTO finalizarForcado(UUID reservaId) {
+        Optional<Reserva> reserva = reservaRepository.findById(reservaId);
+        Optional<ReservaRapida> reservaRapida = reservaRapidaService.findById(reservaId);
+        ReservaDTO reservaDTO = new ReservaDTO();
 
-        if (!StatusReservaEnum.RESERVADA.equals(reserva.getStatus()) && !StatusReservaEnum.ATIVA.equals(reserva.getStatus())) {
-            throw new IllegalStateException("Só é possivel finalizar uma reserva com status 'RESERVADA' ou 'ATIVA'.");
-        }
-
+        if (!reserva.isPresent() && !reservaRapida.isPresent()) throw new EntityNotFoundException("Reserva não encontrada.");
+       
         OffsetDateTime agora = OffsetDateTime.now();
-        // Bloqueia apenas finalizações ANTES do início (não faz sentido finalizar algo que não começou)
-        if (agora.isBefore(reserva.getInicio())) {
-            throw new IllegalStateException("Não é possível finalizar uma reserva que ainda não começou.");
+
+        if(reserva.isPresent()){
+            if (!StatusReservaEnum.RESERVADA.equals(reserva.get().getStatus()) && !StatusReservaEnum.ATIVA.equals(reserva.get().getStatus())) {
+                throw new IllegalStateException("Só é possivel finalizar uma reserva com status 'RESERVADA' ou 'ATIVA'.");
+            }
+            if (agora.isBefore(reserva.get().getInicio())) {
+                throw new IllegalStateException("Não é possível finalizar uma reserva que ainda não começou.");
+            }
+            reserva.get().setStatus(StatusReservaEnum.REMOVIDA);
+            reservaRepository.save(reserva.get());
+            reservaDTO = new ReservaDTO(reserva.get());
+        }
+        if (reservaRapida.isPresent()){
+            if (!StatusReservaEnum.RESERVADA.equals(reservaRapida.get().getStatus()) && !StatusReservaEnum.ATIVA.equals(reservaRapida.get().getStatus())) {
+                throw new IllegalStateException("Só é possivel finalizar uma reserva com status 'RESERVADA' ou 'ATIVA'.");
+            }
+            // if (agora.isBefore(reservaRapida.get().getInicio())) {
+            //     throw new IllegalStateException("Não é possível finalizar uma reserva que ainda não começou.");
+            // }
+            reservaRapida.get().setStatus(StatusReservaEnum.REMOVIDA);
+            reservaRapidaService.save(reservaRapida.get());
+            reservaDTO = new ReservaDTO(reservaRapida.get());
         }
 
-        reserva.setStatus(StatusReservaEnum.REMOVIDA);
-        return reservaRepository.save(reserva);
+        return reservaDTO;
+
     }
 
     /**

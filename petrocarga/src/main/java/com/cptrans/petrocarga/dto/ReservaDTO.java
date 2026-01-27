@@ -8,6 +8,8 @@ import com.cptrans.petrocarga.models.Motorista;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.models.Vaga;
 import com.cptrans.petrocarga.models.Veiculo;
+import com.cptrans.petrocarga.models.Reserva;
+import com.cptrans.petrocarga.models.ReservaRapida;
 
 
 public class ReservaDTO {
@@ -70,6 +72,42 @@ public class ReservaDTO {
         this.criadoEm = criadoEm;
     }
 
+    public ReservaDTO(Reserva reserva){
+        this.id = reserva.getId();
+        this.vagaId = reserva.getVaga().getId();
+        this.motoristaId = reserva.getMotorista().getId();
+        this.motoristaNome = reserva.getMotorista().getUsuario().getNome();        
+        this.motoristaCpf = reserva.getMotorista().getUsuario().getCpf();
+        this.numeroEndereco = reserva.getVaga().getNumeroEndereco();
+        this.referenciaEndereco = reserva.getVaga().getReferenciaEndereco();
+        this.enderecoVaga = reserva.getVaga().getEndereco().toResponseDTO();
+        this.inicio = reserva.getInicio();
+        this.fim = reserva.getFim();
+        this.tamanhoVeiculo = reserva.getVeiculo().getTipo().getComprimento();
+        this.placaVeiculo = reserva.getVeiculo().getPlaca();
+        this.modeloVeiculo = reserva.getVeiculo().getModelo();
+        this.marcaVeiculo = reserva.getVeiculo().getMarca();
+        this.cpfProprietarioVeiculo = reserva.getVeiculo().getCpfProprietario();
+        this.cnpjProprietarioVeiculo = reserva.getVeiculo().getCnpjProprietario();
+        this.status = reserva.getStatus();
+        this.criadoPor = reserva.getCriadoPor().toResponseDTO();
+        this.criadoEm = reserva.getCriadoEm();
+    }
+
+    public ReservaDTO (ReservaRapida reservaRapida) {
+        this.id = reservaRapida.getId();
+        this.vagaId = reservaRapida.getVaga().getId();
+        this.numeroEndereco = reservaRapida.getVaga().getNumeroEndereco();
+        this.referenciaEndereco = reservaRapida.getVaga().getReferenciaEndereco();
+        this.enderecoVaga = reservaRapida.getVaga().getEndereco().toResponseDTO();
+        this.inicio = reservaRapida.getInicio();
+        this.fim = reservaRapida.getFim();
+        this.tamanhoVeiculo = reservaRapida.getTipoVeiculo().getComprimento();
+        this.placaVeiculo = reservaRapida.getPlaca();
+        this.status = reservaRapida.getStatus();
+        this.criadoPor = reservaRapida.getAgente().getUsuario().toResponseDTO();
+        this.criadoEm = reservaRapida.getCriadoEm();
+    }
     public UUID getId() {
         return id;
     }
@@ -130,8 +168,8 @@ public class ReservaDTO {
     public UsuarioResponseDTO getCriadoPor() {
         return criadoPor;
     }
-    public void setCriadoPor(Usuario criadoPor) {
-        this.criadoPor = criadoPor.toResponseDTO();
+    public void setCriadoPor(UsuarioResponseDTO criadoPor) {
+        this.criadoPor = criadoPor;
     }
     public OffsetDateTime getCriadoEm() {
         return criadoEm;
@@ -190,8 +228,4 @@ public class ReservaDTO {
     public void setEnderecoVaga(EnderecoVagaResponseDTO enderecoVaga) {
         this.enderecoVaga = enderecoVaga;
     }
-    public void setCriadoPor(UsuarioResponseDTO criadoPor) {
-        this.criadoPor = criadoPor;
-    }
-    
 }

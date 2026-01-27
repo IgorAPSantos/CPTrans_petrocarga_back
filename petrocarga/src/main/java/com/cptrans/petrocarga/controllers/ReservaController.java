@@ -132,9 +132,9 @@ public class ReservaController {
 
     @PreAuthorize("hasAnyRole('ADMIN','GESTOR','AGENTE')")
     @PostMapping("/{id}/finalizar-forcado")
-    public ResponseEntity<ReservaResponseDTO> finalizarReservaForcado(@PathVariable UUID id) {
-        Reserva reservaFinalizada = reservaService.finalizarForcado(id);
-        return ResponseEntity.ok(reservaFinalizada.toResponseDTO());
+    public ResponseEntity<ReservaDTO> finalizarReservaForcado(@PathVariable UUID id) {
+        ReservaDTO reservaFinalizada = reservaService.finalizarForcado(id);
+        return ResponseEntity.ok(reservaFinalizada);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','AGENTE','MOTORISTA','EMPRESA')")
