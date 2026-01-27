@@ -17,12 +17,18 @@ spring:
         password: ${DATABASE_PASSWORD}
 
     # Configuração SMTP para envio de emails em produção
-    # IMPORTANTE: Porta 465 (SSL) é OBRIGATÓRIA no Railway pois 587 é bloqueada
-    # Ignorando variável SMTP_PORT para forçar 465
+    # Usando Resend (smtp.resend.com) - serviço de email transacional
+    # 
+    # Variáveis configuradas no Railway Dashboard:
+    # - SMTP_HOST=smtp.resend.com
+    # - SMTP_PORT=465
+    # - SMTP_USERNAME=resend
+    # - SMTP_PASSWORD=re_xxxxx (sua API key)
+    # - SMTP_FROM=onboarding@resend.dev (ou seu domínio verificado)
     mail:
-        host: ${SMTP_HOST:smtp.gmail.com}
-        port: 465
-        username: ${SMTP_USERNAME:}
+        host: ${SMTP_HOST:smtp.resend.com}
+        port: ${SMTP_PORT:465}
+        username: ${SMTP_USERNAME:resend}
         password: ${SMTP_PASSWORD:}
         properties:
             mail:
@@ -32,10 +38,10 @@ spring:
                         enable: false
                     ssl:
                         enable: true
-                    connectiontimeout: 10000
-                    timeout: 10000
-                    writetimeout: 10000
-        from: ${SMTP_FROM:${SMTP_USERNAME:no-reply@petrocarga.test}}
+                    connectiontimeout: 15000
+                    timeout: 15000
+                    writetimeout: 15000
+        from: ${SMTP_FROM:onboarding@resend.dev}
 
 app:
     frontend:
