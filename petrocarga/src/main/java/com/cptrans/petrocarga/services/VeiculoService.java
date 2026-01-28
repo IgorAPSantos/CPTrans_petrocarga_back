@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 
 import com.cptrans.petrocarga.dto.VeiculoRequestDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
+import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.models.Veiculo;
+import com.cptrans.petrocarga.repositories.ReservaRepository;
 import com.cptrans.petrocarga.repositories.VeiculoRepository;
 import com.cptrans.petrocarga.security.UserAuthenticated;
 import com.cptrans.petrocarga.utils.DateUtils;
@@ -23,6 +25,9 @@ public class VeiculoService {
 
     @Autowired
     private VeiculoRepository veiculoRepository;
+
+    @Autowired
+    private ReservaRepository reservaRepository;
 
     @Autowired
     private UsuarioService usuarioService;
@@ -130,6 +135,9 @@ public class VeiculoService {
             if(!veiculo.getUsuario().getId().equals(usuarioLogado.id())) {
                 throw new IllegalArgumentException("Usuário nao pode deletar veiculo de outro usuário.");
             }
+        }
+        if (reservaRepository.existsByVeiculoIdAndStatusIn(veiculo.getId(), List.of(StatusReservaEnum.RESERVADA, StatusReservaEnum.ATIVA))) {
+            throw new IllegalArgumentException("Veículo não pode ser deletado pois possui reservas ativas ou reservadas.");
         }
         veiculo.setAtivo(false);
         veiculo.setDeletadoEm(OffsetDateTime.now(DateUtils.FUSO_BRASIL));
