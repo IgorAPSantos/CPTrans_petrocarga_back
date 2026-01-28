@@ -56,7 +56,8 @@ public class SecurityConfig {
                     "/motoristas/cadastro/",
                     "/motoristas/cadastro",
                     "/notificacoes/stream/",
-                    "/notificacoes/stream"
+                    "/notificacoes/stream",
+                    "/api/test/**"  // Endpoints de teste de email (remover em produção)
                 ).permitAll()
                 .anyRequest().authenticated()
             )
