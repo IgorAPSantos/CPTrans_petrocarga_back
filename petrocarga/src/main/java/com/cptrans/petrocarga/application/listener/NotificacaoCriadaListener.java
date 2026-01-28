@@ -9,6 +9,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import com.cptrans.petrocarga.application.service.PushNotificationService;
 import com.cptrans.petrocarga.application.service.RealTimeNotificationService;
 import com.cptrans.petrocarga.domain.event.NotificacaoCriadaEvent;
+import com.google.firebase.FirebaseApp;
 
 @Component
 public class NotificacaoCriadaListener {
@@ -21,9 +22,8 @@ public class NotificacaoCriadaListener {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onNotificacaoEnviada(NotificacaoCriadaEvent event) {
-        if(realTimeNotificationService.isAtivo(event.notificacao().getUsuarioId())){
-            realTimeNotificationService.enviarNotificacao(event.notificacao());
-        }else{
+        realTimeNotificationService.enviarNotificacao(event.notificacao());
+        if (!FirebaseApp.getApps().isEmpty()){
             pushNotificationService.enviarNotificacao(event.notificacao());
         }
     }
