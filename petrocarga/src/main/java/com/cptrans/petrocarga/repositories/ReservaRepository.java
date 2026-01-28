@@ -47,4 +47,39 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
         @Param("graceMinutes") int graceMinutes,
         @Param("agora") OffsetDateTime agora
     );
+
+    @Query("SELECT COUNT(DISTINCT v.id) FROM Vaga v")
+    Long countTotalSlots();
+
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'ATIVA'")
+    Long countActiveReservations();
+
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'CONCLUIDA'")
+    Long countCompletedReservations();
+
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'CANCELADA'")
+    Long countCanceledReservations();
+
+    @Query("SELECT new map(CAST(r.veiculo.tipo AS string) as tipo, COUNT(DISTINCT r.id) as count, COUNT(DISTINCT r.veiculo.id) as uniqueVehicles) " +
+           "FROM Reserva r " +
+           "WHERE r.veiculo.tipo IS NOT NULL " +
+           "GROUP BY r.veiculo.tipo " +
+           "ORDER BY count DESC")
+    List<java.util.Map<String, Object>> getVehicleTypeStats();
+
+    @Query("SELECT new map(ev.bairro as name, COUNT(r.id) as count) " +
+           "FROM Reserva r " +
+           "JOIN r.vaga v " +
+           "JOIN v.endereco ev " +
+           "WHERE ev.bairro IS NOT NULL " +
+           "GROUP BY ev.bairro " +
+           "ORDER BY count DESC")
+    List<java.util.Map<String, Object>> getDistrictStats();
+
+    @Query("SELECT new map(r.cidadeOrigem as name, COUNT(r.id) as count) " +
+           "FROM Reserva r " +
+           "WHERE r.cidadeOrigem IS NOT NULL " +
+           "GROUP BY r.cidadeOrigem " +
+           "ORDER BY count DESC")
+    List<java.util.Map<String, Object>> getOriginStats();
 }
