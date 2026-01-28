@@ -17,10 +17,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Session;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -166,7 +166,7 @@ public class GmailApiEmailService implements EmailSender {
      * Envia email via Gmail API.
      * 
      * Fluxo:
-     * 1. Cria MimeMessage com javax.mail
+     * 1. Cria MimeMessage com jakarta.mail
      * 2. Converte para base64url (formato exigido pela Gmail API)
      * 3. Envia via Gmail API usando "me" como userId (conta autenticada)
      */
@@ -223,7 +223,7 @@ public class GmailApiEmailService implements EmailSender {
         
         MimeMessage email = new MimeMessage(session);
         email.setFrom(new InternetAddress(fromEmail));
-        email.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(to));
+        email.addRecipient(jakarta.mail.Message.RecipientType.TO, new InternetAddress(to));
         email.setSubject(subject, "UTF-8");
         email.setText(text, "UTF-8");
         
