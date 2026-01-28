@@ -33,7 +33,7 @@ public class UsuarioService {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private EmailSender emailService;
+    private EmailSender emailSender;
     
     public List<Usuario> findAll() {
         return usuarioRepository.findAll();
@@ -76,8 +76,8 @@ public class UsuarioService {
         Usuario saved = usuarioRepository.save(novoUsuario);
 
         // Envia código de ativação via email (assíncrono)
-        // O EmailService é @Async, exceções são tratadas pelo AsyncUncaughtExceptionHandler
-        emailService.sendActivationCode(saved.getEmail(), codeStr);
+        // O EmailSender é @Async, exceções são tratadas pelo AsyncUncaughtExceptionHandler
+        emailSender.sendActivationCode(saved.getEmail(), codeStr);
 
         return saved;
     }
@@ -122,7 +122,7 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
 
         // Reenvia código de ativação via email (assíncrono)
-        emailService.sendActivationCode(usuario.getEmail(), codeStr);
+        emailSender.sendActivationCode(usuario.getEmail(), codeStr);
     }
 
     // ==================== RECUPERAÇÃO DE SENHA ====================
@@ -151,7 +151,7 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
 
         // Envia email de recuperação de forma assíncrona
-        emailService.sendPasswordResetCode(usuario.getEmail(), codeStr);
+        emailSender.sendPasswordResetCode(usuario.getEmail(), codeStr);
     }
 
     @Transactional
