@@ -1,5 +1,8 @@
 package com.cptrans.petrocarga.services;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,13 +22,33 @@ public class DashboardService {
     @Autowired
     private ReservaRepository reservaRepository;
 
-    @Cacheable(value = "dashboard-kpi", unless = "#result == null")
-    public DashboardKpiDTO getKpis() {
+    private static final ZoneId ZONE_ID = ZoneId.of("America/Sao_Paulo");
+
+    private OffsetDateTime resolveStartDate(OffsetDateTime startDate) {
+        if (startDate != null) {
+            return startDate;
+        }
+        return LocalDate.now(ZONE_ID).atStartOfDay(ZONE_ID).toOffsetDateTime();
+    }
+
+    private OffsetDateTime resolveEndDate(OffsetDateTime endDate) {
+        if (endDate != null) {
+            return endDate;
+        }
+        return LocalDate.now(ZONE_ID).atTime(23, 59, 59).atZone(ZONE_ID).toOffsetDateTime();
+    }
+
+    @Cacheable(value = "dashboard-kpi", key = "#startDate?.toString() + '-' + #endDate?.toString()", unless = "#result == null")
+    public DashboardKpiDTO getKpis(OffsetDateTime startDate, OffsetDateTime endDate) {
+        OffsetDateTime resolvedStart = resolveStartDate(startDate);
+        OffsetDateTime resolvedEnd = resolveEndDate(endDate);
+
         Long totalSlots = reservaRepository.countTotalSlots();
-        Long activeReservations = reservaRepository.countActiveReservations();
-        Long completedReservations = reservaRepository.countCompletedReservations();
-        Long canceledReservations = reservaRepository.countCanceledReservations();
-        Long totalReservations = reservaRepository.count();
+        Long activeReservations = reservaRepository.countActiveReservations(resolvedStart, resolvedEnd);
+        Long completedReservations = reservaRepository.countCompletedReservations(resolvedStart, resolvedEnd);
+        Long canceledReservations = reservaRepository.countCanceledReservations(resolvedStart, resolvedEnd);
+        Long totalReservations = reservaRepository.countTotalReservationsInPeriod(resolvedStart, resolvedEnd);
+        Long multipleSlotReservations = reservaRepository.countMultipleSlotReservations(resolvedStart, resolvedEnd);
 
         Double occupancyRate = totalSlots > 0 
             ? (double) activeReservations / totalSlots * 100 
@@ -37,13 +60,19 @@ public class DashboardService {
             occupancyRate,
             completedReservations,
             canceledReservations,
-            totalReservations
+            totalReservations,
+            multipleSlotReservations,
+            resolvedStart,
+            resolvedEnd
         );
     }
 
-    @Cacheable(value = "dashboard-vehicle-types", unless = "#result == null || #result.isEmpty()")
-    public List<VehicleTypeStatDTO> getVehicleTypeStats() {
-        List<Map<String, Object>> results = reservaRepository.getVehicleTypeStats();
+    @Cacheable(value = "dashboard-vehicle-types", key = "#startDate?.toString() + '-' + #endDate?.toString()", unless = "#result == null || #result.isEmpty()")
+    public List<VehicleTypeStatDTO> getVehicleTypeStats(OffsetDateTime startDate, OffsetDateTime endDate) {
+        OffsetDateTime resolvedStart = resolveStartDate(startDate);
+        OffsetDateTime resolvedEnd = resolveEndDate(endDate);
+
+        List<Map<String, Object>> results = reservaRepository.getVehicleTypeStats(resolvedStart, resolvedEnd);
         
         return results.stream()
             .map(row -> new VehicleTypeStatDTO(
@@ -54,9 +83,12 @@ public class DashboardService {
             .collect(Collectors.toList());
     }
 
-    @Cacheable(value = "dashboard-districts", unless = "#result == null || #result.isEmpty()")
-    public List<LocationStatDTO> getDistrictStats() {
-        List<Map<String, Object>> results = reservaRepository.getDistrictStats();
+    @Cacheable(value = "dashboard-districts", key = "#startDate?.toString() + '-' + #endDate?.toString()", unless = "#result == null || #result.isEmpty()")
+    public List<LocationStatDTO> getDistrictStats(OffsetDateTime startDate, OffsetDateTime endDate) {
+        OffsetDateTime resolvedStart = resolveStartDate(startDate);
+        OffsetDateTime resolvedEnd = resolveEndDate(endDate);
+
+        List<Map<String, Object>> results = reservaRepository.getDistrictStats(resolvedStart, resolvedEnd);
         
         return results.stream()
             .map(row -> new LocationStatDTO(
@@ -67,9 +99,12 @@ public class DashboardService {
             .collect(Collectors.toList());
     }
 
-    @Cacheable(value = "dashboard-origins", unless = "#result == null || #result.isEmpty()")
-    public List<LocationStatDTO> getOriginStats() {
-        List<Map<String, Object>> results = reservaRepository.getOriginStats();
+    @Cacheable(value = "dashboard-origins", key = "#startDate?.toString() + '-' + #endDate?.toString()", unless = "#result == null || #result.isEmpty()")
+    public List<LocationStatDTO> getOriginStats(OffsetDateTime startDate, OffsetDateTime endDate) {
+        OffsetDateTime resolvedStart = resolveStartDate(startDate);
+        OffsetDateTime resolvedEnd = resolveEndDate(endDate);
+
+        List<Map<String, Object>> results = reservaRepository.getOriginStats(resolvedStart, resolvedEnd);
         
         return results.stream()
             .map(row -> new LocationStatDTO(
@@ -80,13 +115,13 @@ public class DashboardService {
             .collect(Collectors.toList());
     }
 
-    @Cacheable(value = "dashboard-summary", unless = "#result == null")
-    public DashboardSummaryDTO getSummary() {
+    @Cacheable(value = "dashboard-summary", key = "#startDate?.toString() + '-' + #endDate?.toString()", unless = "#result == null")
+    public DashboardSummaryDTO getSummary(OffsetDateTime startDate, OffsetDateTime endDate) {
         return new DashboardSummaryDTO(
-            getKpis(),
-            getVehicleTypeStats(),
-            getDistrictStats(),
-            getOriginStats()
+            getKpis(startDate, endDate),
+            getVehicleTypeStats(startDate, endDate),
+            getDistrictStats(startDate, endDate),
+            getOriginStats(startDate, endDate)
         );
     }
 }
