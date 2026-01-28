@@ -6,28 +6,31 @@ import com.cptrans.petrocarga.models.Usuario;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class UsuarioRequestDTO {
 
-    @NotBlank(message="Nome não pode ser vazio.")
+    @Valid
+    @NotNull(message="O campo 'nome' é obrigatório.")
+    @Size(min = 2, max = 100, message="Nome deve conter entre 2 e 100 caracteres.")
     private String nome;
 
-    @NotBlank
     @Valid
     @CPF(message="CPF inválido.")
     private String cpf;
 
+    @Valid
+    @NotNull(message="O campo 'telefone' é obrigatório.")
     @Size(min = 10, max = 11, message="Telefone deve conter entre 10 e 11 dígitos.")
     private String telefone;
 
-    @NotBlank
     @Valid
     @Email(message="Email inválido.")
     private String email;
 
-    @NotBlank
+    @Valid
+    @NotNull(message="O campo 'senha' é obrigatório.")
     @Size(min = 6, max = 100, message="Senha deve conter no mínimo 6 caracteres.")
     private String senha;
 

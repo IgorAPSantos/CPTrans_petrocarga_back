@@ -83,8 +83,11 @@ public class UsuarioService {
     }
 
     @Transactional
-    public Usuario activateAccount(String email, String code) {
-        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado."));
+    public Usuario activateAccount(String email, String cpf, String code) {
+        if((email == null && cpf == null) || (email != null && cpf != null)) {
+            throw new IllegalArgumentException("Informe um email OU CPF.");
+        }
+        Usuario usuario = usuarioRepository.findByEmailOrCpf(email, cpf).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado."));
 
         if (usuario.getVerificationCode() == null || !usuario.getVerificationCode().equals(code)) {
             throw new IllegalArgumentException("Código inválido.");
@@ -106,8 +109,11 @@ public class UsuarioService {
     }
 
     @Transactional
-    public void resendActivationCode(String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado."));
+    public void resendActivationCode(String email, String cpf) {
+        if ((email == null && cpf == null) || (email != null && cpf != null)) {
+            throw new IllegalArgumentException("Informe um email OU CPF.");
+        }
+        Usuario usuario = usuarioRepository.findByEmailOrCpf(email, cpf).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado."));
 
         if (usuario.getAtivo() != null && usuario.getAtivo()) {
             throw new IllegalArgumentException("Usuário já ativado.");
@@ -128,12 +134,15 @@ public class UsuarioService {
     // ==================== RECUPERAÇÃO DE SENHA ====================
 
     @Transactional
-    public void forgotPassword(String email) {
+    public void forgotPassword(String email, String cpf) {
+        if ((email == null && cpf == null) || (email != null && cpf != null)) {
+            throw new IllegalArgumentException("Informe um email OU CPF.");
+        }
         // Busca usuário pelo email (silenciosamente ignora se não existir por segurança)
-        Optional<Usuario> optUsuario = usuarioRepository.findByEmail(email);
+        Optional<Usuario> optUsuario = usuarioRepository.findByEmailOrCpf(email, cpf);
         
         if (optUsuario.isEmpty()) {
-            // Por segurança, não revelamos se o email existe ou não
+            // Por segurança, não revelamos se o email/cpf existe ou não
             return;
         }
 
@@ -155,8 +164,12 @@ public class UsuarioService {
     }
 
     @Transactional
-    public void resetPassword(String email, String code, String novaSenha) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
+    public void resetPassword(String email, String cpf, String code, String novaSenha) {
+        if ((email == null && cpf == null) || (email != null && cpf != null)) {
+            throw new IllegalArgumentException("Informe um email OU CPF.");
+        }
+
+        Usuario usuario = usuarioRepository.findByEmailOrCpf(email, cpf)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
 
         // Valida código

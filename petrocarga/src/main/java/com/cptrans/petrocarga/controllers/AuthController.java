@@ -32,6 +32,7 @@ import com.cptrans.petrocarga.services.AuthService;
 import com.cptrans.petrocarga.services.UsuarioService;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 
 @RestController
@@ -52,7 +53,7 @@ public class AuthController {
     private String sameSite;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO request, HttpServletResponse response) {
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid AuthRequestDTO request, HttpServletResponse response) {
         AuthResponseDTO auth = authService.login(request);
         ResponseCookie cookie = ResponseCookie.from("auth-token", auth.getToken())
             .httpOnly(true)
@@ -69,7 +70,7 @@ public class AuthController {
 
     //TODO: Remover rota depois de cadastrar o primeiro admin em deploy
     @PostMapping("/admin")
-    public ResponseEntity<UsuarioResponseDTO> createAdmin(@RequestBody UsuarioRequestDTO usuario) {
+    public ResponseEntity<UsuarioResponseDTO> createAdmin(@RequestBody @Valid UsuarioRequestDTO usuario) {
         Usuario novoUsuario = usuarioService.createUsuario(usuario.toEntity(), PermissaoEnum.ADMIN);
         return ResponseEntity.ok(novoUsuario.toResponseDTO());
     }
@@ -100,9 +101,9 @@ public class AuthController {
    }
 
         @PostMapping("/activate")
-        public ResponseEntity<ApiResponse> activateAccount(@RequestBody AccountActivationRequest request) {
+        public ResponseEntity<ApiResponse> activateAccount(@RequestBody @Valid AccountActivationRequest request) {
             try {
-                usuarioService.activateAccount(request.email(), request.codigo());
+                usuarioService.activateAccount(request.email(), request.cpf(), request.codigo());
                 return ResponseEntity.ok(ApiResponse.success(
                     "Conta ativada com sucesso! Você já pode fazer login.",
                     "ACCOUNT_ACTIVATED"
@@ -121,59 +122,50 @@ public class AuthController {
         }
 
         @PostMapping("/resend-code")
-        public ResponseEntity<ApiResponse> resendCode(@RequestBody ResendCodeRequest request) {
+        public ResponseEntity<ApiResponse> resendCode(@RequestBody @Valid ResendCodeRequest request) {
             try {
-                usuarioService.resendActivationCode(request.email());
+                usuarioService.resendActivationCode(request.email(), request.cpf());
                 return ResponseEntity.ok(ApiResponse.success(
                     "Código de ativação reenviado! Verifique sua caixa de entrada e spam.",
                     "ACTIVATION_CODE_SENT"
                 ));
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().body(ApiResponse.error(
-                    "Esta conta já está ativada.",
-                    "ACCOUNT_ALREADY_ACTIVE"
-                ));
             } catch (jakarta.persistence.EntityNotFoundException e) {
                 return ResponseEntity.status(404).body(ApiResponse.error(
-                    "Email não encontrado. Verifique se o email está correto.",
-                    "EMAIL_NOT_FOUND"
+                    "Email ou CPF não encontrado. Verifique se o email ou CPF está correto.",
+                    "EMAIL_OR_CPF_NOT_FOUND"
                 ));
             }
         }
 
         @PostMapping("/forgot-password")
-        public ResponseEntity<ApiResponse> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        public ResponseEntity<ApiResponse> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
             try {
-                usuarioService.forgotPassword(request.email());
+                usuarioService.forgotPassword(request.email(), request.cpf());
                 return ResponseEntity.ok(ApiResponse.success(
-                    "Se o email estiver cadastrado, você receberá um código de recuperação. Verifique sua caixa de entrada e spam.",
+                    "Se o email ou CPF estiver cadastrado, você receberá um código de recuperação. Verifique sua caixa de entrada e spam.",
                     "RESET_CODE_SENT"
                 ));
             } catch (jakarta.persistence.EntityNotFoundException e) {
                 // Retorna mensagem genérica para não expor se o email existe
                 return ResponseEntity.ok(ApiResponse.success(
-                    "Se o email estiver cadastrado, você receberá um código de recuperação. Verifique sua caixa de entrada e spam.",
+                    "Se o email ou CPF estiver cadastrado, você receberá um código de recuperação. Verifique sua caixa de entrada e spam.",
                     "RESET_CODE_SENT"
                 ));
             }
         }
 
         @PostMapping("/reset-password")
-        public ResponseEntity<ApiResponse> resetPassword(@RequestBody ResetPasswordRequest request) {
+        public ResponseEntity<ApiResponse> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
             try {
-                usuarioService.resetPassword(request.email(), request.codigo(), request.novaSenha());
+                usuarioService.resetPassword(request.email(), request.cpf(), request.codigo(), request.novaSenha());
                 return ResponseEntity.ok(ApiResponse.success(
                     "Senha alterada com sucesso! Você já pode fazer login com a nova senha.",
                     "PASSWORD_RESET_SUCCESS"
                 ));
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().body(ApiResponse.error(
-                    "Código de recuperação inválido ou expirado. Solicite um novo código.",
-                    "INVALID_RESET_CODE"
-                ));
-            } catch (jakarta.persistence.EntityNotFoundException e) {
+            } 
+            catch (jakarta.persistence.EntityNotFoundException e) {
                 return ResponseEntity.status(404).body(ApiResponse.error(
-                    "Email não encontrado. Verifique se o email está correto.",
+                    "Email ou CPF não encontrado. Verifique se o email ou CPF está correto.",
                     "EMAIL_NOT_FOUND"
                 ));
             }

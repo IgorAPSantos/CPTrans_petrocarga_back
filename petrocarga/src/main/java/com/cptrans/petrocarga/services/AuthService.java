@@ -23,7 +23,18 @@ public class AuthService {
     private JwtService jwtService;
 
     public AuthResponseDTO login(AuthRequestDTO request) {
-        Usuario usuario = usuarioRepository.findByEmail(request.getEmail()).orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas."));
+        if((request.getEmail() == null && request.getCpf() == null) || (request.getEmail() != null && request.getCpf() != null)) throw new IllegalArgumentException("Informe um email OU CPF.");
+        Usuario usuario = usuarioRepository.findByEmailOrCpf(request.getEmail(), request.getCpf()).orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas."));
+
+        // if(request.getEmail() != null){
+        //     usuario = usuarioRepository.findByEmail(request.getEmail()).orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas."));
+        // }
+        // if(request.getCpf() != null){
+        //     usuario = usuarioRepository.findByCpf(request.getCpf()).orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas."));
+        // }
+
+        // if(usuario == null) throw new IllegalArgumentException("Credenciais inválidas.");
+
         if(usuario.getAtivo().equals(false)) {
             throw new IllegalArgumentException("Usuário desativado.");
         }
