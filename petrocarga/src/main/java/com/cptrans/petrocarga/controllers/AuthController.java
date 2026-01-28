@@ -32,6 +32,7 @@ import com.cptrans.petrocarga.services.AuthService;
 import com.cptrans.petrocarga.services.UsuarioService;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 
 @RestController
@@ -52,7 +53,7 @@ public class AuthController {
     private String sameSite;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO request, HttpServletResponse response) {
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid AuthRequestDTO request, HttpServletResponse response) {
         AuthResponseDTO auth = authService.login(request);
         ResponseCookie cookie = ResponseCookie.from("auth-token", auth.getToken())
             .httpOnly(true)
