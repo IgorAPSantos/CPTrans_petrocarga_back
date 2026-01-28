@@ -78,6 +78,7 @@ public class SendGridEmailService implements EmailSender {
     private void sendEmail(String to, String subject, String text) {
         try {
             LOGGER.info("[{}] Sending email via SendGrid API to {}", Thread.currentThread().getName(), to);
+            LOGGER.info("[{}] From: {}, Subject: {}", Thread.currentThread().getName(), fromEmail, subject);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
