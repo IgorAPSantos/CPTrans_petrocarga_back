@@ -51,35 +51,45 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
     @Query("SELECT COUNT(DISTINCT v.id) FROM Vaga v")
     Long countTotalSlots();
 
-    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'ATIVA'")
-    Long countActiveReservations();
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'ATIVA' AND r.inicio BETWEEN :startDate AND :endDate")
+    Long countActiveReservations(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
 
-    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'CONCLUIDA'")
-    Long countCompletedReservations();
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'CONCLUIDA' AND r.inicio BETWEEN :startDate AND :endDate")
+    Long countCompletedReservations(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
 
-    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'CANCELADA'")
-    Long countCanceledReservations();
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'CANCELADA' AND r.inicio BETWEEN :startDate AND :endDate")
+    Long countCanceledReservations(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
+
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.inicio BETWEEN :startDate AND :endDate")
+    Long countTotalReservationsInPeriod(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
+
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.inicio BETWEEN :startDate AND :endDate " +
+           "AND (r.veiculo.tipo = 'CAMINHAO_MEDIO' OR r.veiculo.tipo = 'CAMINHAO_LONGO')")
+    Long countMultipleSlotReservations(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
 
     @Query("SELECT new map(CAST(r.veiculo.tipo AS string) as tipo, COUNT(DISTINCT r.id) as count, COUNT(DISTINCT r.veiculo.id) as uniqueVehicles) " +
            "FROM Reserva r " +
            "WHERE r.veiculo.tipo IS NOT NULL " +
+           "AND r.inicio BETWEEN :startDate AND :endDate " +
            "GROUP BY r.veiculo.tipo " +
            "ORDER BY count DESC")
-    List<java.util.Map<String, Object>> getVehicleTypeStats();
+    List<java.util.Map<String, Object>> getVehicleTypeStats(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
 
     @Query("SELECT new map(ev.bairro as name, COUNT(r.id) as count) " +
            "FROM Reserva r " +
            "JOIN r.vaga v " +
            "JOIN v.endereco ev " +
            "WHERE ev.bairro IS NOT NULL " +
+           "AND r.inicio BETWEEN :startDate AND :endDate " +
            "GROUP BY ev.bairro " +
            "ORDER BY count DESC")
-    List<java.util.Map<String, Object>> getDistrictStats();
+    List<java.util.Map<String, Object>> getDistrictStats(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
 
     @Query("SELECT new map(r.cidadeOrigem as name, COUNT(r.id) as count) " +
            "FROM Reserva r " +
            "WHERE r.cidadeOrigem IS NOT NULL " +
+           "AND r.inicio BETWEEN :startDate AND :endDate " +
            "GROUP BY r.cidadeOrigem " +
            "ORDER BY count DESC")
-    List<java.util.Map<String, Object>> getOriginStats();
+    List<java.util.Map<String, Object>> getOriginStats(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
 }
