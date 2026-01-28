@@ -19,7 +19,7 @@ public class AuthRequestDTO {
 
     @Valid
     @NotNull(message = "O campo 'senha' é obrigatório.")
-    @Size(min = 6, message = "Senha deve conter no mínimo 6 caracteres.")
+    @Size(min = 6, max = 100, message = "Senha deve conter no mínimo 6 caracteres.")
     public String senha;
 
     public String getEmail() {
