@@ -10,15 +10,20 @@ import com.cptrans.petrocarga.models.Denuncia;
 public class DenunciaResponseDTO {
 
     private UUID id;
-    private String descricao;
     private UUID criadoPorId;
     private UUID vagaId;
     private UUID reservaId;
+    private UUID veiculoId;
     private String nomeMotorista;
     private String telefoneMotorista;
+    private String descricao;
     private EnderecoVagaResponseDTO enderecoVaga;
     private String numeroEndereco;
     private String referenciaEndereco;
+    private String marcaVeiculo;
+    private String modeloVeiculo;
+    private String placaVeiculo;
+    private Integer tamanhoVeiculo;
     private StatusDenunciaEnum status;
     private TipoDenunciaEnum tipo;
     private String resposta;
@@ -30,22 +35,27 @@ public class DenunciaResponseDTO {
     public DenunciaResponseDTO() {}
 
     public DenunciaResponseDTO(Denuncia denuncia){
-        if(denuncia.getAtualizadoPor() != null) this.atualizadoPorId = denuncia.getAtualizadoPor().getId();
         this.id = denuncia.getId();
-        this.descricao = denuncia.getDescricao();
         this.criadoPorId = denuncia.getCriadoPor().getId();
-        this.nomeMotorista = denuncia.getReserva().getMotorista().getUsuario().getNome();
         this.telefoneMotorista = denuncia.getReserva().getMotorista().getUsuario().getTelefone();
         this.vagaId = denuncia.getVaga().getId();
         this.reservaId = denuncia.getReserva().getId();
+        this.descricao = denuncia.getDescricao();
+        this.nomeMotorista = denuncia.getReserva().getMotorista().getUsuario().getNome();
         this.enderecoVaga = denuncia.getVaga().getEndereco().toResponseDTO();
         this.numeroEndereco = denuncia.getVaga().getNumeroEndereco();
         this.referenciaEndereco = denuncia.getVaga().getReferenciaEndereco();
+        this.veiculoId = denuncia.getReserva().getVeiculo().getId();
+        this.marcaVeiculo = denuncia.getReserva().getVeiculo().getMarca();
+        this.modeloVeiculo = denuncia.getReserva().getVeiculo().getModelo();
+        this.placaVeiculo = denuncia.getReserva().getVeiculo().getPlaca();
+        this.tamanhoVeiculo = denuncia.getReserva().getVeiculo().getTipo().getComprimento();
         this.status = denuncia.getStatus();
         this.tipo = denuncia.getTipo();
         this.resposta = denuncia.getResposta();
         this.criadoEm = denuncia.getCriadoEm();
         this.atualizadoEm = denuncia.getAtualizadoEm();
+        this.atualizadoPorId = denuncia.getAtualizadoPor() != null ? denuncia.getAtualizadoPor().getId() : null;
         this.encerradoEm = denuncia.getEncerradoEm();
     }
 
@@ -115,6 +125,26 @@ public class DenunciaResponseDTO {
 
     public String getTelefoneMotorista() {
         return telefoneMotorista;
+    }
+
+    public UUID getVeiculoId() {
+        return veiculoId;
+    }
+
+    public String getMarcaVeiculo() {
+        return marcaVeiculo;
+    }
+
+    public String getModeloVeiculo() {
+        return modeloVeiculo;
+    }
+
+    public String getPlacaVeiculo() {
+        return placaVeiculo;
+    }
+
+    public Integer getTamanhoVeiculo() {
+        return tamanhoVeiculo;
     }
 
 }
