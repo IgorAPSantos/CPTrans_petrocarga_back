@@ -36,7 +36,7 @@ public class ReservaRapidaRequestDTO {
         ReservaRapida reservaRapida = new ReservaRapida();
         reservaRapida.setVaga(vaga);
         reservaRapida.setTipoVeiculo(this.tipoVeiculo);
-        reservaRapida.setPlaca(this.placa);
+        reservaRapida.setPlaca(this.placa != null ? this.placa.trim().toUpperCase() : null);
         reservaRapida.setInicio(this.inicio);
         reservaRapida.setFim(this.fim);
         return reservaRapida;

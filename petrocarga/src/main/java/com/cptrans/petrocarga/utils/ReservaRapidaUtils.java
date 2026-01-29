@@ -13,7 +13,7 @@ public class ReservaRapidaUtils {
     public static final Integer  LIMITE_DE_RESERVAS_POR_PLACA = 3;
 
     public static void validarQuantidadeReservasPorPlaca(Integer quantidadeReservasRapidasPorPlaca, ReservaRapida novaReservaRapida) {
-        if(quantidadeReservasRapidasPorPlaca.equals(LIMITE_DE_RESERVAS_POR_PLACA)){
+        if(quantidadeReservasRapidasPorPlaca >= LIMITE_DE_RESERVAS_POR_PLACA ){
             throw new IllegalArgumentException("Veículo com placa " + novaReservaRapida.getPlaca() + " já atingiu o limite de reservas rápidas (" + LIMITE_DE_RESERVAS_POR_PLACA + ").");
         }
     }
@@ -23,6 +23,10 @@ public class ReservaRapidaUtils {
    
         if(!reservasRapidasAtivasNaVaga.isEmpty()){
             for(ReservaRapida reservaRapida : reservasRapidasAtivasNaVaga){
+                System.out.println(reservaRapida.getVaga().getId());
+                System.out.println(reservaRapida.getStatus());
+                System.out.println(reservaRapida.getPlaca());
+                System.out.println(reservaRapida.getInicio().atZoneSameInstant(DateUtils.FUSO_BRASIL) + " - " + reservaRapida.getFim().atZoneSameInstant(DateUtils.FUSO_BRASIL));
                 Boolean reservaSobrepostas = novaReservaRapida.getInicio().toInstant().isBefore(reservaRapida.getFim().toInstant()) && novaReservaRapida.getFim().toInstant().isAfter(reservaRapida.getInicio().toInstant());
                 validarReservaRapidaAtivaPorPlaca(reservaRapida.getPlaca(), novaReservaRapida.getPlaca());
                 if(reservaSobrepostas){

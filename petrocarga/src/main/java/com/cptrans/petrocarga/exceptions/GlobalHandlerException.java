@@ -105,7 +105,7 @@ public class GlobalHandlerException {
         error.put("erro", "Integridade de dados violada.");
         String causeMessage = ex.getMostSpecificCause().getMessage().split("Detalhe:")[0].trim();
         error.put("cause", causeMessage);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -161,4 +161,4 @@ public class GlobalHandlerException {
         error.put("cause", causeMessage);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
-}   
+}
