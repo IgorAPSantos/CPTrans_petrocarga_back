@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.cptrans.petrocarga.enums.PermissaoEnum;
@@ -21,4 +23,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UUID>, JpaSpec
     public List<Usuario> findByPermissao(PermissaoEnum permissao);
     public List<Usuario> findByPermissaoAndAtivo(PermissaoEnum permissao, Boolean ativo);
     public Optional<Usuario> findByIdAndAtivo(UUID id, Boolean ativo);
+    @Query("SELECT u FROM Usuario u WHERE (u.email = :email OR u.cpf = :cpf) AND u.ativo = :ativo")
+    public Optional<Usuario> findByEmailOrCpfAndAtivo(@Param("email") String email, @Param("cpf") String cpf, @Param("ativo") Boolean ativo);
 }

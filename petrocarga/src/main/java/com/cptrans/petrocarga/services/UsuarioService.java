@@ -139,7 +139,7 @@ public class UsuarioService {
             throw new IllegalArgumentException("Informe um email OU CPF.");
         }
         // Busca usuário pelo email (silenciosamente ignora se não existir por segurança)
-        Optional<Usuario> optUsuario = usuarioRepository.findByEmailOrCpf(email, cpf);
+        Optional<Usuario> optUsuario = usuarioRepository.findByEmailOrCpfAndAtivo(email, cpf, true);
         
         if (optUsuario.isEmpty()) {
             // Por segurança, não revelamos se o email/cpf existe ou não
@@ -171,6 +171,10 @@ public class UsuarioService {
 
         Usuario usuario = usuarioRepository.findByEmailOrCpf(email, cpf)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
+
+        if (!usuario.getAtivo()) {
+            throw new IllegalArgumentException("Usuário desativado.");
+        }
 
         // Valida código
         if (usuario.getVerificationCode() == null || !usuario.getVerificationCode().equals(code)) {
