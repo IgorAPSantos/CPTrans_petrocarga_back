@@ -9,7 +9,7 @@ spring:
     jpa:
         hibernate:
             ddl-auto: validate
-        show-sql: true
+        show-sql: false
         open-in-view: true
     
     flyway:
@@ -68,7 +68,10 @@ logging:
             springframework:
                 web: info
             hibernate:
-                SQL: info
+                SQL: off
+                type:
+                    descriptor:
+                        sql: off
 
 jwt:
   secret: ${JWT_SECRET:72f9a128dd6f4c4a9c82e36df3ba62a9d12f1c3b9475a1f0e9d54d7e1b2a3c4d}

@@ -10,7 +10,8 @@ spring:
         driver-class-name: org.postgresql.Driver
         hikari:
             maximum-pool-size: 5
-
+    jpa:
+        show-sql: true
     flyway:
         url: jdbc:postgresql://localhost:5432/petrocarga
         user: postgres
@@ -41,3 +42,9 @@ app:
     cookie-settings:
         secure: false
         same-site: Lax
+
+logging:
+    level:
+        org:
+            hibernate:
+                sql: info
