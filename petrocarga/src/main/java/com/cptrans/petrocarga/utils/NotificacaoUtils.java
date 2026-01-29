@@ -9,11 +9,7 @@ public class NotificacaoUtils {
     
     public static void validateByPermissao(PermissaoEnum permissaoUsuarioLogado,  PermissaoEnum permissaoDestinatario) {
         switch (permissaoUsuarioLogado) {
-            case ADMIN, GESTOR -> {
-                break;
-            }
-            case AGENTE -> {
-                if (!permissaoDestinatario.equals(PermissaoEnum.GESTOR)) throw new IllegalArgumentException("Usuários com permissão AGENTE só podem enviar notificações para usuários com permissão GESTOR");
+            case ADMIN, GESTOR, AGENTE -> {
                 break;
             }
             case EMPRESA -> throw new IllegalArgumentException("Usuários com permissão EMPRESA não podem enviar notificações para outros usuários.");
