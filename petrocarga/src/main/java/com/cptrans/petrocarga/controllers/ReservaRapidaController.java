@@ -28,8 +28,6 @@ import com.cptrans.petrocarga.services.ReservaRapidaService;
 import com.cptrans.petrocarga.services.VagaService;
 
 
-
-
 @RestController
 @RequestMapping("/reserva-rapida")
 public class ReservaRapidaController {
@@ -55,6 +53,7 @@ public class ReservaRapidaController {
     public ResponseEntity<List<ReservaRapidaResponseDTO>> getReservasRapidasByUsuarioId(@PathVariable UUID usuarioId, @RequestParam(required = false) UUID vagaId, @RequestParam(required = false) String placaVeiculo, @RequestParam(required = false) LocalDate data, @RequestParam(required = false) List<StatusReservaEnum> listaStatus) {
         Agente agente = agenteService.findByUsuarioId(usuarioId);
         if(vagaId != null || placaVeiculo != null || data != null || (listaStatus != null && !listaStatus.isEmpty())) {
+            placaVeiculo = placaVeiculo != null ? placaVeiculo.trim().toUpperCase() : null;
             return ResponseEntity.ok().body(reservaRapidaService.findByAgenteWithFilters(agente, vagaId, placaVeiculo, data, listaStatus).stream().map(ReservaRapida::toResponse).collect(Collectors.toList()));
         }
         List<ReservaRapidaResponseDTO> reservasRapidas = reservaRapidaService.findByAgente(agente).stream()

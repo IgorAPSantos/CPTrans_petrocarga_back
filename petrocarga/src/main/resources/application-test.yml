@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/petrocarga
+    username: postgres
+    password: 123456
+
+  flyway:
+    enabled: false
+    
+app:
+    firebase-push-notification:
+        enabled: false
+        credentials: "classpath:firebase-service-account.json"

@@ -66,6 +66,7 @@ public class ReservaController {
     public ResponseEntity<List<ReservaDTO>> getAllReservasWithFiltersByVaga(@PathVariable UUID vagaId,@RequestParam(required = false) LocalDate data, @RequestParam(required = false) String placa,@RequestParam(required = false) List<StatusReservaEnum> status) {
         Vaga vaga = vagaService.findById(vagaId);
         if(placa != null) {
+            placa = placa.trim().toUpperCase();
             List<ReservaDTO> reservas = reservaService.getReservasByVagaDataAndPlaca(vaga, data, placa, status);
             return ResponseEntity.ok(reservas);
         }
@@ -77,6 +78,7 @@ public class ReservaController {
     @GetMapping("/all")
     public ResponseEntity<List<ReservaDTO>> getAllReservasWithFilters(@RequestParam(required = false) LocalDate data, @RequestParam(required = false) String placa,@RequestParam(required = false) List<StatusReservaEnum> status) {
         if(placa != null) {
+            placa = placa.trim().toUpperCase();
             List<ReservaDTO> reservas = reservaService.getAllReservasByDataAndPlaca( data, placa, status);
             return ResponseEntity.ok(reservas);
         }
@@ -87,7 +89,7 @@ public class ReservaController {
     @PreAuthorize("hasAnyRole('ADMIN','AGENTE')")
     @GetMapping("/placa")
     public ResponseEntity<List<ReservaDTO>> getAllReservasByPlaca(@RequestParam(required = true) String placa) {
-        List<ReservaDTO> reservas = reservaService.getReservasAtivasByPlaca(placa);
+        List<ReservaDTO> reservas = reservaService.getReservasAtivasByPlaca(placa.trim().toUpperCase());
         return ResponseEntity.ok(reservas);
     }
 
