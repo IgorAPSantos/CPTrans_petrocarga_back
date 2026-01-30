@@ -6,6 +6,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import com.cptrans.petrocarga.dto.dashboard.DashboardKpiDTO;
 import com.cptrans.petrocarga.dto.dashboard.DashboardSummaryDTO;
 import com.cptrans.petrocarga.dto.dashboard.LocationStatDTO;
 import com.cptrans.petrocarga.dto.dashboard.VehicleTypeStatDTO;
+import com.cptrans.petrocarga.repositories.ReservaRapidaRepository;
 import com.cptrans.petrocarga.repositories.ReservaRepository;
 
 @Service
@@ -21,6 +23,9 @@ public class DashboardService {
 
     @Autowired
     private ReservaRepository reservaRepository;
+
+    @Autowired
+    private ReservaRapidaRepository reservaRapidaRepository;
 
     private static final ZoneId ZONE_ID = ZoneId.of("America/Sao_Paulo");
 
@@ -44,10 +49,12 @@ public class DashboardService {
         OffsetDateTime resolvedEnd = resolveEndDate(endDate);
 
         Long totalSlots = reservaRepository.countTotalSlots();
-        Long activeReservations = reservaRepository.countActiveReservations(resolvedStart, resolvedEnd);
-        Long completedReservations = reservaRepository.countCompletedReservations(resolvedStart, resolvedEnd);
+        Long activeReservations = reservaRepository.countActiveReservations(resolvedStart, resolvedEnd) + reservaRapidaRepository.countActiveReservations(resolvedStart, resolvedEnd);
+        Long pendingReservations = reservaRepository.countPendingReservations(resolvedStart, resolvedEnd);
+        Long completedReservations = reservaRepository.countCompletedReservations(resolvedStart, resolvedEnd) + reservaRapidaRepository.countCompletedReservations(resolvedStart, resolvedEnd);
         Long canceledReservations = reservaRepository.countCanceledReservations(resolvedStart, resolvedEnd);
-        Long totalReservations = reservaRepository.countTotalReservationsInPeriod(resolvedStart, resolvedEnd);
+        Long removedReservations = reservaRepository.countRemovedReservations(resolvedStart, resolvedEnd) + reservaRapidaRepository.countRemovedReservations(resolvedStart, resolvedEnd);
+        Long totalReservations = reservaRepository.countTotalReservationsInPeriod(resolvedStart, resolvedEnd) + reservaRapidaRepository.countTotalReservationsInPeriod(resolvedStart, resolvedEnd);
         Long multipleSlotReservations = reservaRepository.countMultipleSlotReservations(resolvedStart, resolvedEnd);
 
         Double occupancyRate = totalSlots > 0 
@@ -57,9 +64,11 @@ public class DashboardService {
         return new DashboardKpiDTO(
             totalSlots,
             activeReservations,
+            pendingReservations,
             occupancyRate,
             completedReservations,
             canceledReservations,
+            removedReservations,
             totalReservations,
             multipleSlotReservations,
             resolvedStart,

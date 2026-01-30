@@ -29,18 +29,26 @@ public class ReservaDTO {
     private String marcaVeiculo;
     private String cpfProprietarioVeiculo;
     private String cnpjProprietarioVeiculo;
+    private String cidadeOrigem;
+    private String entradaCidade;
     private StatusReservaEnum status;
+    private Boolean checkedIn;
+    private OffsetDateTime checkInEm;
+    private OffsetDateTime checkOutEm;
     private UsuarioResponseDTO criadoPor;
     private OffsetDateTime criadoEm;
 
     public ReservaDTO() {
     }
-    public ReservaDTO(UUID reservaId, Vaga vaga, OffsetDateTime inicio, OffsetDateTime fim, Integer tamanhoVeiculo, String placaVeiculo, StatusReservaEnum status, Usuario criadoPor, OffsetDateTime criadoEm) {
+    public ReservaDTO(UUID reservaId, UUID vagaId, String numeroEndereco,
+        String referenciaEndereco, EnderecoVagaResponseDTO enderecoVaga, OffsetDateTime inicio,
+        OffsetDateTime fim, Integer tamanhoVeiculo, String placaVeiculo, StatusReservaEnum status,
+        Usuario criadoPor, OffsetDateTime criadoEm) {
         this.id = reservaId;
-        this.vagaId = vaga.getId();
-        this.numeroEndereco = vaga.getNumeroEndereco();
-        this.referenciaEndereco = vaga.getReferenciaEndereco();
-        this.enderecoVaga = vaga.getEndereco().toResponseDTO();
+        this.vagaId = vagaId;
+        this.numeroEndereco = numeroEndereco;
+        this.referenciaEndereco = referenciaEndereco;
+        this.enderecoVaga = enderecoVaga;
         this.inicio = inicio;
         this.fim = fim;
         this.tamanhoVeiculo = tamanhoVeiculo;
@@ -50,7 +58,7 @@ public class ReservaDTO {
         this.criadoEm = criadoEm;
     }
 
-    public ReservaDTO(UUID reservaId, Vaga vaga, OffsetDateTime inicio, OffsetDateTime fim, Veiculo veiculo, StatusReservaEnum status, Usuario criadoPor, OffsetDateTime criadoEm, Motorista motorista) {
+    public ReservaDTO(UUID reservaId, String cidadeOrigem, String entradaCidade, Boolean checkedIn, OffsetDateTime checkInEm, OffsetDateTime checkOutEm,  Vaga vaga, OffsetDateTime inicio, OffsetDateTime fim, Veiculo veiculo, StatusReservaEnum status, Usuario criadoPor, OffsetDateTime criadoEm, Motorista motorista) {
         this.id = reservaId;
         this.vagaId = vaga.getId();
         this.motoristaId = motorista.getId();
@@ -67,7 +75,12 @@ public class ReservaDTO {
         this.marcaVeiculo = veiculo.getMarca();
         this.cpfProprietarioVeiculo = veiculo.getCpfProprietario();
         this.cnpjProprietarioVeiculo = veiculo.getCnpjProprietario();
+        this.cidadeOrigem = cidadeOrigem;
+        this.entradaCidade = entradaCidade;
         this.status = status;
+        this.checkedIn = checkedIn;
+        this.checkInEm = checkInEm;
+        this.checkOutEm = checkOutEm;
         this.criadoPor = criadoPor.toResponseDTO();
         this.criadoEm = criadoEm;
     }
@@ -89,7 +102,12 @@ public class ReservaDTO {
         this.marcaVeiculo = reserva.getVeiculo().getMarca();
         this.cpfProprietarioVeiculo = reserva.getVeiculo().getCpfProprietario();
         this.cnpjProprietarioVeiculo = reserva.getVeiculo().getCnpjProprietario();
+        this.cidadeOrigem = reserva.getCidadeOrigem();
+        this.entradaCidade = reserva.getEntradaCidade();
         this.status = reserva.getStatus();
+        this.checkedIn = reserva.isCheckedIn();
+        this.checkInEm = reserva.getCheckInEm();
+        this.checkOutEm = reserva.getCheckOutEm();
         this.criadoPor = reserva.getCriadoPor().toResponseDTO();
         this.criadoEm = reserva.getCriadoEm();
     }
@@ -159,12 +177,50 @@ public class ReservaDTO {
     public void setPlacaVeiculo(String placaVeiculo) {
         this.placaVeiculo = placaVeiculo;
     }
+
+    public String getCidadeOrigem() {
+        return cidadeOrigem;
+    }
+
+    public void setCidadeOrigem(String cidadeOrigem) {
+        this.cidadeOrigem = cidadeOrigem;
+    }
+
+    public String getEntradaCidade() {
+        return entradaCidade;
+    }
+    public void setEntradaCidade(String entradaCidade) {
+        this.entradaCidade = entradaCidade;
+    }
+
     public StatusReservaEnum getStatus() {
         return status;
     }
     public void setStatus(StatusReservaEnum status) {
         this.status = status;
     }
+
+    public Boolean isCheckedIn() {
+        return checkedIn;
+    }
+
+    public void setCheckedIn(Boolean checkedIn) {
+        this.checkedIn = checkedIn;
+    }
+
+    public OffsetDateTime getCheckInEm() {
+        return checkInEm;
+    }
+    public void setCheckInEm(OffsetDateTime checkInEm) {
+        this.checkInEm = checkInEm;
+    }
+    public OffsetDateTime getCheckOutEm() {
+        return checkOutEm;
+    }
+    public void setCheckOutEm(OffsetDateTime checkOutEm) {
+        this.checkOutEm = checkOutEm;
+    }
+
     public UsuarioResponseDTO getCriadoPor() {
         return criadoPor;
     }

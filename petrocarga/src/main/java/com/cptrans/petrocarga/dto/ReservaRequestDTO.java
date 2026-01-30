@@ -13,17 +13,20 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class ReservaRequestDTO {
-    @NotNull
+    @NotNull(message = "O campo 'vagaId' é obrigatório.")
     private UUID vagaId;
-    @NotNull
+    @NotNull(message = "O campo 'motoristaId' é obrigatório.")
     private UUID motoristaId;
-    @NotNull
+    @NotNull(message = "O campo 'veiculoId' é obrigatório.")
     private UUID veiculoId;
-    @NotBlank
+    @NotNull(message = "O campo 'cidadeOrigem' é obrigatório.")
+    @NotBlank(message = "O campo 'cidadeOrigem' não pode estar em branco.")
     private String cidadeOrigem;
-    @NotNull
+    @NotBlank(message = "O campo 'entradaCidade' não pode estar em branco.")
+    private String entradaCidade;
+    @NotNull(message = "O campo 'inicio' é obrigatório.")
     private OffsetDateTime inicio;
-    @NotNull
+    @NotNull(message = "O campo 'fim' é obrigatório.")
     private OffsetDateTime fim;
 
 
@@ -33,6 +36,7 @@ public class ReservaRequestDTO {
         reserva.setMotorista(motorista);
         reserva.setVeiculo(veiculo);
         reserva.setCidadeOrigem(this.cidadeOrigem);
+        reserva.setEntradaCidade(this.entradaCidade);
         reserva.setInicio(this.inicio);
         reserva.setFim(this.fim);
         return reserva;
@@ -41,6 +45,7 @@ public class ReservaRequestDTO {
     public Reserva toEntity() {
         Reserva reserva = new Reserva();
         reserva.setCidadeOrigem(this.cidadeOrigem);
+        reserva.setEntradaCidade(this.entradaCidade);
         reserva.setInicio(this.inicio);
         reserva.setFim(this.fim);
         reserva.setStatus(StatusReservaEnum.ATIVA);
@@ -59,6 +64,9 @@ public class ReservaRequestDTO {
     }
     public String getCidadeOrigem() {
         return cidadeOrigem;
+    }
+    public String getEntradaCidade() {
+        return entradaCidade;
     }
     public OffsetDateTime getInicio() {
         return inicio;

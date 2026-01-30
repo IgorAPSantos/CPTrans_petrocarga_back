@@ -16,10 +16,14 @@ public class ReservaResponseDTO {
     private UUID veiculoId;
     private UUID criadoPorId;
     private String cidadeOrigem;
+    private String entradaCidade;
     private OffsetDateTime criadoEm;
     private OffsetDateTime inicio;
     private OffsetDateTime fim;
     private StatusReservaEnum status;
+    private Boolean checkedIn;
+    private OffsetDateTime checkInEm;
+    private OffsetDateTime checkOutEm;
 
     public ReservaResponseDTO() {
     }
@@ -33,10 +37,14 @@ public class ReservaResponseDTO {
         this.veiculoId = reserva.getVeiculo().getId();
         this.criadoPorId = reserva.getCriadoPor().getId();
         this.cidadeOrigem = reserva.getCidadeOrigem();
+        this.entradaCidade = reserva.getEntradaCidade();
         this.criadoEm = reserva.getCriadoEm();
         this.inicio = reserva.getInicio();
         this.fim = reserva.getFim();
         this.status = reserva.getStatus();
+        this.checkedIn = reserva.isCheckedIn();
+        this.checkInEm = reserva.getCheckInEm();
+        this.checkOutEm = reserva.getCheckOutEm();
     }
 
     // Getters and Setters
@@ -104,6 +112,14 @@ public class ReservaResponseDTO {
         this.cidadeOrigem = cidadeOrigem;
     }
 
+    public String getEntradaCidade() {
+        return entradaCidade;
+    }
+
+    public void setEntradaCidade(String entradaCidade) {
+        this.entradaCidade = entradaCidade;
+    }
+
     public OffsetDateTime getCriadoEm() {
         return criadoEm;
     }
@@ -134,5 +150,29 @@ public class ReservaResponseDTO {
 
     public void setStatus(StatusReservaEnum status) {
         this.status = status;
+    }
+
+    public Boolean isCheckedIn() {
+        return checkedIn;
+    }
+
+    public void setCheckedIn(Boolean checkedIn) {
+        this.checkedIn = checkedIn;
+    }
+
+    public OffsetDateTime getCheckInEm() {
+        return checkInEm;
+    }
+
+    public void setCheckInEm(OffsetDateTime checkInEm) {
+        this.checkInEm = checkInEm;
+    }
+
+    public OffsetDateTime getCheckOutEm() {
+        return checkOutEm;
+    }
+
+    public void setCheckOutEm(OffsetDateTime checkOutEm) {
+        this.checkOutEm = checkOutEm;
     }
 }

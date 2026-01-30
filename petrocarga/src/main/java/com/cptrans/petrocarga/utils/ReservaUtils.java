@@ -131,11 +131,11 @@ public class ReservaUtils {
         List<ReservaDTO> listaFinalReservas = new ArrayList<>(); 
 
         if(reservasRapidas != null && !reservasRapidas.isEmpty()) {
-                reservasRapidas.forEach(rr -> listaFinalReservas.add(new ReservaDTO(rr.getId(), rr.getVaga(), rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca(), rr.getStatus(), rr.getAgente().getUsuario(), rr.getCriadoEm())));
+                reservasRapidas.forEach(rr -> listaFinalReservas.add(new ReservaDTO(rr.getId(), rr.getVaga().getId(), rr.getVaga().getNumeroEndereco(), rr.getVaga().getReferenciaEndereco(), rr.getVaga().getEndereco().toResponseDTO(), rr.getInicio(), rr.getFim(), rr.getTipoVeiculo().getComprimento(), rr.getPlaca(), rr.getStatus(), rr.getAgente().getUsuario(), rr.getCriadoEm())));
         }
     
         if(reservas != null && !reservas.isEmpty()) {
-            reservas.forEach(r-> listaFinalReservas.add(new ReservaDTO(r.getId(), r.getVaga(), r.getInicio(), r.getFim(), r.getVeiculo(), r.getStatus(), r.getCriadoPor(), r.getCriadoEm(), r.getMotorista())));
+            reservas.forEach(r-> listaFinalReservas.add(new ReservaDTO(r.getId(), r.getCidadeOrigem(), r.getEntradaCidade(), r.isCheckedIn(), r.getCheckInEm(), r.getCheckOutEm(), r.getVaga(), r.getInicio(), r.getFim(), r.getVeiculo(), r.getStatus(), r.getCriadoPor(), r.getCriadoEm(), r.getMotorista())));
         }
     
         return listaFinalReservas;

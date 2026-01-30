@@ -47,6 +47,9 @@ public class Reserva {
     @Column(name = "cidade_origem", length = 100)
     private String cidadeOrigem;
 
+    @Column(name = "entrada_cidade", length = 100, nullable = true)
+    private String entradaCidade;
+
     @Column(name = "criado_em", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime criadoEm;
 
@@ -65,6 +68,9 @@ public class Reserva {
 
     @Column(name = "check_in_em")
     private OffsetDateTime checkInEm;
+
+    @Column(name = "check_out_em", nullable = false)
+    private OffsetDateTime checkOutEm;
 
     // Constructors
     public Reserva() {
@@ -122,6 +128,14 @@ public class Reserva {
         this.cidadeOrigem = cidadeOrigem;
     }
 
+    public String getEntradaCidade() {
+        return entradaCidade;
+    }
+
+    public void setEntradaCidade(String entradaCidade) {
+        this.entradaCidade = entradaCidade;
+    }
+
     public OffsetDateTime getCriadoEm() {
         return criadoEm;
     }
@@ -154,7 +168,7 @@ public class Reserva {
         this.status = status;
     }
 
-    public Boolean getCheckedIn() {
+    public Boolean isCheckedIn() {
         return checkedIn;
     }
 
@@ -170,10 +184,18 @@ public class Reserva {
         this.checkInEm = checkInEm;
     }
 
+    public OffsetDateTime getCheckOutEm() {
+        return checkOutEm;
+    }
+
+    public void setCheckOutEm(OffsetDateTime checkOutEm) {
+        this.checkOutEm = checkOutEm;
+    }
+
     public ReservaResponseDTO toResponseDTO() {
         return new ReservaResponseDTO(this);
     }
     public ReservaDTO toReservaDTO(){
-        return new ReservaDTO(this.id, this.vaga, this.inicio, this.fim, this.veiculo, this.status, this.criadoPor, this.criadoEm, this.motorista);
+        return new ReservaDTO(this.id, this.cidadeOrigem, this.entradaCidade, this.checkedIn, this.checkInEm, this.checkOutEm, this.vaga, this.inicio, this.fim, this.veiculo, this.status, this.criadoPor, this.criadoEm, this.motorista);
     }
 }

@@ -141,6 +141,6 @@ public class ReservaRapida {
     }
 
     public ReservaDTO toReservaDTO() {
-        return new ReservaDTO(this.id, this.vaga, this.inicio, this.fim, this.tipoVeiculo.getComprimento(), this.placa, this.status, this.agente.getUsuario(), this.criadoEm);
+        return new ReservaDTO(this.id, this.vaga.getId(), this.vaga.getNumeroEndereco(), this.vaga.getReferenciaEndereco(), this.vaga.getEndereco().toResponseDTO(), this.inicio, this.fim, this.tipoVeiculo.getComprimento(), this.placa, this.status, this.agente.getUsuario(), this.criadoEm);
     }
 }
