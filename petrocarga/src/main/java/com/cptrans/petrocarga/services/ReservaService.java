@@ -347,7 +347,7 @@ public static class Intervalo {
             throw new IllegalStateException("Reserva não está ativa.");
         }
 
-        if (Boolean.TRUE.equals(reserva.getCheckedIn())) {
+        if (Boolean.TRUE.equals(reserva.isCheckedIn())) {
             throw new IllegalStateException("Check-in já foi realizado para esta reserva.");
         }
 
@@ -468,6 +468,7 @@ public static class Intervalo {
         Reserva reserva = findById(reservaId);
         if (reserva.getStatus() != StatusReservaEnum.ATIVA) throw new IllegalArgumentException("Reserva com status '" + reserva.getStatus() + "' não pode ser finalizada.");
         reserva.setStatus(StatusReservaEnum.CONCLUIDA);
+        reserva.setCheckOutEm(OffsetDateTime.now(DateUtils.FUSO_BRASIL));
         Reserva reservaSalva = reservaRepository.save(reserva);
         try {
             reservaSchedulerService.cancelarSchedulerFinalizaReserva(reservaSalva.getId());
@@ -531,6 +532,7 @@ public static class Intervalo {
         if(reserva.isPresent()) {
             if(reserva.get().getStatus() != StatusReservaEnum.CONCLUIDA) {
                 reserva.get().setStatus(StatusReservaEnum.CONCLUIDA);
+                reserva.get().setCheckOutEm(OffsetDateTime.now(DateUtils.FUSO_BRASIL));
                 reservaRepository.save(reserva.get());
             }
         }

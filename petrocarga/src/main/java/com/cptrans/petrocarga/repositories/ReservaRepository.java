@@ -51,6 +51,9 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
     @Query("SELECT COUNT(DISTINCT v.id) FROM Vaga v")
     Long countTotalSlots();
 
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'RESERVADA' AND r.inicio BETWEEN :startDate AND :endDate")
+    Long countPendingReservations(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
+
     @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'ATIVA' AND r.inicio BETWEEN :startDate AND :endDate")
     Long countActiveReservations(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
 
@@ -59,6 +62,9 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
 
     @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'CANCELADA' AND r.inicio BETWEEN :startDate AND :endDate")
     Long countCanceledReservations(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
+
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'REMOVIDA' AND r.inicio BETWEEN :startDate AND :endDate")
+    Long countRemovedReservations(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
 
     @Query("SELECT COUNT(r) FROM Reserva r WHERE r.inicio BETWEEN :startDate AND :endDate")
     Long countTotalReservationsInPeriod(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);

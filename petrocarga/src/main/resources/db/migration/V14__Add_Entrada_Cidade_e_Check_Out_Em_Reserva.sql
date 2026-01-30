@@ -1,0 +1,3 @@
+ALTER TABLE reserva 
+	ADD COLUMN  entrada_cidade VARCHAR(100) NULL,
+	ADD COLUMN check_out_em TIMESTAMPTZ NULL;
