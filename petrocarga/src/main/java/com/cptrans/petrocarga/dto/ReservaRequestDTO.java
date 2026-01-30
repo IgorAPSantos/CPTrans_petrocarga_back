@@ -11,6 +11,7 @@ import com.cptrans.petrocarga.models.Veiculo;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class ReservaRequestDTO {
     @NotNull(message = "O campo 'vagaId' é obrigatório.")
@@ -22,7 +23,7 @@ public class ReservaRequestDTO {
     @NotNull(message = "O campo 'cidadeOrigem' é obrigatório.")
     @NotBlank(message = "O campo 'cidadeOrigem' não pode estar em branco.")
     private String cidadeOrigem;
-    @NotBlank(message = "O campo 'entradaCidade' não pode estar em branco.")
+    @Size(min = 3, max = 100, message = "O campo 'entradaCidade' deve ter entre 3 e 100 caracteres.")
     private String entradaCidade;
     @NotNull(message = "O campo 'inicio' é obrigatório.")
     private OffsetDateTime inicio;
