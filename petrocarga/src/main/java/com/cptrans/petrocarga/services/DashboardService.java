@@ -124,13 +124,30 @@ public class DashboardService {
             .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "dashboard-entry-origins", key = "#startDate?.toString() + '-' + #endDate?.toString()", unless = "#result == null || #result.isEmpty()")
+    public List<LocationStatDTO> getEntryOriginStats(OffsetDateTime startDate, OffsetDateTime endDate) {
+        OffsetDateTime resolvedStart = resolveStartDate(startDate);
+        OffsetDateTime resolvedEnd = resolveEndDate(endDate);
+
+        List<Map<String, Object>> results = reservaRepository.getEntryOriginStats(resolvedStart, resolvedEnd);
+        
+        return results.stream()
+            .map(row -> new LocationStatDTO(
+                (String) row.get("name"),
+                "entry-origin",
+                ((Number) row.get("count")).longValue()
+            ))
+            .collect(Collectors.toList());
+    }
+
     @Cacheable(value = "dashboard-summary", key = "#startDate?.toString() + '-' + #endDate?.toString()", unless = "#result == null")
     public DashboardSummaryDTO getSummary(OffsetDateTime startDate, OffsetDateTime endDate) {
         return new DashboardSummaryDTO(
             getKpis(startDate, endDate),
             getVehicleTypeStats(startDate, endDate),
             getDistrictStats(startDate, endDate),
-            getOriginStats(startDate, endDate)
+            getOriginStats(startDate, endDate),
+            getEntryOriginStats(startDate, endDate)
         );
     }
 }

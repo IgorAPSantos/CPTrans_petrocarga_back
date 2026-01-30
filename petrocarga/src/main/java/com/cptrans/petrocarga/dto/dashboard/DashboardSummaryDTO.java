@@ -7,16 +7,18 @@ public class DashboardSummaryDTO {
     private List<VehicleTypeStatDTO> vehicleTypes;
     private List<LocationStatDTO> districts;
     private List<LocationStatDTO> origins;
+    private List<LocationStatDTO> entryOrigins;
 
     public DashboardSummaryDTO() {
     }
 
     public DashboardSummaryDTO(DashboardKpiDTO kpis, List<VehicleTypeStatDTO> vehicleTypes,
-            List<LocationStatDTO> districts, List<LocationStatDTO> origins) {
+            List<LocationStatDTO> districts, List<LocationStatDTO> origins, List<LocationStatDTO> entryOrigins) {
         this.kpis = kpis;
         this.vehicleTypes = vehicleTypes;
         this.districts = districts;
         this.origins = origins;
+        this.entryOrigins = entryOrigins;
     }
 
     public DashboardKpiDTO getKpis() {
@@ -49,5 +51,13 @@ public class DashboardSummaryDTO {
 
     public void setOrigins(List<LocationStatDTO> origins) {
         this.origins = origins;
+    }
+
+    public List<LocationStatDTO> getEntryOrigins() {
+        return entryOrigins;
+    }
+
+    public void setEntryOrigins(List<LocationStatDTO> entryOrigins) {
+        this.entryOrigins = entryOrigins;
     }
 }

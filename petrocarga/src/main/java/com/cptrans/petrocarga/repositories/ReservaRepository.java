@@ -98,4 +98,12 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
            "GROUP BY r.cidadeOrigem " +
            "ORDER BY count DESC")
     List<java.util.Map<String, Object>> getOriginStats(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
+
+    @Query("SELECT new map(r.entradaCidade as name, COUNT(r.id) as count) " +
+           "FROM Reserva r " +
+           "WHERE r.entradaCidade IS NOT NULL " +
+           "AND r.inicio BETWEEN :startDate AND :endDate " +
+           "GROUP BY r.entradaCidade " +
+           "ORDER BY count DESC")
+    List<java.util.Map<String, Object>> getEntryOriginStats(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
 }
