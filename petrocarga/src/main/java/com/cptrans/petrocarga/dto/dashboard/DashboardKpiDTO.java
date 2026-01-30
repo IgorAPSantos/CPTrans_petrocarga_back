@@ -5,9 +5,11 @@ import java.time.OffsetDateTime;
 public class DashboardKpiDTO {
     private Long totalSlots;
     private Long activeReservations;
+    private Long pendingReservations;
     private Double occupancyRate;
     private Long completedReservations;
     private Long canceledReservations;
+    private Long removedReservations;
     private Long totalReservations;
     private Long multipleSlotReservations;
     private OffsetDateTime startDate;
@@ -16,14 +18,16 @@ public class DashboardKpiDTO {
     public DashboardKpiDTO() {
     }
 
-    public DashboardKpiDTO(Long totalSlots, Long activeReservations, Double occupancyRate,
-            Long completedReservations, Long canceledReservations, Long totalReservations,
+    public DashboardKpiDTO(Long totalSlots, Long activeReservations, Long pendingReservations, Double occupancyRate,
+            Long completedReservations, Long canceledReservations, Long removedReservations, Long totalReservations,
             Long multipleSlotReservations, OffsetDateTime startDate, OffsetDateTime endDate) {
         this.totalSlots = totalSlots;
         this.activeReservations = activeReservations;
+        this.pendingReservations = pendingReservations;
         this.occupancyRate = occupancyRate;
         this.completedReservations = completedReservations;
         this.canceledReservations = canceledReservations;
+        this.removedReservations = removedReservations;
         this.totalReservations = totalReservations;
         this.multipleSlotReservations = multipleSlotReservations;
         this.startDate = startDate;
@@ -44,6 +48,14 @@ public class DashboardKpiDTO {
 
     public void setActiveReservations(Long activeReservations) {
         this.activeReservations = activeReservations;
+    }
+
+    public Long getPendingReservations() {
+        return pendingReservations;
+    }
+
+    public void setPendingReservations(Long pendingReservations) {
+        this.pendingReservations = pendingReservations;
     }
 
     public Double getOccupancyRate() {
@@ -68,6 +80,14 @@ public class DashboardKpiDTO {
 
     public void setCanceledReservations(Long canceledReservations) {
         this.canceledReservations = canceledReservations;
+    }
+
+    public Long getRemovedReservations() {
+        return removedReservations;
+    }
+
+    public void setRemovedReservations(Long removedReservations) {
+        this.removedReservations = removedReservations;
     }
 
     public Long getTotalReservations() {
