@@ -143,6 +143,6 @@ public class ReservaUtils {
     }
 
     public Boolean existsByUsuarioId(UUID usuarioId) {
-        return reservaRepository.existsByStatusInAndCriadoPorIdOrMotoristaUsuarioId(List.of(StatusReservaEnum.ATIVA, StatusReservaEnum.RESERVADA), usuarioId, usuarioId);
+        return reservaRepository.existsByCriadoPorIdOrMotoristaUsuarioId(usuarioId);
     }
 }

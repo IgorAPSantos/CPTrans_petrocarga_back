@@ -142,18 +142,17 @@ List<Object[]> getMostUsedVagas(
     @Param("endDate") OffsetDateTime endDate
 );
 
-// @Query(value ="""
-//               select EXISTS (
-//     SELECT 1
-//     FROM reserva r
-//     LEFT JOIN motorista m ON r.motorista_id = m.id
-//     WHERE
-//         (r.criado_por = :usuarioId OR m.usuario_id = :usuarioId)
-//         AND r.status IN ('RESERVADA', 'ATIVA')
-// );
-//        """,
-//        nativeQuery = true)
-// Boolean existsByCriadoPorIdOrMotoristaUsuarioId (@Param("usuarioId") UUID usuarioId);
+@Query(value ="""
+              select EXISTS (
+    SELECT 1
+    FROM reserva r
+    LEFT JOIN motorista m ON r.motorista_id = m.id
+    WHERE
+        (r.criado_por = :usuarioId OR m.usuario_id = :usuarioId)
+        AND r.status IN ('RESERVADA', 'ATIVA')
+);
+       """,
+       nativeQuery = true)
+Boolean existsByCriadoPorIdOrMotoristaUsuarioId (@Param("usuarioId") UUID usuarioId);
 
-Boolean existsByStatusInAndCriadoPorIdOrMotoristaUsuarioId (List<StatusReservaEnum> status, UUID criadoPorId, UUID motoristaUsuarioId);
 }
