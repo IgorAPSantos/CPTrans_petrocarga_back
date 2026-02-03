@@ -139,6 +139,26 @@ public class DashboardService {
             ))
             .collect(Collectors.toList());
     }
+    @Cacheable(value = "dashboard-most-used", key = "#startDate?.toString() + '-' + #endDate?.toString()", unless = "#result == null || #result.isEmpty()")
+    public List<LocationStatDTO> getMostUsedVagas(OffsetDateTime startDate, OffsetDateTime endDate) {
+        OffsetDateTime resolvedStart = resolveStartDate(startDate);
+        OffsetDateTime resolvedEnd = resolveEndDate(endDate);
+
+        List<Object[]> results = reservaRepository.getMostUsedVagas(resolvedStart, resolvedEnd);
+        
+        if (results == null || results.isEmpty()) {
+            return List.of();
+        }
+        
+        return results.stream()
+    .map(r -> new LocationStatDTO(
+        (String) r[0],                
+        "most-used",
+        ((Number) r[1]).longValue()
+    ))
+    .toList();
+
+    }
 
     @Cacheable(value = "dashboard-summary", key = "#startDate?.toString() + '-' + #endDate?.toString()", unless = "#result == null")
     public DashboardSummaryDTO getSummary(OffsetDateTime startDate, OffsetDateTime endDate) {
@@ -147,7 +167,8 @@ public class DashboardService {
             getVehicleTypeStats(startDate, endDate),
             getDistrictStats(startDate, endDate),
             getOriginStats(startDate, endDate),
-            getEntryOriginStats(startDate, endDate)
+            getEntryOriginStats(startDate, endDate),
+            getMostUsedVagas(startDate, endDate)
         );
     }
 }

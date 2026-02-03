@@ -106,4 +106,54 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
            "GROUP BY r.entradaCidade " +
            "ORDER BY count DESC")
     List<java.util.Map<String, Object>> getEntryOriginStats(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
+
+@Query(
+  value = """
+    SELECT
+      COALESCE(CONCAT(ev.logradouro, ', ', v.numero_endereco), 'SEM ENDERECO') AS name,
+      SUM(x.total_utilizacoes) AS count
+    FROM (
+       SELECT
+         r.vaga_id,
+         COUNT(1) AS total_utilizacoes
+       FROM reserva r
+       WHERE r.status = 'CONCLUIDA'
+         AND r.inicio BETWEEN :startDate AND :endDate
+       GROUP BY r.vaga_id
+
+       UNION ALL
+
+       SELECT
+         rr.vaga_id,
+         COUNT(1) AS total_utilizacoes
+       FROM reserva_rapida rr
+       WHERE rr.inicio BETWEEN :startDate AND :endDate
+       GROUP BY rr.vaga_id
+    ) x
+    JOIN vaga v ON v.id = x.vaga_id
+    LEFT JOIN endereco_vaga ev ON ev.id = v.endereco_id
+    GROUP BY ev.logradouro, v.numero_endereco
+    ORDER BY count DESC
+  """,
+  nativeQuery = true
+)
+List<Object[]> getMostUsedVagas(
+    @Param("startDate") OffsetDateTime startDate,
+    @Param("endDate") OffsetDateTime endDate
+);
+
+// @Query(value ="""
+//               select EXISTS (
+//     SELECT 1
+//     FROM reserva r
+//     LEFT JOIN motorista m ON r.motorista_id = m.id
+//     WHERE
+//         (r.criado_por = :usuarioId OR m.usuario_id = :usuarioId)
+//         AND r.status IN ('RESERVADA', 'ATIVA')
+// );
+//        """,
+//        nativeQuery = true)
+// Boolean existsByCriadoPorIdOrMotoristaUsuarioId (@Param("usuarioId") UUID usuarioId);
+
+Boolean existsByStatusInAndCriadoPorIdOrMotoristaUsuarioId (List<StatusReservaEnum> status, UUID criadoPorId, UUID motoristaUsuarioId);
 }
