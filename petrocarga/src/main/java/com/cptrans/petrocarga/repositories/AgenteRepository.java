@@ -13,6 +13,8 @@ import com.cptrans.petrocarga.models.Usuario;
 @Repository
 public interface AgenteRepository extends JpaRepository<Agente, UUID>, JpaSpecificationExecutor<Agente> {
     public Optional<Agente> findByUsuario(Usuario usuario);
+    public Optional<Agente> findByUsuarioAndUsuarioAtivo(Usuario usuario, Boolean ativo);
+    public Optional<Agente> findByIdAndUsuarioAtivo(UUID agenteId, Boolean ativo);
     public Optional<Agente> findByMatricula(String matricula);
     public Boolean existsByMatricula(String matricula);
 }

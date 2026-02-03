@@ -8,17 +8,19 @@ public class DashboardSummaryDTO {
     private List<LocationStatDTO> districts;
     private List<LocationStatDTO> origins;
     private List<LocationStatDTO> entryOrigins;
+    private List<LocationStatDTO> mostUsedVagas;
 
     public DashboardSummaryDTO() {
     }
 
     public DashboardSummaryDTO(DashboardKpiDTO kpis, List<VehicleTypeStatDTO> vehicleTypes,
-            List<LocationStatDTO> districts, List<LocationStatDTO> origins, List<LocationStatDTO> entryOrigins) {
+            List<LocationStatDTO> districts, List<LocationStatDTO> origins, List<LocationStatDTO> entryOrigins, List<LocationStatDTO> mostUsedVagas) {
         this.kpis = kpis;
         this.vehicleTypes = vehicleTypes;
         this.districts = districts;
         this.origins = origins;
         this.entryOrigins = entryOrigins;
+        this.mostUsedVagas = mostUsedVagas;
     }
 
     public DashboardKpiDTO getKpis() {
@@ -60,4 +62,13 @@ public class DashboardSummaryDTO {
     public void setEntryOrigins(List<LocationStatDTO> entryOrigins) {
         this.entryOrigins = entryOrigins;
     }
+
+    public List<LocationStatDTO> getMostUsedVagas() {
+        return mostUsedVagas;
+    }
+
+    public void setMostUsedVagas(List<LocationStatDTO> mostUsedVagas) {
+        this.mostUsedVagas = mostUsedVagas;
+    }
+
 }

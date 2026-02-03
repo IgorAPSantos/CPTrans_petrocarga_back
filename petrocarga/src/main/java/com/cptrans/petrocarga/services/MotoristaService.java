@@ -54,18 +54,18 @@ public class MotoristaService {
 
     @Transactional
     public Motorista createMotorista(Motorista novoMotorista) {
-        Usuario usuario = usuarioService.createUsuario(novoMotorista.getUsuario(), PermissaoEnum.MOTORISTA);
-        novoMotorista.setUsuario(usuario);
-        if(motoristaRepository.existsByNumeroCnh(novoMotorista.getNumeroCnh())) {
-            throw new IllegalArgumentException("Número da CNH já cadastrado");
-        }
         // if(novoMotorista.getEmpresa() != null) {
-        //     Empresa empresa = empresaService.findById(novoMotorista.getEmpresa().getId());
-        //     novoMotorista.setEmpresa(empresa);
-        // }
-        if(novoMotorista.getDataValidadeCnh().isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("CNH vencida");
-        }
+            //     Empresa empresa = empresaService.findById(novoMotorista.getEmpresa().getId());
+            //     novoMotorista.setEmpresa(empresa);
+            // }
+            if(novoMotorista.getDataValidadeCnh().isBefore(LocalDate.now())) {
+                throw new IllegalArgumentException("CNH vencida");
+            }
+            Usuario usuario = usuarioService.createUsuario(novoMotorista.getUsuario(), PermissaoEnum.MOTORISTA);
+            novoMotorista.setUsuario(usuario);
+            if(motoristaRepository.existsByNumeroCnh(novoMotorista.getNumeroCnh())) {
+                throw new IllegalArgumentException("Número da CNH já cadastrado");
+            }
         return  motoristaRepository.save(novoMotorista);
     }
 

@@ -32,13 +32,13 @@ public class AgenteService {
     }
 
     public Agente findById(UUID id) {
-        return agenteRepository.findById(id)
+        return agenteRepository.findByIdAndUsuarioAtivo(id, true)
                 .orElseThrow(() -> new EntityNotFoundException("Agente nao encontrado"));
     }
 
     public Agente findByUsuarioId(UUID usuarioId) {
         Usuario usuario = usuarioService.findById(usuarioId);
-        return agenteRepository.findByUsuario(usuario)
+        return agenteRepository.findByUsuarioAndUsuarioAtivo(usuario, true)
                 .orElseThrow(() -> new EntityNotFoundException("Agente não encontrado"));
     }
 

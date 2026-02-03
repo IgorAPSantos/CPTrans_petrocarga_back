@@ -12,14 +12,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cptrans.petrocarga.domain.event.UsuarioCriadoEvent;
 import com.cptrans.petrocarga.dto.GestorFiltrosDTO;
 import com.cptrans.petrocarga.dto.UsuarioPATCHRequestDTO;
 import com.cptrans.petrocarga.enums.PermissaoEnum;
 import com.cptrans.petrocarga.infrastructure.email.EmailSender;
+import com.cptrans.petrocarga.infrastructure.event.SpringDomainEventPublisher;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.repositories.UsuarioRepository;
 import com.cptrans.petrocarga.specification.GestorSpecification;
 import com.cptrans.petrocarga.utils.DateUtils;
+import com.cptrans.petrocarga.utils.ReservaUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -34,6 +37,13 @@ public class UsuarioService {
 
     @Autowired
     private EmailSender emailSender;
+
+    @Autowired
+    private SpringDomainEventPublisher eventPublisher;
+
+    @Autowired
+    private ReservaUtils reservaUtils;
+
     
     public List<Usuario> findAll() {
         return usuarioRepository.findAll();
@@ -77,7 +87,7 @@ public class UsuarioService {
 
         // Envia código de ativação via email (assíncrono)
         // O EmailSender é @Async, exceções são tratadas pelo AsyncUncaughtExceptionHandler
-        emailSender.sendActivationCode(saved.getEmail(), codeStr);
+        eventPublisher.publish(new UsuarioCriadoEvent(saved.getEmail(), saved.getVerificationCode()));
 
         return saved;
     }
@@ -268,6 +278,9 @@ public class UsuarioService {
     }
     public void deleteById(UUID id) {
         Usuario usuario = findByIdAndAtivo(id, true);
+        if(usuario.getPermissao().equals(PermissaoEnum.MOTORISTA) && reservaUtils.existsByUsuarioId(id)){
+            throw new IllegalArgumentException("Motorista não pode ser excluido pois possui reserva ativa.");
+        }
         usuario.setAtivo(false);
         usuario.setDesativadoEm(OffsetDateTime.now(DateUtils.FUSO_BRASIL));
         usuarioRepository.save(usuario);

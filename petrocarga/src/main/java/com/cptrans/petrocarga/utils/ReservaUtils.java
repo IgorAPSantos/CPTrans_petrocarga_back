@@ -3,6 +3,7 @@ package com.cptrans.petrocarga.utils;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -139,5 +140,9 @@ public class ReservaUtils {
         }
     
         return listaFinalReservas;
+    }
+
+    public Boolean existsByUsuarioId(UUID usuarioId) {
+        return reservaRepository.existsByStatusInAndCriadoPorIdOrMotoristaUsuarioId(List.of(StatusReservaEnum.ATIVA, StatusReservaEnum.RESERVADA), usuarioId, usuarioId);
     }
 }

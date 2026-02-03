@@ -25,7 +25,7 @@ public class GestorService {
     }
 
     public Usuario findByUsuarioId(UUID usuarioId) {
-        return usuarioService.findById(usuarioId);
+        return usuarioService.findByIdAndAtivo(usuarioId, true);
     }
 
     public Usuario createGestor(Usuario novoGestor) {
