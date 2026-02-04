@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.cptrans.petrocarga.dto.OperacaoVagaRequestDTO;
 import com.cptrans.petrocarga.enums.DiaSemanaEnum;
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
 import com.cptrans.petrocarga.models.EnderecoVaga;
@@ -28,6 +29,8 @@ public class VagaService {
     private VagaRepository vagaRepository;
     @Autowired
     private EnderecoVagaService enderecoVagaService;
+    @Autowired
+    private OperacaoVagaService operacaoVagaService;
 
     public Vaga save(Vaga vaga) {
         return vagaRepository.save(vaga);
@@ -117,13 +120,17 @@ public class VagaService {
     
     @Transactional()
     public Vaga createVaga(Vaga novaVaga){
-        EnderecoVaga enderecoVaga = enderecoVagaService.cadastrarEnderecoVaga(novaVaga.getEndereco());
-        novaVaga.setEndereco(enderecoVaga);
-        
         if(novaVaga.getComprimento() == null) {
             throw new IllegalArgumentException("O campo 'comprimento' é obrigatório e não pode ser nulo ou vazio.");
         }
+        EnderecoVaga enderecoVaga = enderecoVagaService.cadastrarEnderecoVaga(novaVaga.getEndereco());
+        novaVaga.setEndereco(enderecoVaga);
         
-        return vagaRepository.save(novaVaga);
+        Vaga vagaCadastrada= vagaRepository.save(novaVaga);
+
+        if(vagaCadastrada.getOperacoesVaga() == null || vagaCadastrada.getOperacoesVaga().isEmpty()) {
+            vagaCadastrada.setOperacoesVaga(operacaoVagaService.setOperacoesVagaDefault(vagaCadastrada));
+        }
+        return vagaCadastrada;
     }
 }

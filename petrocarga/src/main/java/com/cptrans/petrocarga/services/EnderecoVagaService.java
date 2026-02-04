@@ -17,12 +17,7 @@ public class EnderecoVagaService {
     public EnderecoVaga cadastrarEnderecoVaga(EnderecoVaga novoEndereco){
         Optional<EnderecoVaga> enderecoCadrastado = enderecoVagaRepository.findByCodigoPmp(novoEndereco.getCodigoPmp());
         if(enderecoCadrastado.isPresent()){
-            if(enderecoCadrastado.get().getLogradouro().equals(novoEndereco.getLogradouro()) && enderecoCadrastado.get().getBairro().equals(novoEndereco.getBairro())) {
-                return enderecoCadrastado.get();
-            }
-            enderecoCadrastado.get().setLogradouro(novoEndereco.getLogradouro());
-            enderecoCadrastado.get().setBairro(novoEndereco.getBairro());
-            return enderecoVagaRepository.save(enderecoCadrastado.get());
+           return enderecoCadrastado.get();
         }
         if(novoEndereco.getCodigoPmp() == null || novoEndereco.getCodigoPmp().isEmpty()) {
             throw new IllegalArgumentException("O campo 'codigoPMP' é obrigatório e não pode ser nulo ou vazio.");
