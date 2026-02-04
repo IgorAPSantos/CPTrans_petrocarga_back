@@ -3,7 +3,6 @@ package com.cptrans.petrocarga.controllers;
 import java.util.List;
 import java.util.UUID;
 
-import org.hibernate.validator.constraints.br.CPF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,9 +37,9 @@ public class AgenteController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
     @GetMapping
-    public ResponseEntity<List<AgenteResponseDTO>> getAllAgentes(@RequestParam(required = false) String nome, @Valid @CPF @RequestParam(required = false) String cpf, @RequestParam(required = false) String matricula, @RequestParam(required = false) Boolean ativo, @Valid @Email @RequestParam(required = false) String email) {
-        if(nome != null || cpf != null || matricula != null || ativo != null || email != null) {
-            AgenteFiltrosDTO filtros = new AgenteFiltrosDTO(nome, cpf, matricula, ativo, email);
+    public ResponseEntity<List<AgenteResponseDTO>> getAllAgentes(@RequestParam(required = false) String nome, @RequestParam(required = false) String telefone, @RequestParam(required = false) String matricula, @RequestParam(required = false) Boolean ativo, @Valid @Email @RequestParam(required = false) String email) {
+        if(nome != null || telefone != null || matricula != null || ativo != null || email != null) {
+            AgenteFiltrosDTO filtros = new AgenteFiltrosDTO(nome, telefone, matricula, ativo, email);
             List<Agente> agentesFiltrados = agenteService.findByFiltros(filtros);
             List<AgenteResponseDTO> responseFiltrado = agentesFiltrados.stream().map(Agente::toResponseDTO).toList();
             return ResponseEntity.ok(responseFiltrado);

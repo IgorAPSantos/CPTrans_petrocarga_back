@@ -25,9 +25,9 @@ public class AgenteSpecification {
                 );
             }
 
-            if (filtros.cpf() != null) {
+            if (filtros.telefone() != null) {
                 predicates.add(
-                    cb.equal(root.get("usuario").get("cpf"), filtros.cpf())
+                    cb.equal(root.get("usuario").get("telefone"), filtros.telefone())
                 );
             }
 

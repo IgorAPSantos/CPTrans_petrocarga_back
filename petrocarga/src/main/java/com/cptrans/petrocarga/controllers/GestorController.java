@@ -33,9 +33,9 @@ public class GestorController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping()
-    public ResponseEntity<List<UsuarioResponseDTO>> getAllGestores(@RequestParam(required = false) String nome, @RequestParam(required = false) String cpf, @RequestParam(required = false) String email, @RequestParam(required = false) Boolean ativo) {
-        if(nome != null || cpf != null || email != null || ativo != null) {
-            GestorFiltrosDTO filtros = new GestorFiltrosDTO(nome, cpf, email, ativo);
+    public ResponseEntity<List<UsuarioResponseDTO>> getAllGestores(@RequestParam(required = false) String nome, @RequestParam(required = false) String telefone, @RequestParam(required = false) String email, @RequestParam(required = false) Boolean ativo) {
+        if(nome != null || telefone != null || email != null || ativo != null) {
+            GestorFiltrosDTO filtros = new GestorFiltrosDTO(nome, telefone, email, ativo);
             return ResponseEntity.ok(gestorService.findAllWithFiltros(filtros).stream()
                     .map(gestor -> gestor.toResponseDTO())
                     .toList());
