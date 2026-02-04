@@ -29,9 +29,9 @@ public class GestorSpecification {
                 );
             }
 
-            if (filtros.cpf() != null) {
+            if (filtros.telefone() != null) {
                 predicates.add(
-                    cb.equal(root.get("cpf"), filtros.cpf())
+                    cb.equal(root.get("telefone"), filtros.telefone())
                 );
             }
 

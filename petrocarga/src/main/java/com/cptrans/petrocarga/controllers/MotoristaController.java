@@ -38,12 +38,12 @@ public class MotoristaController {
     @GetMapping
     public ResponseEntity<List<MotoristaResponseDTO>> getAllMotoristas(
         @RequestParam(required = false) String nome,
-        @RequestParam(required = false) String cpf,
+        @RequestParam(required = false) String telefone,
         @RequestParam(required = false) String cnh,
         @RequestParam(required = false) Boolean ativo
     ) {
-        MotoristaFiltrosDTO filtros = new MotoristaFiltrosDTO(nome, cpf, cnh, ativo);
-        if(filtros.nome() != null || filtros.cpf() != null || filtros.cnh() != null || filtros.ativo() != null) {
+        MotoristaFiltrosDTO filtros = new MotoristaFiltrosDTO(nome, telefone, cnh, ativo);
+        if(filtros.nome() != null || filtros.telefone() != null || filtros.cnh() != null || filtros.ativo() != null) {
             List<MotoristaResponseDTO> motoristasFiltrados = motoristaService.findAllWithFiltros(filtros).stream()
                     .map(MotoristaResponseDTO::new)
                     .collect(Collectors.toList());
