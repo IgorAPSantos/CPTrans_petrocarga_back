@@ -43,11 +43,8 @@ public class VagaRequestDTO {
     private Integer comprimento;
     
     @Valid
-    @Schema(description = "Status inicial da vaga (Ex: DISPONIVEL, OCUPADA)", example= "DISPONIVEL")
-    private StatusVagaEnum status;
-
-    @Valid
     private Set<OperacaoVagaRequestDTO> operacoesVaga;
+
 
     public Vaga toEntity() {
         Vaga vaga = new Vaga();
@@ -57,11 +54,11 @@ public class VagaRequestDTO {
         vaga.setReferenciaEndereco(this.referenciaEndereco);
         vaga.setReferenciaGeoFim(this.referenciaGeoFim);
         vaga.setReferenciaGeoInicio(this.referenciaGeoInicio);
-        vaga.setStatus(this.status);
+        vaga.setStatus(StatusVagaEnum.INDISPONIVEL);
         vaga.setTipoVaga(this.tipoVaga);
         vaga.setEndereco(this.endereco.toEntity());
 
-        if (this.operacoesVaga != null) {
+        if (this.operacoesVaga != null && !this.operacoesVaga.isEmpty()) {
             Set<OperacaoVaga> operacoes = this.operacoesVaga.stream()
                     .map(dto -> {
                         return dto.toEntity(vaga);
@@ -136,14 +133,6 @@ public class VagaRequestDTO {
 
     public void setComprimento(Integer comprimento) {
         this.comprimento = comprimento;
-    }
-
-    public StatusVagaEnum getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusVagaEnum status) {
-        this.status = status;
     }
 
     public Set<OperacaoVagaRequestDTO> getOperacoesVaga() {

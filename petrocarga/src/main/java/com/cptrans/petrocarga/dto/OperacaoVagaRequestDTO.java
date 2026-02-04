@@ -7,8 +7,10 @@ import com.cptrans.petrocarga.models.OperacaoVaga;
 import com.cptrans.petrocarga.models.Vaga;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 public class OperacaoVagaRequestDTO {
+    @NotNull(message = "O campo 'codigoDiaSemana' é obrigatório.")
     @Schema(description = "Código do dia da semana (do 1 ao 7)", example = "1")
     private Integer codigoDiaSemana;
     @Schema(description = "Hora de inicio", example = "00:00")
