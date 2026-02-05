@@ -26,9 +26,9 @@ public interface ReservaRapidaRepository extends JpaRepository<ReservaRapida, UU
     public List<ReservaRapida> findByAgenteAndVagaId(Agente agente, UUID vagaId);
     public List<ReservaRapida> findByAgenteAndPlacaIgnoringCase(Agente agente, String placaVeiculo);
     public List<ReservaRapida> findByAgenteAndStatusIn(Agente agente, List<StatusReservaEnum> listaStatus);
-    public List<ReservaRapida> findByFimGreaterThanAndInicioLessThan(OffsetDateTime novoInicio, OffsetDateTime novoFim);
+    public List<ReservaRapida> findByFimGreaterThanAndInicioLessThanAndStatusIn(OffsetDateTime novoInicio, OffsetDateTime novoFim, List<StatusReservaEnum> status);
     public List<ReservaRapida> findByAgenteAndVagaIdAndPlacaIgnoringCaseAndStatusIn(Agente agente, UUID vagaId, String placaVeiculo, List<StatusReservaEnum> status);
-    public Integer countByPlaca(String placa);
+    public Integer countByPlacaIgnoringCase(String placa);
     
     @Query("SELECT COUNT(rr) FROM ReservaRapida rr WHERE rr.status = 'ATIVA' AND rr.inicio BETWEEN :startDate AND :endDate")
     Long countActiveReservations(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);

@@ -25,7 +25,8 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
     public List<Reserva> findByVagaAndStatusAndInicio(Vaga vaga, StatusReservaEnum status, OffsetDateTime data);
     public List<Reserva> findByVeiculoPlacaIgnoringCaseAndStatusIn(String placa, List<StatusReservaEnum> status);
     public Integer countByVeiculoPlacaIgnoringCaseAndStatusIn(String placa,List<StatusReservaEnum> status);
-    public List<Reserva> findByFimGreaterThanAndInicioLessThan(OffsetDateTime novoInicio, OffsetDateTime novoFim);
+    public List<Reserva> findByFimGreaterThanAndInicioLessThanAndStatusIn(OffsetDateTime novoInicio, OffsetDateTime novoFim, List<StatusReservaEnum> status);
+    public List<Reserva> findByFimGreaterThanAndInicioLessThanAndMotoristaUsuarioIdAndStatusIn(OffsetDateTime novoInicio, OffsetDateTime novoFim, UUID usuarioId, List<StatusReservaEnum> status);
     public Boolean existsByVeiculoIdAndStatusIn(UUID veiculoId, List<StatusReservaEnum> status);
 
     @Query("SELECT r FROM Reserva r " +
