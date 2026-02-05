@@ -109,7 +109,6 @@ public class ReservaRapidaService {
     }
 
     public ReservaRapida create(ReservaRapida novaReservaRapida) {
-        Integer quantidadeReservasRapidasPorPlaca = reservaRapidaRepository.countByPlaca(novaReservaRapida.getPlaca());
         Vaga vagaReserva = vagaService.findById(novaReservaRapida.getVaga().getId());
         List<StatusReservaEnum> listaStatus = new ArrayList<>(List.of(StatusReservaEnum.ATIVA, StatusReservaEnum.RESERVADA));
         List<Reserva>  reservasAtivasNaVaga = reservaRepository.findByVagaAndStatusIn(vagaReserva, listaStatus);
@@ -121,7 +120,7 @@ public class ReservaRapidaService {
             novaReservaRapida.setAgente(agenteLogado);
         }
 
-        ReservaRapidaUtils.validarQuantidadeReservasPorPlaca(quantidadeReservasRapidasPorPlaca, novaReservaRapida);
+        reservaRapidaUtils.validarQuantidadeReservasPorPlaca(novaReservaRapida.toReservaDTO());
         ReservaUtils.validarTempoMaximoReserva(novaReservaRapida.toReservaDTO(), novaReservaRapida.getVaga());
         reservaRapidaUtils.validarEspacoDisponivelNaVaga(novaReservaRapida, vagaReserva, reservasAtivasNaVaga, reservasRapidasAtivasNaVaga);
         ReservaRapida reservaRapidaCriada = reservaRapidaRepository.save(novaReservaRapida);
