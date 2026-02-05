@@ -1,6 +1,7 @@
 package com.cptrans.petrocarga.repositories;
 
 import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +15,7 @@ import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.models.Agente;
 import com.cptrans.petrocarga.models.ReservaRapida;
 import com.cptrans.petrocarga.models.Vaga;
+import com.cptrans.petrocarga.repositories.projections.StayDurationAggProjection;
 
 @Repository
 public interface ReservaRapidaRepository extends JpaRepository<ReservaRapida, UUID>, JpaSpecificationExecutor<ReservaRapida> {
@@ -32,6 +34,55 @@ public interface ReservaRapidaRepository extends JpaRepository<ReservaRapida, UU
     
     @Query("SELECT COUNT(rr) FROM ReservaRapida rr WHERE rr.status = 'ATIVA' AND rr.inicio BETWEEN :startDate AND :endDate")
     Long countActiveReservations(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
+
+        /**
+         * "Ativas no período" (overlap) != "iniciadas no período".
+         *
+         * <p>Ativas no período significa que houve interseção com o intervalo consultado:
+         * {@code rr.inicio <= endDate AND (rr.fim IS NULL OR rr.fim >= startDate)}.</p>
+         */
+        @Query("SELECT COUNT(rr) FROM ReservaRapida rr " +
+            "WHERE rr.status = 'ATIVA' " +
+            "AND rr.inicio <= :endDate " +
+            "AND (rr.fim IS NULL OR rr.fim >= :startDate)")
+        Long countActiveReservationsDuringPeriod(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
+
+        /**
+         * Soma de (comprimento do TipoVeiculoEnum em metros × minutos de overlap) para reservas rápidas ATIVAS.
+         */
+        @Query(
+            value = """
+                SELECT
+                    COALESCE(
+                        SUM(
+                            (
+                                CASE rr.tipo_veiculo
+                                    WHEN 'AUTOMOVEL' THEN 5
+                                    WHEN 'VUC' THEN 7
+                                    WHEN 'CAMINHONETA' THEN 8
+                                    WHEN 'CAMINHAO_MEDIO' THEN 12
+                                    WHEN 'CAMINHAO_LONGO' THEN 19
+                                    ELSE 0
+                                END
+                            )
+                            * GREATEST(
+                                    EXTRACT(EPOCH FROM (LEAST(rr.fim, :endDate) - GREATEST(rr.inicio, :startDate))) / 60.0,
+                                    0
+                                )
+                        ),
+                        0
+                    ) AS occupiedLengthMinute
+                FROM reserva_rapida rr
+                WHERE rr.status = 'ATIVA'
+                    AND rr.inicio <= :endDate
+                    AND rr.fim >= :startDate
+            """,
+            nativeQuery = true
+        )
+        BigDecimal sumOccupiedLengthMinutesActiveDuringPeriod(
+                @Param("startDate") OffsetDateTime startDate,
+                @Param("endDate") OffsetDateTime endDate
+        );
 
     @Query("SELECT COUNT(rr) FROM ReservaRapida rr WHERE rr.status = 'CONCLUIDA' AND rr.inicio BETWEEN :startDate AND :endDate")
     Long countCompletedReservations(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
@@ -64,5 +115,26 @@ public interface ReservaRapidaRepository extends JpaRepository<ReservaRapida, UU
            "GROUP BY ev.bairro " +
            "ORDER BY count DESC")
     List<java.util.Map<String, Object>> getDistrictStats(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
+
+        @Query(
+            value = """
+                SELECT
+                    COUNT(1) AS totalCount,
+                    COALESCE(SUM(EXTRACT(EPOCH FROM (rr.fim - rr.inicio)) / 60.0), 0) AS sumMinutes,
+                    MIN(EXTRACT(EPOCH FROM (rr.fim - rr.inicio)) / 60.0) AS minMinutes,
+                    MAX(EXTRACT(EPOCH FROM (rr.fim - rr.inicio)) / 60.0) AS maxMinutes
+                FROM reserva_rapida rr
+                WHERE rr.status = 'CONCLUIDA'
+                    AND rr.inicio BETWEEN :startDate AND :endDate
+                    AND rr.inicio IS NOT NULL
+                    AND rr.fim IS NOT NULL
+                    AND rr.fim >= rr.inicio
+            """,
+            nativeQuery = true
+        )
+        StayDurationAggProjection getStayDurationAggCompletedReservations(
+                @Param("startDate") OffsetDateTime startDate,
+                @Param("endDate") OffsetDateTime endDate
+        );
 
 }
