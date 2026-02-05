@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.cptrans.petrocarga.enums.StatusVagaEnum;
@@ -18,4 +19,7 @@ public interface  VagaRepository extends JpaRepository<Vaga, UUID> {
     Page<Vaga> findByStatus(StatusVagaEnum status, Pageable pageable);
     Page<Vaga> findByEnderecoLogradouroContainingIgnoreCase(String logradouro, Pageable pageable);
     Page<Vaga> findByStatusAndEnderecoLogradouroContainingIgnoreCase(StatusVagaEnum status, String logradouro, Pageable pageable);
+
+    @Query("SELECT COALESCE(SUM(v.comprimento), 0) FROM Vaga v")
+    Long sumTotalAvailableLengthMeters();
 }
