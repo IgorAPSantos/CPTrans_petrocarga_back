@@ -1,6 +1,7 @@
 package com.cptrans.petrocarga.repositories;
 
 import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,6 +14,8 @@ import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.models.Reserva;
 import com.cptrans.petrocarga.models.Usuario;
 import com.cptrans.petrocarga.models.Vaga;
+import com.cptrans.petrocarga.repositories.projections.StayDurationAggProjection;
+import com.cptrans.petrocarga.repositories.projections.VehicleRouteEventProjection;
 
 @Repository
 public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
@@ -57,6 +60,122 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID> {
 
     @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'ATIVA' AND r.inicio BETWEEN :startDate AND :endDate")
     Long countActiveReservations(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
+
+    /**
+     * "Ativas no período" (overlap) != "iniciadas no período".
+     *
+     * <p>Ativas no período significa que houve interseção com o intervalo consultado:
+     * {@code r.inicio <= endDate AND (r.fim IS NULL OR r.fim >= startDate)}.</p>
+     */
+    @Query("SELECT COUNT(r) FROM Reserva r " +
+           "WHERE r.status = 'ATIVA' " +
+           "AND r.inicio <= :endDate " +
+           "AND (r.fim IS NULL OR r.fim >= :startDate)")
+    Long countActiveReservationsDuringPeriod(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
+
+              /**
+               * Soma de (comprimento do veículo em metros × minutos de overlap) para reservas ATIVAS.
+               *
+               * <p>Usado para métricas de ocupação por comprimento no dashboard. Não altera as validações
+               * existentes; apenas agrega dados já persistidos.</p>
+               */
+              @Query(
+                     value = """
+                            SELECT
+                                   COALESCE(
+                                          SUM(
+                                                 (
+                                                        COALESCE(
+                                                               ve.comprimento,
+                                                               CASE ve.tipo
+                                                                      WHEN 'AUTOMOVEL' THEN 5
+                                                                      WHEN 'VUC' THEN 7
+                                                                      WHEN 'CAMINHONETA' THEN 8
+                                                                      WHEN 'CAMINHAO_MEDIO' THEN 12
+                                                                      WHEN 'CAMINHAO_LONGO' THEN 19
+                                                                      ELSE 0
+                                                               END
+                                                        )
+                                                 )
+                                                 * GREATEST(
+                                                               EXTRACT(EPOCH FROM (LEAST(r.fim, :endDate) - GREATEST(r.inicio, :startDate))) / 60.0,
+                                                               0
+                                                        )
+                                          ),
+                                          0
+                                   ) AS occupiedLengthMinute
+                            FROM reserva r
+                            JOIN veiculo ve ON ve.id = r.veiculo_id
+                            WHERE r.status = 'ATIVA'
+                                   AND r.inicio <= :endDate
+                                   AND r.fim >= :startDate
+                     """,
+                     nativeQuery = true
+              )
+              BigDecimal sumOccupiedLengthMinutesActiveDuringPeriod(
+                            @Param("startDate") OffsetDateTime startDate,
+                            @Param("endDate") OffsetDateTime endDate
+              );
+
+                            /**
+                             * Eventos de trajeto para reconstrução (origem -> vaga(s) -> destino), unificando Reserva e ReservaRapida.
+                             *
+                             * <p>Filtro por interseção do intervalo: {@code inicio <= endDate AND fim >= startDate}.
+                             * Isso permite retornar eventos que começaram antes de {@code startDate} mas ainda estavam em vigor no período.</p>
+                             */
+                            @Query(
+                                   value = """
+                                          SELECT
+                                                 x.placa AS placa,
+                                                 x.source AS source,
+                                                 x.inicio AS inicio,
+                                                 x.fim AS fim,
+                                                 x.cidade_origem AS cidadeOrigem,
+                                                 x.entrada_cidade AS entradaCidade,
+                                                 x.vaga_id AS vagaId,
+                                                 x.vaga_label AS vagaLabel
+                                          FROM (
+                                                 SELECT
+                                                        ve.placa AS placa,
+                                                        'RESERVA' AS source,
+                                                        r.inicio AS inicio,
+                                                        r.fim AS fim,
+                                                        r.cidade_origem AS cidade_origem,
+                                                        r.entrada_cidade AS entrada_cidade,
+                                                        r.vaga_id AS vaga_id,
+                                                        COALESCE(CONCAT(ev.logradouro, ', ', v.numero_endereco), 'SEM ENDERECO') AS vaga_label
+                                                 FROM reserva r
+                                                 JOIN veiculo ve ON ve.id = r.veiculo_id
+                                                 JOIN vaga v ON v.id = r.vaga_id
+                                                 LEFT JOIN endereco_vaga ev ON ev.id = v.endereco_id
+                                                 WHERE r.inicio <= :endDate
+                                                        AND r.fim >= :startDate
+
+                                                 UNION ALL
+
+                                                 SELECT
+                                                        rr.placa AS placa,
+                                                        'RESERVA_RAPIDA' AS source,
+                                                        rr.inicio AS inicio,
+                                                        rr.fim AS fim,
+                                                        NULL AS cidade_origem,
+                                                        NULL AS entrada_cidade,
+                                                        rr.vaga_id AS vaga_id,
+                                                        COALESCE(CONCAT(ev2.logradouro, ', ', v2.numero_endereco), 'SEM ENDERECO') AS vaga_label
+                                                 FROM reserva_rapida rr
+                                                 JOIN vaga v2 ON v2.id = rr.vaga_id
+                                                 LEFT JOIN endereco_vaga ev2 ON ev2.id = v2.endereco_id
+                                                 WHERE rr.inicio <= :endDate
+                                                        AND rr.fim >= :startDate
+                                          ) x
+                                          ORDER BY x.placa ASC, x.inicio ASC
+                                   """,
+                                   nativeQuery = true
+                            )
+                            List<VehicleRouteEventProjection> getVehicleRouteEventsDuringPeriod(
+                                          @Param("startDate") OffsetDateTime startDate,
+                                          @Param("endDate") OffsetDateTime endDate
+                            );
 
     @Query("SELECT COUNT(r) FROM Reserva r WHERE r.status = 'CONCLUIDA' AND r.inicio BETWEEN :startDate AND :endDate")
     Long countCompletedReservations(@Param("startDate") OffsetDateTime startDate, @Param("endDate") OffsetDateTime endDate);
@@ -155,5 +274,26 @@ List<Object[]> getMostUsedVagas(
        """,
        nativeQuery = true)
 Boolean existsByCriadoPorIdOrMotoristaUsuarioId (@Param("usuarioId") UUID usuarioId);
+
+@Query(
+       value = """
+              SELECT
+                     COUNT(1) AS totalCount,
+                     COALESCE(SUM(EXTRACT(EPOCH FROM (r.check_out_em - r.check_in_em)) / 60.0), 0) AS sumMinutes,
+                     MIN(EXTRACT(EPOCH FROM (r.check_out_em - r.check_in_em)) / 60.0) AS minMinutes,
+                     MAX(EXTRACT(EPOCH FROM (r.check_out_em - r.check_in_em)) / 60.0) AS maxMinutes
+              FROM reserva r
+              WHERE r.status = 'CONCLUIDA'
+                     AND r.inicio BETWEEN :startDate AND :endDate
+                     AND r.check_in_em IS NOT NULL
+                     AND r.check_out_em IS NOT NULL
+                     AND r.check_out_em >= r.check_in_em
+       """,
+       nativeQuery = true
+)
+StayDurationAggProjection getStayDurationAggCompletedReservations(
+              @Param("startDate") OffsetDateTime startDate,
+              @Param("endDate") OffsetDateTime endDate
+);
 
 }
