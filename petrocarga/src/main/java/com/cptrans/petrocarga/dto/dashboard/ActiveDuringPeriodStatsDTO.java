@@ -1,5 +1,9 @@
 package com.cptrans.petrocarga.dto.dashboard;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
  * Métricas calculadas por interseção de intervalo (overlap).
  *
@@ -12,41 +16,11 @@ package com.cptrans.petrocarga.dto.dashboard;
  *       Implementado via interseção: {@code inicio <= endDate AND (fim IS NULL OR fim >= startDate)}.</li>
  * </ul>
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ActiveDuringPeriodStatsDTO {
-    private Long total;
-    private Long reserva;
-    private Long reservaRapida;
-
-    public ActiveDuringPeriodStatsDTO() {
-    }
-
-    public ActiveDuringPeriodStatsDTO(Long total, Long reserva, Long reservaRapida) {
-        this.total = total;
-        this.reserva = reserva;
-        this.reservaRapida = reservaRapida;
-    }
-
-    public Long getTotal() {
-        return total;
-    }
-
-    public void setTotal(Long total) {
-        this.total = total;
-    }
-
-    public Long getReserva() {
-        return reserva;
-    }
-
-    public void setReserva(Long reserva) {
-        this.reserva = reserva;
-    }
-
-    public Long getReservaRapida() {
-        return reservaRapida;
-    }
-
-    public void setReservaRapida(Long reservaRapida) {
-        this.reservaRapida = reservaRapida;
-    }
+    private Integer total;
+    private Integer reserva;
+    private Integer reservaRapida;
 }

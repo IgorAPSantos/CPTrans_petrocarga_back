@@ -99,9 +99,9 @@ public class DashboardService {
         Long reserva = reservaRepository.countActiveReservationsDuringPeriod(resolvedStart, resolvedEnd);
         Long rapida = reservaRapidaRepository.countActiveReservationsDuringPeriod(resolvedStart, resolvedEnd);
 
-        long reservaCount = reserva != null ? reserva : 0L;
-        long rapidaCount = rapida != null ? rapida : 0L;
-        long total = reservaCount + rapidaCount;
+        int reservaCount = toInt(reserva);
+        int rapidaCount = toInt(rapida);
+        int total = reservaCount + rapidaCount;
 
         return new ActiveDuringPeriodStatsDTO(total, reservaCount, rapidaCount);
     }
@@ -199,20 +199,20 @@ public class DashboardService {
         Long totalReservations = reservaRepository.countTotalReservationsInPeriod(resolvedStart, resolvedEnd) + reservaRapidaRepository.countTotalReservationsInPeriod(resolvedStart, resolvedEnd);
         Long multipleSlotReservations = reservaRepository.countMultipleSlotReservations(resolvedStart, resolvedEnd);
 
-        Double occupancyRate = totalSlots > 0 
-            ? (double) activeReservations / totalSlots * 100 
+        Double occupancyRate = totalSlots != null && totalSlots > 0
+            ? (double) activeReservations / totalSlots * 100
             : 0.0;
 
         return new DashboardKpiDTO(
-            totalSlots,
-            activeReservations,
-            pendingReservations,
+            toInt(totalSlots),
+            toInt(activeReservations),
+            toInt(pendingReservations),
             occupancyRate,
-            completedReservations,
-            canceledReservations,
-            removedReservations,
-            totalReservations,
-            multipleSlotReservations,
+            toInt(completedReservations),
+            toInt(canceledReservations),
+            toInt(removedReservations),
+            toInt(totalReservations),
+            toInt(multipleSlotReservations),
             resolvedStart,
             resolvedEnd
         );
@@ -228,8 +228,8 @@ public class DashboardService {
         return results.stream()
             .map(row -> new VehicleTypeStatDTO(
                 (String) row.get("tipo"),
-                ((Number) row.get("count")).longValue(),
-                ((Number) row.get("uniqueVehicles")).longValue()
+                toInt((Number) row.get("count")),
+                toInt((Number) row.get("uniqueVehicles"))
             ))
             .collect(Collectors.toList());
     }
@@ -245,7 +245,7 @@ public class DashboardService {
             .map(row -> new LocationStatDTO(
                 (String) row.get("name"),
                 "district",
-                ((Number) row.get("count")).longValue()
+                toInt((Number) row.get("count"))
             ))
             .collect(Collectors.toList());
     }
@@ -261,7 +261,7 @@ public class DashboardService {
             .map(row -> new LocationStatDTO(
                 (String) row.get("name"),
                 "origin",
-                ((Number) row.get("count")).longValue()
+                toInt((Number) row.get("count"))
             ))
             .collect(Collectors.toList());
     }
@@ -277,7 +277,7 @@ public class DashboardService {
             .map(row -> new LocationStatDTO(
                 (String) row.get("name"),
                 "entry-origin",
-                ((Number) row.get("count")).longValue()
+                toInt((Number) row.get("count"))
             ))
             .collect(Collectors.toList());
     }
@@ -296,7 +296,7 @@ public class DashboardService {
     .map(r -> new LocationStatDTO(
         (String) r[0],                
         "most-used",
-        ((Number) r[1]).longValue()
+        toInt((Number) r[1])
     ))
     .toList();
 
@@ -316,5 +316,13 @@ public class DashboardService {
             getLengthOccupancyStats(startDate, endDate),
             getVehicleRoutes(startDate, endDate)
         );
+    }
+
+    private static int toInt(Long value) {
+        return value == null ? 0 : value.intValue();
+    }
+
+    private static int toInt(Number value) {
+        return value == null ? 0 : value.intValue();
     }
 }
