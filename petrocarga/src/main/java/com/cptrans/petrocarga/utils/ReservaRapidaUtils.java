@@ -2,25 +2,54 @@ package com.cptrans.petrocarga.utils;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.cptrans.petrocarga.dto.ReservaDTO;
+import com.cptrans.petrocarga.enums.StatusReservaEnum;
 import com.cptrans.petrocarga.models.Reserva;
 import com.cptrans.petrocarga.models.ReservaRapida;
 import com.cptrans.petrocarga.models.Vaga;
+import com.cptrans.petrocarga.repositories.ReservaRapidaRepository;
+import com.cptrans.petrocarga.repositories.ReservaRepository;
 
 @Component
 public class ReservaRapidaUtils {
+    @Autowired
+    private ReservaUtils reservaUtils;
+
+    @Autowired
+    private ReservaRepository reservaRepository;
+
+    @Autowired
+    private ReservaRapidaRepository reservaRapidaRepository;
+
     public static final Integer  LIMITE_DE_RESERVAS_POR_PLACA = 3;
 
-    public static void validarQuantidadeReservasPorPlaca(Integer quantidadeReservasRapidasPorPlaca, ReservaRapida novaReservaRapida) {
+    public void validarQuantidadeReservasPorPlaca( ReservaDTO novaReserva) {
+        Integer quantidadeReservasRapidasPorPlaca = reservaRapidaRepository.countByPlacaIgnoringCase(novaReserva.getPlacaVeiculo());
         if(quantidadeReservasRapidasPorPlaca >= LIMITE_DE_RESERVAS_POR_PLACA ){
-            throw new IllegalArgumentException("Veículo com placa " + novaReservaRapida.getPlaca() + " já atingiu o limite de reservas rápidas (" + LIMITE_DE_RESERVAS_POR_PLACA + ").");
+            throw new IllegalArgumentException("Veículo com placa " + novaReserva.getPlacaVeiculo() + " já atingiu o limite de reservas rápidas (" + LIMITE_DE_RESERVAS_POR_PLACA + ").");
+        }
+        List<StatusReservaEnum> listaStatus = List.of(StatusReservaEnum.ATIVA, StatusReservaEnum.RESERVADA);
+        List<Reserva> reservasNormaisSobrepostas = reservaRepository.findByFimGreaterThanAndInicioLessThanAndStatusIn(novaReserva.getInicio(), novaReserva.getFim(), listaStatus);
+        List<ReservaRapida> reservasRapidasSobrepostas = reservaRapidaRepository.findByFimGreaterThanAndInicioLessThanAndStatusIn(novaReserva.getInicio(), novaReserva.getFim(), listaStatus);
+        List<ReservaDTO> reservasSobrepostas = ReservaUtils.juntarReservas(reservasNormaisSobrepostas, reservasRapidasSobrepostas);
+
+        if(reservasSobrepostas != null && !reservasSobrepostas.isEmpty()  ){
+            for(ReservaDTO reserva : reservasSobrepostas){
+                if(reserva.getPlacaVeiculo().equals(novaReserva.getPlacaVeiculo()) ) {
+                    throw new IllegalArgumentException("Veículo de placa " + novaReserva.getPlacaVeiculo() + " ja possui uma reserva com status: " + reserva.getStatus() + " com inicio: " + reserva.getInicio().atZoneSameInstant(DateUtils.FUSO_BRASIL) + " e fim: " + reserva.getFim().atZoneSameInstant(DateUtils.FUSO_BRASIL) + ".");
+                }
+            } 
         }
     }
 
     public void validarEspacoDisponivelNaVaga(ReservaRapida novaReservaRapida, Vaga vagaReserva, List<Reserva> reservasAtivasNaVaga, List<ReservaRapida> reservasRapidasAtivasNaVaga) {
         Integer tamanhoDisponivelVaga = vagaReserva.getComprimento() - novaReservaRapida.getTipoVeiculo().getComprimento();
    
+        reservaUtils.validarLimiteReservasPorPlaca(novaReservaRapida.toReservaDTO(), ReservaUtils.METODO_POST);
+
         if(!reservasRapidasAtivasNaVaga.isEmpty()){
             for(ReservaRapida reservaRapida : reservasRapidasAtivasNaVaga){
                 System.out.println(reservaRapida.getVaga().getId());
@@ -39,7 +68,7 @@ public class ReservaRapidaUtils {
             for(Reserva reserva : reservasAtivasNaVaga){
                 Boolean reservaSobrepostas = novaReservaRapida.getInicio().toInstant().isBefore(reserva.getFim().toInstant()) && novaReservaRapida.getFim().toInstant().isAfter(reserva.getInicio().toInstant());
     
-                if(reserva.getVeiculo().getPlaca().equals(novaReservaRapida.getPlaca())) {
+                if(reserva.getVeiculo().getPlaca().equalsIgnoreCase(novaReservaRapida.getPlaca())) {
                     throw new IllegalArgumentException("Veículo com placa " + novaReservaRapida.getPlaca() + " já possui uma reserva ativa nesta vaga.");
                 }
                 if(reservaSobrepostas){
@@ -53,9 +82,10 @@ public class ReservaRapidaUtils {
     }
 
     public void validarReservaRapidaAtivaPorPlaca(String PlacaReservaAtiva, String PlacaNovaReserva) {
-          if(PlacaReservaAtiva.equals(PlacaNovaReserva)) {
+          if(PlacaReservaAtiva.equalsIgnoreCase(PlacaNovaReserva)) {
                 throw new IllegalArgumentException("Veículo com placa " + PlacaNovaReserva + " já possui uma reserva ativa nesta vaga.");
             }
+
     }
 
     public Integer getLIMITE_DE_RESERVAS_POR_PLACA() {

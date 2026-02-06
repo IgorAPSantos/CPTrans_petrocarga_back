@@ -61,12 +61,16 @@ public class ReservaUtils {
         ReservaDTO novaReservaDTO = novaReserva.toReservaDTO();
         
         validarLimiteReservasPorPlaca(novaReservaDTO, metodoChamador);
+        validarMotoristaReserva(motoristaDaReserva.getUsuario().getId(), novaReservaDTO, metodoChamador);
 
         if(!reservasVaga.isEmpty()){
             for(ReservaDTO reserva : reservasVaga){ 
                 Boolean reservaSobrepostas = novaReserva.getInicio().toInstant().isBefore(reserva.getFim().toInstant()) && novaReserva.getFim().toInstant().isAfter(reserva.getInicio().toInstant());
                 if(reservaSobrepostas){
-                    validarMotoristaReserva(usuarioLogado, motoristaDaReserva, reserva, metodoChamador);
+                    if(metodoChamador.equals(METODO_PATCH) && motoristaDaReserva.getUsuario().getId().equals(usuarioLogado.getId())){
+                        if(tamanhoDisponivelVaga < 0) throw new IllegalArgumentException("Não há espaço suficiente na vaga para a reserva no período solicitado devido a uma reserva existente. Espaço disponível: " + (tamanhoDisponivelVaga + veiculoDaReserva.getComprimento()) + " metros.");
+                        return;
+                    }
                     tamanhoDisponivelVaga -= reserva.getTamanhoVeiculo();
                     if(tamanhoDisponivelVaga < 0) throw new IllegalArgumentException("Não há espaço suficiente na vaga para a reserva no período solicitado devido a uma reserva existente. Espaço disponível: " + (tamanhoDisponivelVaga + veiculoDaReserva.getComprimento()) + " metros.");
                 }
@@ -76,17 +80,16 @@ public class ReservaUtils {
     }
 
     public void validarLimiteReservasPorPlaca (ReservaDTO novaReserva, String metodoChamador){
-        Integer quantidadeReservasPorPlaca = reservaRepository.countByVeiculoPlacaIgnoringCaseAndStatusIn(novaReserva.getPlacaVeiculo(), List.of(StatusReservaEnum.ATIVA, StatusReservaEnum.RESERVADA));
-        List<Reserva> reservasNormaisSobrepostas = reservaRepository.findByFimGreaterThanAndInicioLessThan(novaReserva.getInicio(), novaReserva.getFim());
-        List<ReservaRapida> reservasRapidasSobrepostas = reservaRapidaRepository.findByFimGreaterThanAndInicioLessThan(novaReserva.getInicio(), novaReserva.getFim());
+        List<StatusReservaEnum> listaStatus = List.of(StatusReservaEnum.ATIVA, StatusReservaEnum.RESERVADA);
+        Integer quantidadeReservasPorPlaca = reservaRepository.countByVeiculoPlacaIgnoringCaseAndStatusIn(novaReserva.getPlacaVeiculo(), listaStatus);
+        List<Reserva> reservasNormaisSobrepostas = reservaRepository.findByFimGreaterThanAndInicioLessThanAndStatusIn(novaReserva.getInicio(), novaReserva.getFim(), listaStatus);
+        List<ReservaRapida> reservasRapidasSobrepostas = reservaRapidaRepository.findByFimGreaterThanAndInicioLessThanAndStatusIn(novaReserva.getInicio(), novaReserva.getFim(), listaStatus);
         List<ReservaDTO> reservasSobrepostas = juntarReservas(reservasNormaisSobrepostas, reservasRapidasSobrepostas);
         if (quantidadeReservasPorPlaca.equals(LIMITE_DE_RESERVAS_POR_PLACA)) throw new IllegalArgumentException("Veículo de placa " + novaReserva.getPlacaVeiculo() + " ja atingiu o limite de " + LIMITE_DE_RESERVAS_POR_PLACA + " reservas ativas/reservadas.");
         if(reservasSobrepostas != null && !reservasSobrepostas.isEmpty()  ){
             for(ReservaDTO reserva : reservasSobrepostas){
-                if(reserva.getStatus().equals(StatusReservaEnum.ATIVA) || reserva.getStatus().equals(StatusReservaEnum.RESERVADA)) {
-                    if( reserva.getPlacaVeiculo().equals(novaReserva.getPlacaVeiculo()) && !metodoChamador.equals(METODO_PATCH)){
-                        throw new IllegalArgumentException("Veículo de placa " + novaReserva.getPlacaVeiculo() + " ja possui uma reserva com status: " + reserva.getStatus() + " na vaga de id: " + reserva.getVagaId() + " com inicio: " + reserva.getInicio().atZoneSameInstant(DateUtils.FUSO_BRASIL) + " e fim: " + reserva.getFim().atZoneSameInstant(DateUtils.FUSO_BRASIL) + ".");
-                    }
+                if(reserva.getPlacaVeiculo().equals(novaReserva.getPlacaVeiculo()) && !metodoChamador.equals(METODO_PATCH)) {
+                    throw new IllegalArgumentException("Veículo de placa " + novaReserva.getPlacaVeiculo() + " ja possui uma reserva com status: " + reserva.getStatus() + " com inicio: " + reserva.getInicio().atZoneSameInstant(DateUtils.FUSO_BRASIL) + " e fim: " + reserva.getFim().atZoneSameInstant(DateUtils.FUSO_BRASIL) + ".");
                 }
             } 
         }
@@ -113,19 +116,12 @@ public class ReservaUtils {
         }
     }
 
-    private static void validarMotoristaReserva(Usuario usuarioLogado, Motorista motoristaNovaReserva, ReservaDTO reservaExistente, String metodoChamador) {
-        if(usuarioLogado.getPermissao().equals(PermissaoEnum.MOTORISTA)){
-            if((reservaExistente.getMotoristaId()!= null && reservaExistente.getCriadoPor() != null) && (reservaExistente.getCriadoPor().getId().equals(usuarioLogado.getId()) || reservaExistente.getMotoristaId().equals(usuarioLogado.getId()))){
-                if ((reservaExistente.getStatus().equals(StatusReservaEnum.ATIVA) || reservaExistente.getStatus().equals(StatusReservaEnum.RESERVADA)) && !metodoChamador.equals(METODO_PATCH) ){
-                    throw new IllegalArgumentException("Motorista já possui uma reserva ativa nesta vaga.");
-                }
-            }
+    public void validarMotoristaReserva( UUID motoristaUsuarioId, ReservaDTO novaReserva, String metodoChamador) {
+        List<StatusReservaEnum> listaStatus = List.of(StatusReservaEnum.ATIVA, StatusReservaEnum.RESERVADA);
+        List<Reserva> reservasAtivasSobrepostasPorMotorista = reservaRepository.findByFimGreaterThanAndInicioLessThanAndMotoristaUsuarioIdAndStatusIn(novaReserva.getInicio(),novaReserva.getFim(), motoristaUsuarioId, listaStatus);
+        if(reservasAtivasSobrepostasPorMotorista != null && !reservasAtivasSobrepostasPorMotorista.isEmpty() && !metodoChamador.equals(METODO_PATCH)){
+            throw new IllegalArgumentException("Motorista já possui uma reserva ativa ou reservada com horário conflitante.");
         }
-        if(usuarioLogado.getPermissao().equals(PermissaoEnum.EMPRESA)){
-            if(reservaExistente.getMotoristaId().equals(motoristaNovaReserva.getId()) && (reservaExistente.getStatus().equals(StatusReservaEnum.ATIVA) || reservaExistente.getStatus().equals(StatusReservaEnum.RESERVADA))){
-                throw new IllegalArgumentException("O motorista selecionado já possui uma reserva ativa nesta vaga.");
-            } 
-        }    
     }
 
     public static List<ReservaDTO> juntarReservas(List<Reserva> reservas, List<ReservaRapida> reservasRapidas) {
