@@ -87,15 +87,28 @@ public class GlobalHandlerException {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGeneric(Exception ex) {
+    public ResponseEntity<Map<String, String>> handleGeneric(Exception ex, HttpServletRequest request) {
         Map<String, String> error = new HashMap<>();
         error.put("erro", "Erro interno no servidor");
-        String causeMessage = "unknown";
-        if (ex.getCause() != null && ex.getCause().getMessage() != null) {
-            causeMessage = ex.getCause().getMessage();
+
+        // Monta mensagem detalhada para diagnóstico
+        String exType = ex.getClass().getName();
+        String exMsg = ex.getMessage();
+        String causeMessage;
+
+        if (exMsg != null && !exMsg.isBlank()) {
+            causeMessage = exType + ": " + exMsg;
+        } else if (ex.getCause() != null && ex.getCause().getMessage() != null) {
+            causeMessage = exType + " causado por " + ex.getCause().getClass().getName() + ": " + ex.getCause().getMessage();
+        } else {
+            causeMessage = exType + " (sem mensagem)";
         }
+
         error.put("cause", causeMessage);
-        ex.printStackTrace();
+
+        log.error("=== ERRO NÃO TRATADO em {} {} ===", request.getMethod(), request.getRequestURI());
+        log.error("Tipo: {} | Mensagem: {}", exType, exMsg);
+        log.error("Stack trace completo:", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
