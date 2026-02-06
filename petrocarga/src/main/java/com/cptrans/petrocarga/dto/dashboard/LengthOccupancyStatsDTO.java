@@ -1,5 +1,9 @@
 package com.cptrans.petrocarga.dto.dashboard;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
  * Ocupação por comprimento (m) ao longo de um período.
  *
@@ -14,41 +18,11 @@ package com.cptrans.petrocarga.dto.dashboard;
  *   <li>{@code occupancyRatePercent}: {@code occupiedLengthMeters / availableLengthMeters * 100}.</li>
  * </ul>
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class LengthOccupancyStatsDTO {
     private Double availableLengthMeters;
     private Double occupiedLengthMeters;
     private Double occupancyRatePercent;
-
-    public LengthOccupancyStatsDTO() {
-    }
-
-    public LengthOccupancyStatsDTO(Double availableLengthMeters, Double occupiedLengthMeters, Double occupancyRatePercent) {
-        this.availableLengthMeters = availableLengthMeters;
-        this.occupiedLengthMeters = occupiedLengthMeters;
-        this.occupancyRatePercent = occupancyRatePercent;
-    }
-
-    public Double getAvailableLengthMeters() {
-        return availableLengthMeters;
-    }
-
-    public void setAvailableLengthMeters(Double availableLengthMeters) {
-        this.availableLengthMeters = availableLengthMeters;
-    }
-
-    public Double getOccupiedLengthMeters() {
-        return occupiedLengthMeters;
-    }
-
-    public void setOccupiedLengthMeters(Double occupiedLengthMeters) {
-        this.occupiedLengthMeters = occupiedLengthMeters;
-    }
-
-    public Double getOccupancyRatePercent() {
-        return occupancyRatePercent;
-    }
-
-    public void setOccupancyRatePercent(Double occupancyRatePercent) {
-        this.occupancyRatePercent = occupancyRatePercent;
-    }
 }
