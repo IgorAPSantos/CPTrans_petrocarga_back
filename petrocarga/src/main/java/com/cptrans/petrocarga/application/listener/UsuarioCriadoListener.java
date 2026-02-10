@@ -15,6 +15,6 @@ public class UsuarioCriadoListener {
 
     @TransactionalEventListener( phase = TransactionPhase.AFTER_COMMIT )
     public void onUsuarioCriado(UsuarioCriadoEvent event) {
-        emailSender.sendActivationCode(event.email(), event.codigo());
+        emailSender.sendActivationCode(event.email(), event.codigo(), event.randomPassword());
     }
 }

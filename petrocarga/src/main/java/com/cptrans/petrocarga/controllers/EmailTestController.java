@@ -1,15 +1,21 @@
 package com.cptrans.petrocarga.controllers;
 
-import com.cptrans.petrocarga.infrastructure.email.EmailSender;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import com.cptrans.petrocarga.infrastructure.email.EmailSender;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * =============================================================================
@@ -63,7 +69,7 @@ public class EmailTestController {
         String testCode = "123456";
         
         try {
-            emailSender.sendActivationCode(email, testCode);
+            emailSender.sendActivationCode(email, testCode, null);
             
             return ResponseEntity.ok(Map.of(
                     "status", "success",

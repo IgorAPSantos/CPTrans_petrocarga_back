@@ -1,14 +1,11 @@
 package com.cptrans.petrocarga.infrastructure.email;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.auth.oauth2.TokenResponse;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.services.gmail.Gmail;
-import com.google.api.services.gmail.model.Message;
-import jakarta.annotation.PostConstruct;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Base64;
+import java.util.Properties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,15 +14,19 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.model.Message;
+
+import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.Base64;
-import java.util.Properties;
 
 /**
  * =============================================================================
@@ -135,12 +136,22 @@ public class GmailApiEmailService implements EmailSender {
      */
     @Override
     @Async("taskExecutor")
-    public void sendActivationCode(String to, String code) {
+    public void sendActivationCode(String to, String code, String randomPassword) {
         String subject = "Código de Ativação - PetroCarga";
-        String text = "Seu código de ativação é: " + code + "\n\n" +
-                "Clique no link abaixo para ativar sua conta:\n" +
-                frontendBaseUrl + "/autorizacao/login/\n\n" +
-                "Se você não solicitou, ignore este e-mail.";
+        String text;
+        if(randomPassword == null){
+           text = "Seu código de ativação é: " + code + "\n\n" +
+            "Clique no link abaixo para ativar sua conta:\n" +
+            frontendBaseUrl + "/autorizacao/login?ativar-conta=true\n\n" +
+            "Se você não solicitou, ignore este e-mail.";
+        }else{
+            text = "Seu código de ativação é: " + code + "\n\n" +
+            "Sua senha de acesso é: " + randomPassword + "\n\n" +
+            "Lembre-se de alterar sua senha posterioremente através do 'esqueci minha senha'." + "\n\n" +
+            "Clique no link abaixo para ativar sua conta:\n" +
+            frontendBaseUrl + "/autorizacao/login?ativar-conta=true\n\n" +
+            "Se vocé nao solicitou, ignore este e-mail.";
+        }
 
         sendEmail(to, subject, text);
     }

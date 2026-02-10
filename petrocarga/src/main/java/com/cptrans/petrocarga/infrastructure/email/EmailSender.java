@@ -11,7 +11,7 @@ public interface EmailSender {
      * @param to email do destinatário
      * @param code código de ativação
      */
-    void sendActivationCode(String to, String code);
+    void sendActivationCode(String to, String code, String randomPassword);
     
     /**
      * Envia código de recuperação de senha.

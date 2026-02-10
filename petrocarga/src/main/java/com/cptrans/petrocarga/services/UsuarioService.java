@@ -82,12 +82,18 @@ public class UsuarioService {
         String codeStr = String.format("%06d", code);
         novoUsuario.setVerificationCode(codeStr);
         novoUsuario.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(10));
+        String password = null;
+        if(novoUsuario.getPermissao().equals(PermissaoEnum.GESTOR) || novoUsuario.getPermissao().equals(PermissaoEnum.AGENTE)) {
+            SecureRandom randomPassword = new SecureRandom();
+            password = String.format("%06d", randomPassword.nextInt(1_000_000));
+            novoUsuario.setSenha(passwordEncoder.encode(password));
+        }
 
         Usuario saved = usuarioRepository.save(novoUsuario);
 
         // Envia código de ativação via email (assíncrono)
         // O EmailSender é @Async, exceções são tratadas pelo AsyncUncaughtExceptionHandler
-        eventPublisher.publish(new UsuarioCriadoEvent(saved.getEmail(), saved.getVerificationCode()));
+        eventPublisher.publish(new UsuarioCriadoEvent(saved.getEmail(), saved.getVerificationCode(), password));
 
         return saved;
     }
@@ -136,9 +142,9 @@ public class UsuarioService {
         usuario.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(10));
 
         usuarioRepository.save(usuario);
-
+        String randomPassword = null;
         // Reenvia código de ativação via email (assíncrono)
-        emailSender.sendActivationCode(usuario.getEmail(), codeStr);
+        emailSender.sendActivationCode(usuario.getEmail(), codeStr, randomPassword);
     }
 
     // ==================== RECUPERAÇÃO DE SENHA ====================
