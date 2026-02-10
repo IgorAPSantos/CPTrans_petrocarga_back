@@ -65,6 +65,7 @@ public class UsuarioService {
         return usuarioRepository.findByPermissaoAndAtivo(permissao, ativo);
     }
 
+    @Transactional
     public Usuario createUsuario(Usuario novoUsuario, PermissaoEnum permissao) {
         if(usuarioRepository.findByEmail(novoUsuario.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email já cadastrado");
