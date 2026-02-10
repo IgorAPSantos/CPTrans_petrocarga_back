@@ -14,7 +14,6 @@ package com.cptrans.petrocarga.services;
  * - RESEND_API_KEY: sua API key do Resend
  * - RESEND_FROM: onboarding@resend.dev (tier gratuito)
  */
-import com.cptrans.petrocarga.infrastructure.email.EmailSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +23,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import com.cptrans.petrocarga.infrastructure.email.EmailSender;
 
 @Service
 public class EmailService implements EmailSender {
@@ -68,13 +69,27 @@ public class EmailService implements EmailSender {
 
     @Override
     @Async("taskExecutor")
-    public void sendActivationCode(String to, String code) {
+    public void sendActivationCode(String to, String code, String randomPassword) {
         // Ensure 'from' uses configured username when available
         if ((from == null || from.isBlank()) && mailUsername != null && !mailUsername.isBlank()) {
             from = mailUsername;
         }
 
         logMailEndpointInfo();
+        String text;
+        if(randomPassword == null){
+            text = "Seu código de ativação é: " + code + "\n\n" +
+            "Clique no link abaixo para ativar sua conta:\n" +
+            frontendBaseUrl + "/autorizacao/login?ativar-conta=true\n\n" +
+            "Se vocé nao solicitou, ignore este e-mail.";
+        }else{
+            text = "Seu código de ativação é: " + code + "\n\n" +
+            "Sua senha de acesso é: " + randomPassword + "\n\n" +
+            "Lembre-se de alterar sua senha posterioremente através do 'esqueci minha senha'." + "\n\n" +
+            "Clique no link abaixo para ativar sua conta:\n" +
+            frontendBaseUrl + "/autorizacao/login?ativar-conta=true\n\n" +
+            "Se vocé nao solicitou, ignore este e-mail.";
+        }
 
         try {
             LOGGER.info("[{}] Sending activation code to {}", Thread.currentThread().getName(), to);
@@ -84,13 +99,7 @@ public class EmailService implements EmailSender {
             message.setFrom(from);
             message.setTo(to);
             message.setSubject("Código de Ativação - PetroCarga");
-            message.setText(
-                "Seu código de ativação é: " + code + "\n\n" +
-                "Clique no link abaixo para ativar sua conta:\n" +
-                frontendBaseUrl + "/autorizacao/login/\n\n" +
-                "Se você não solicitou, ignore este e-mail.");
-
-            mailSender.send(message);
+            message.setText(text);
             LOGGER.info("[{}] Email de ativação enviado com sucesso para: {}", Thread.currentThread().getName(), to);
         } catch (MailException e) {
             LOGGER.error("[{}] MailException ao enviar ativação para {}: {}", Thread.currentThread().getName(), to, e.getMessage(), e);
